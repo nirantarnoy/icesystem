@@ -264,7 +264,7 @@ if ($is_find_date == 1) {
                     <?php
                     echo \kartik\select2\Select2::widget([
                         'name' => 'find_customer_id',
-                        'data' => \yii\helpers\ArrayHelper::map(\backend\models\Customer::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'is_show_pos' => 1])->all(), 'id', 'name'),
+                        'data' => \yii\helpers\ArrayHelper::map(\backend\models\Customer::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'is_show_pos' => 1,'status'=>1])->all(), 'id', 'name'),
                         'value' => $find_customer_id,
                         'options' => [
                             'placeholder' => '--ลูกค้า--'
