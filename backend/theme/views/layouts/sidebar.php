@@ -753,6 +753,14 @@
                                 </a>
                             </li>
                         <?php endif;?>
+                        <?php if (\Yii::$app->user->can('adminreportreturn/index')): ?>
+                            <li class="nav-item">
+                                <a href="index.php?r=adminreportreturn/index2" class="nav-link adminreportreturn">
+                                    <i class="far fa-circlez nav-icon"></i>
+                                    <p>ยอดคืนแยกสายส่ง</p>
+                                </a>
+                            </li>
+                        <?php endif;?>
                         <?php if (\Yii::$app->user->can('salereportemp/index')): ?>
 <!--                        <li class="nav-item">-->
 <!--                            <a href="index.php?r=salereportemp" class="nav-link salereportemp">-->

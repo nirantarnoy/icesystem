@@ -1747,7 +1747,7 @@ class PosController extends Controller
                 $session->setFlash('msg', 'บันทึกรายการเรียบร้อย');
 
 
-                return $this->redirect(['pos/indextest','id'=>0]);
+                return $this->redirect(['pos/index','id'=>0]);
             }
 
         }
@@ -2370,6 +2370,7 @@ class PosController extends Controller
             $sql2 .= " FROM orders inner join order_line on orders.id = order_line.order_id";
             $sql2 .= " WHERE orders.sale_channel_id = 2 and orders.status <> 3 ";
             $sql2 .= " AND orders.payment_method_id = 2";
+            $sql2 .= " AND orders.order_channel_id = 0";
             $sql2 .= " AND orders.order_date>=" . "'" . date('Y-m-d H:i:s', strtotime($user_login_datetime)) . "'";
             $sql2 .= " AND orders.order_date<=" . "'" . date('Y-m-d H:i:s') . "'";
             //$sql .= " AND orders.created_by=181";

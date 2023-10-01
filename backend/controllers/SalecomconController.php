@@ -90,20 +90,39 @@ class SalecomconController extends Controller
     public function actionCreate()
     {
         $model = new Salecomcon();
-        $company_id = 1;
-        $branch_id = 1;
-        $default_warehouse = 6;
+        $company_id = 0;
+        $branch_id = 0;
+
         if (!empty(\Yii::$app->user->identity->company_id)) {
             $company_id = \Yii::$app->user->identity->company_id;
         }
         if (!empty(\Yii::$app->user->identity->branch_id)) {
             $branch_id = \Yii::$app->user->identity->branch_id;
-            if ($branch_id == 2) {
-                $default_warehouse = 5;
-            }
         }
         if ($model->load(Yii::$app->request->post())) {
-            if($model->save()){
+            $fdate = date('Y-m-d');
+            $tdate = date('Y-m-d');
+
+            $xdate = explode('/',$model->from_date);
+            $xdate2 = explode('/',$model->to_date);
+
+            if($xdate != null){
+                if(count($xdate) > 1){
+                    $fdate = $xdate[2].'/'. $xdate[1].'/'.$xdate[0];
+                }
+            }
+            if($xdate2 != null){
+                if(count($xdate2) > 1){
+                    $tdate = $xdate2[2].'/'. $xdate2[1].'/'.$xdate2[0];
+                }
+            }
+
+
+            $model->from_date = date('Y-m-d', strtotime($fdate));
+            $model->to_date = date('Y-m-d', strtotime($tdate));
+            $model->company_id = $company_id;
+            $model->branch_id = $branch_id;
+            if($model->save(false)){
                 return $this->redirect(['view', 'id' => $model->id]);
             }
 
@@ -125,7 +144,30 @@ class SalecomconController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post())) {
+            $fdate = date('Y-m-d');
+            $tdate = date('Y-m-d');
+
+            $xdate = explode('/',$model->from_date);
+            $xdate2 = explode('/',$model->to_date);
+
+            if($xdate != null){
+                if(count($xdate) > 1){
+                    $fdate = $xdate[2].'/'. $xdate[1].'/'.$xdate[0];
+                }
+            }
+            if($xdate2 != null){
+                if(count($xdate2) > 1){
+                    $tdate = $xdate2[2].'/'. $xdate2[1].'/'.$xdate2[0];
+                }
+            }
+
+
+            $model->from_date = date('Y-m-d', strtotime($fdate));
+            $model->to_date = date('Y-m-d', strtotime($tdate));
+            if($model->save(false)){
+
+            }
             return $this->redirect(['view', 'id' => $model->id]);
         }
 

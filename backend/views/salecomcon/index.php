@@ -70,6 +70,18 @@ $this->params['breadcrumbs'][] = $this->title;
                     }
                 }
             ],
+            [
+                'attribute' => 'from_date',
+                'value' => function ($data) {
+                    return date('d/m/Y', strtotime($data->from_date));
+                }
+            ],
+            [
+                'attribute' => 'to_date',
+                'value' => function ($data) {
+                    return date('d/m/Y', strtotime($data->to_date));
+                }
+            ],
 
             [
 

@@ -23,6 +23,22 @@ use yii\widgets\ActiveForm;
 
             <?= $form->field($model, 'com_extra')->textInput() ?>
 
+
+            <?= $form->field($model, 'from_date')->widget(\kartik\date\DatePicker::className(),[
+                    'value' => $model->from_date == null ? date('d/m/Y'): date('d/m/Y',strtotime($model->from_date)),
+                    'pluginOptions' => [
+                            'autoclose'=> true,
+                            'format'=> 'dd/mm/yyyy',
+                    ]
+            ]) ?>
+            <?= $form->field($model, 'to_date')->widget(\kartik\date\DatePicker::className(),[
+                'value' => $model->to_date == null ? date('d/m/Y'): date('d/m/Y',strtotime($model->to_date)),
+                'pluginOptions' => [
+                    'autoclose'=> true,
+                    'format'=> 'dd/mm/yyyy',
+                ]
+            ]) ?>
+
             <label for=""><?= $model->getAttributeLabel('status') ?></label>
             <?php echo $form->field($model, 'status')->widget(\toxor88\switchery\Switchery::className(), ['options' => ['label' => '', 'class' => 'form-control']])->label(false) ?>
             <br>
@@ -31,6 +47,7 @@ use yii\widgets\ActiveForm;
             </div>
         </div>
     </div>
+
     <?php ActiveForm::end(); ?>
 
 </div>

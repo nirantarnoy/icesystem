@@ -25,6 +25,7 @@ class CustomerController extends Controller
                     'checklist' => ['POST'],
                     'addnewasset' => ['POST'],
                     'checkin' => ['POST'],
+                    'routeall' => ['POST'],
                 ],
             ],
         ];
@@ -452,6 +453,33 @@ class CustomerController extends Controller
             }
 
 
+        }
+
+        return ['status' => $status, 'data' => $data];
+    }
+
+    public function actionRouteall()
+    {
+        $company_id = 1;
+        $branch_id = 1;
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+        $route_id = $req_data['route_id'];
+
+        $data = [];
+        $status = false;
+        if ($route_id) {
+            $model = \common\models\DeliveryRoute::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'status' => 1,])->andFilterWhere(['>','id',1])->all();
+            if ($model) {
+                $status = true;
+                foreach ($model as $value) {
+                    array_push($data, [
+                        'id' => $value->id,
+                        'code' => $value->code,
+                        'name' => $value->name,
+                    ]);
+                }
+            }
         }
 
         return ['status' => $status, 'data' => $data];

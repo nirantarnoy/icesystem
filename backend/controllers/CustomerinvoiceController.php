@@ -158,6 +158,7 @@ class CustomerinvoiceController extends Controller
                         $remain_amt = 0;
                         $check_is_cus_car = \backend\models\Customer::find()->select('is_show_pos')->where(['id' => $model->customer_id])->one();
                         if ($check_is_cus_car->is_show_pos == 0 || $check_is_cus_car->is_show_pos == null) { // route
+                           // echo "this";return;
                             //  $customer_remain_amount = \common\models\QuerySalePaySummary::find()->where(['customer_id' => $model->customer_id, 'order_id' => $xlist[$i]])->one();
                             //    $customer_remain_amount = \common\models\OrderLine::find()->where(['customer_id' => $model->customer_id, 'order_id' => $xlist[$i]])->sum('qty');
                           //  $customer_remain_amount = \common\models\OrderLine::find()->where(['order_id' => $xlist[$i], 'customer_id' => $model->customer_id])->sum('line_total');
@@ -172,12 +173,14 @@ class CustomerinvoiceController extends Controller
                                 $model_line->status = 1;
                             //    $model_line->note = $list_note[$i]==null?'':$list_note[$i];
                                 if ($model_line->save(false)) {
-                                    //\common\models\Orders::updateAll(['payment_status'=>1],['id'=>$xlist[$i]]);
-                                    $model_update_order = \common\models\Orders::find()->where(['id'=>$xlist[$i]])->one();
-                                    if($model_update_order){
-                                        $model_update_order->payment_status = 1;
-                                        $model_update_order->save(false);
-                                    }
+                                  //  \common\models\Orders::updateAll(['payment_status'=>1],['id'=>$xlist[$i]]);
+                                    // update payment_status in order table
+
+//                                    $model_update_order = \common\models\Orders::find()->where(['id'=>$xlist[$i]])->one();
+//                                    if($model_update_order != null){
+//                                        $model_update_order->payment_status = 1;
+//                                        $model_update_order->save(false);
+//                                    }
 
 //                                    $model_wait_pey = new \common\models\OrderWaitPayment();
 //                                    $model_wait_pey->order_id = $xlist[$i];
@@ -203,8 +206,8 @@ class CustomerinvoiceController extends Controller
                                 }
                             }
                             if ($is_payment > 0) {
-                                $customer_remain_amount->payment_status = 1; // update payment status
-                                $customer_remain_amount->save(false);
+//                                $customer_remain_amount->payment_status = 1; // update payment status
+//                                $customer_remain_amount->save(false);
                             }
                         }
                     }
@@ -270,7 +273,7 @@ class CustomerinvoiceController extends Controller
                                     $model_line_pay->payment_method_id = 2;
                                     $model_line_pay->status = 1;
                                     if($model_line_pay->save(false)){
-                                        \common\models\Orders::updateAll(['payment_status'=>1],['id'=>$model_update->order_id]);
+                                      //  \common\models\Orders::updateAll(['payment_status'=>1],['id'=>$model_update->order_id]);
                                     }
                                 }
                             }

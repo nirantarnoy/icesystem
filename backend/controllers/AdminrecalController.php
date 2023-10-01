@@ -81,7 +81,7 @@ class AdminrecalController extends Controller
                 array_push($line_reprocess_car_qty, $this->getProdReprocessCarDaily($value->product_id, $user_login_datetime, $t_date, $company_id, $branch_id)); // รับแปรสภาพรถ
                 // $issue_reprocess_qty = $this->getIssueReprocessDaily($value->product_id, $user_login_datetime, $t_date, $default_wh);
                 array_push($line_scrap_qty, $this->getScrapDaily($value->product_id, $user_login_datetime, $t_date, $company_id, $branch_id, $user_login_id));
-                array_push($line_stock_count, $this->getDailycount($value->product_id, $company_id, $branch_id, $user_login_datetime, $user_login_id));
+                array_push($line_stock_count, $this->getDailycount($value->product_id, $company_id, $branch_id, $user_login_datetime,$t_date, $user_id));
             }
         }
 
@@ -292,19 +292,41 @@ class AdminrecalController extends Controller
 
     function getScrapDaily($product_id, $user_login_datetime, $t_date, $company_id, $branch_id, $user_login_id)
     {
+//        $qty = 0;
+//        if ($product_id != null) {
+//            $data = [];
+//            $model = \common\models\LoginUserRef::find()->where(['login_log_cal_id' => $user_login_id])->all();
+//            if ($model) {
+//                foreach ($model as $value) {
+//                    array_push($data, $value->user_id); // second user
+//                }
+//            }
+//            if (count($data) > 0) {
+//                $qty = \backend\models\Scrap::find()->join('inner join', 'scrap_line', 'scrap_line.scrap_id = scrap.id')->where(['scrap_line.product_id' => $product_id])
+//                    ->andFilterWhere(['between', 'scrap.trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])
+//                    ->andFilterWhere(['scrap.company_id' => $company_id, 'scrap.branch_id' => $branch_id])->andFilterWhere(['in', 'scrap.created_by', $data])->sum('scrap_line.qty');
+//            }
+//
+//        }
+//
+//        return $qty;
         $qty = 0;
+        $second_user_id = [];
         if ($product_id != null) {
-            $data = [];
-            $model = \common\models\LoginUserRef::find()->where(['login_log_cal_id' => $user_login_id])->all();
-            if ($model) {
-                foreach ($model as $value) {
-                    array_push($data, $value->user_id); // second user
+            $model_login = \common\models\LoginLogCal::find()->where(['user_id' => $user_login_id])->orderBy(['id' => SORT_DESC])->one();
+            if ($model_login) {
+                //  $second_user_id = $model_login->second_user_id;
+                $model_user_ref = \common\models\LoginUserRef::find()->select('user_id')->where(['login_log_cal_id' => $model_login->id])->all();
+                if ($model_user_ref) {
+                    foreach ($model_user_ref as $value) {
+                        array_push($second_user_id, $value->user_id);
+                    }
                 }
             }
-            if (count($data) > 0) {
-                $qty = \backend\models\Scrap::find()->join('inner join', 'scrap_line', 'scrap_line.scrap_id = scrap.id')->where(['scrap_line.product_id' => $product_id])
-                    ->andFilterWhere(['between', 'scrap.trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])
-                    ->andFilterWhere(['scrap.company_id' => $company_id, 'scrap.branch_id' => $branch_id])->andFilterWhere(['in', 'scrap.created_by', $data])->sum('scrap_line.qty');
+            if(count($second_user_id) >0){
+                $qty = \backend\models\Scrap::find()->join('inner join', 'scrap_line', 'scrap_line.scrap_id = scrap.id')->where(['scrap_line.product_id' => $product_id,'created_by'=>$second_user_id])->andFilterWhere(['between', 'scrap.trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])->sum('scrap_line.qty');
+            }else{
+                $qty = \backend\models\Scrap::find()->join('inner join', 'scrap_line', 'scrap_line.scrap_id = scrap.id')->where(['scrap_line.product_id' => $product_id])->andFilterWhere(['between', 'scrap.trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])->sum('scrap_line.qty');
             }
 
         }
@@ -338,7 +360,8 @@ class AdminrecalController extends Controller
         if ($user_id != null) {
             $qty = \common\models\QuerySalePosData::find()->where(['created_by' => $user_id, 'product_id' => $product_id])
                 ->andFilterWhere(['between', 'order_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])
-                ->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id,'paymnet_method_id'=>2])->andFilterWhere(['is', 'order_channel_id', new \yii\db\Expression('null')])->sum('line_qty_credit');
+                ->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id,'payment_method_id'=>2])->andFilterWhere(['order_channel_id'=>0])->sum('line_qty_credit');
+           // ->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id,'payment_method_id'=>2])->andFilterWhere(['is', 'order_channel_id', new \yii\db\Expression('null')])->sum('line_qty_credit');
         }
         return $qty;
     }
@@ -350,6 +373,7 @@ class AdminrecalController extends Controller
             $qty = \common\models\QuerySalePosData::find()->where(['created_by' => $user_id, 'product_id' => $product_id])
                 ->andFilterWhere(['between', 'order_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])
                 ->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id,'payment_method_id'=>2])->andFilterWhere(['>', 'order_channel_id', 0])->sum('line_qty_credit');
+           // ->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id,'payment_method_id'=>2])->andFilterWhere(['is not', 'order_channel_id', new \yii\db\Expression('null')])->sum('line_qty_credit');
         }
         return $qty;
     }
@@ -367,19 +391,22 @@ class AdminrecalController extends Controller
 //    return $data;
 //}
 
-    function getDailycount($product_id, $company_id, $branch_id, $t_date, $user_login_id)
+    function getDailycount($product_id, $company_id, $branch_id,$user_login_datetime, $t_date, $user_login_id)
     {
         $qty = 0;
         if ($product_id != null) {
-            $data = [];
-            $model = \common\models\LoginUserRef::find()->where(['login_log_cal_id' => $user_login_id])->all();
-            if ($model) {
-                foreach ($model as $value) {
-                    array_push($data, $value->user_id); // second user
-                }
-            }
-            if (count($data) > 0) {
-                $qty = $model = \common\models\DailyCountStock::find()->where(['product_id' => $product_id, 'user_id' => $data, 'company_id' => $company_id, 'branch_id' => $branch_id])->andFilterWhere(['date(trans_date)' => date('Y-m-d', strtotime($t_date))])->sum('qty');
+//            $data = [];
+//            $model = \common\models\LoginUserRef::find()->where(['login_log_cal_id' => $user_login_id])->all();
+//            if ($model) {
+//                foreach ($model as $value) {
+//                    array_push($data, $value->user_id); // second user
+//                }
+//            }
+//            if (count($data) > 0) {
+                $model = $model = \common\models\DailyCountStock::find()->where(['product_id' => $product_id, 'user_id' => $user_login_id, 'company_id' => $company_id, 'branch_id' => $branch_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])->one();
+           // }
+            if($model){
+                $qty = $model->qty;
             }
 
         }

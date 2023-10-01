@@ -29,7 +29,7 @@ class SiteController extends Controller
 //                        'allow' => false,
 //                    ],
                     [
-                        'actions' => ['login', 'error', 'createadmin', 'changepassword', 'decodex', 'grab', 'addseconduser', 'getcominfo', 'transactionsalecar', 'transactionsalecar2', 'transactionsalecar3', 'createscreenshort', 'transactionsalepos', 'updateroute', 'calmachine', 'clearorder','testclosesum'],
+                        'actions' => ['login', 'error', 'createadmin', 'changepassword', 'decodex', 'grab', 'addseconduser', 'getcominfo', 'transactionsalecar', 'transactionsalecar2', 'transactionsalecar3', 'createscreenshort', 'transactionsalepos', 'updateroute', 'calmachine', 'clearorder','testclosesum','updateorderpayment'],
                         'allow' => true,
                     ],
                     [
@@ -1610,6 +1610,67 @@ class SiteController extends Controller
 //                $model_new->save(false);
             }
         }
+    }
+    public function actionUpdateorderpayment(){
+        $model = \common\models\QueryOrderWaitForUpdatePayment::find()->where(['date(trans_date)'=>date('Y-m-d')])->limit(30)->all();
+        $res = 0;
+        $company_id = 0;
+        $branch_id = 0;
+        if($model){
+            foreach($model as $value){
+                $company_id = $value->company_id;
+                $branch_id = $value->branch_id;
+                $modelorder = \common\models\Orders::find()->where(['id'=>$value->order_id,'payment_status'=>0])->one();
+                if($modelorder){
+                    $modelorder->payment_status = 1;
+                    $modelorder->save(false);
+                    $res+=1;
+                }
+            }
+        }
+        if($res > 0){
+         //   $this->notifymessageorderupdatepayment($company_id,$branch_id,1);
+        }
+    }
+    public function notifymessageorderupdatepayment($company_id, $branch_id, $timeuse)
+    {
+        //$message = "This is test send request from camel paperless";
+        $line_api = 'https://notify-api.line.me/api/notify';
+        $line_token = '';
+
+        //   6kL3UlbKb1djsoGE7KFXSo9SQ1ikYb2MxmTHDeEy3GE   token omnoi
+        if ($company_id == 1 && $branch_id == 1) {
+            // $line_token = 'ZMqo4ZqwBGafMOXKVht2Liq9dCGswp4IRofT2EbdRNN'; // vorapat
+            $b_token = \backend\models\Branch::findLintoken($company_id, $branch_id);
+            //   $line_token = '6kL3UlbKb1djsoGE7KFXSo9SQ1ikYb2MxmTHDeEy3GE'; // omnoi
+            $line_token = trim($b_token);
+        } else if ($company_id == 1 && $branch_id == 2) {
+            $b_token = \backend\models\Branch::findLintoken($company_id, $branch_id);
+            $line_token = trim($b_token);
+            //   $line_token = 'TxAUAOScIROaBexBWXaYrVcbjBItIKUwGzFpoFy3Jrx'; // BKT
+        }
+
+
+        $message = '' . "\n";
+        $message .= 'แจ้งประมวลอัพเดทวางบิลทุก 23:50:' . "\n";
+        $message .= "ประมวลผลรายงานวันที่: " . date('Y-m-d') . "(" . date('H:i') . ")" . "\n";
+        $message .= "ใช้เวลาประมวลผล : " . $timeuse . " วินาที" . "\n";
+
+        $queryData = array('message' => $message);
+        $queryData = http_build_query($queryData, '', '&');
+        $headerOptions = array(
+            'http' => array(
+                'method' => 'POST',
+                'header' => "Content-Type: application/x-www-form-urlencoded\r\n"
+                    . "Authorization: Bearer " . $line_token . "\r\n"
+                    . "Content-Length: " . strlen($queryData) . "\r\n",
+                'content' => $queryData
+            )
+        );
+        $context = stream_context_create($headerOptions);
+        $result = file_get_contents($line_api, FALSE, $context);
+        $res = json_decode($result);
+        return $res;
     }
 }
 

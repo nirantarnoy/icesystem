@@ -17,12 +17,16 @@ class ProductController extends Controller
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'list' => ['POST'],
+                    'listall' => ['POST'],
                     'itemcodelist' => ['POST'],
                     'warehouselist' => ['POST'],
                     'findreprocessstock' => ['POST'], // เบิกคืนจากรถ
                     'issuelist' => ['POST'],
                     'issuelist2' => ['POST'],
                     'findcustpriceoffline' => ['POST'],
+                    'listproductall' => ['GET'],
+                    'adddailycount' => ['POST'],
+                    'addtftransfer' => ['POST'],
                 ],
             ],
         ];
@@ -59,6 +63,7 @@ class ProductController extends Controller
 
         return ['status' => $status, 'data' => $data];
     }
+
     public function actionListall()
     {
         $customer_id = 0;
@@ -89,6 +94,46 @@ class ProductController extends Controller
         }
 
         return ['status' => $status, 'data' => $data];
+    }
+
+    public function actionListproductall()
+    {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+
+        $data = [];
+        $status = false;
+
+        $model = \common\models\Product::find()->where(['status' =>1])->all();
+        // $model = \common\models\QueryCustomerPrice::find()->all();
+        if ($model) {
+            $status = true;
+            foreach ($model as $value) {
+
+                array_push($data, [
+                    'id' => $value->id,
+                    //'image' => 'http://192.168.1.120/icesystem/backend/web/uploads/images/products/' . $product_info->photo,
+                    'image' => 'http://119.59.100.74/icesystem/backend/web/uploads/images/products/' . $value->photo,
+                    'code' => $value->code,
+                    'name' => $value->name,
+                    'sale_price' => 0,
+                    'onhand_qty' => $this->getstockqty($value->id),
+                ]);
+            }
+        }
+
+        return ['status' => $status, 'data' => $data];
+    }
+
+    public function getstockqty($product_id){
+        $qty  = 0;
+        if($product_id){
+            $qty = \backend\models\Stocksum::find()->where(['product_id'=>$product_id,'warehouse_id'=>1])->sum('qty');
+            if($qty == null){
+                $qty = 0;
+            }
+        }
+        return $qty;
     }
 
     public function actionItemcodelist()
@@ -244,7 +289,7 @@ class ProductController extends Controller
 //            $model = \common\models\OrderStock::find()->select(['product_id', 'SUM(qty) as qty', 'SUM(avl_qty) as avl_qty'])->where(['route_id' => $route_id, 'date(trans_date)' => date('Y-m-d', strtotime($trans_date))])->groupBy(['product_id'])->all();
 //            if(!$model){
             $pre_date = date('Y-m-d', strtotime(date('Y-m-d') . " -2 day"));
-           // $model = \common\models\OrderStock::find()->select(['product_id', 'SUM(qty) as qty', 'SUM(avl_qty) as avl_qty'])->where(['route_id' => $route_id])->andFilterWhere(['BETWEEN', 'date(trans_date)', $pre_date, date('Y-m-d', strtotime($trans_date))])->groupBy(['product_id'])->all();
+            // $model = \common\models\OrderStock::find()->select(['product_id', 'SUM(qty) as qty', 'SUM(avl_qty) as avl_qty'])->where(['route_id' => $route_id])->andFilterWhere(['BETWEEN', 'date(trans_date)', $pre_date, date('Y-m-d', strtotime($trans_date))])->groupBy(['product_id'])->all();
             $model = \common\models\OrderStock::find()->select(['product_id', 'SUM(qty) as qty', 'SUM(avl_qty) as avl_qty'])->where(['route_id' => $route_id])->groupBy(['product_id'])->all();
             // }
 
@@ -385,6 +430,120 @@ class ProductController extends Controller
         }
         return ['status' => $status, 'data' => $data];
     }
+    public function actionAdddailycount()
+    {
+        $company_id = 0;
+        $branch_id = 0;
+        $warehouse_id = 0;
+        $user_id = 0;
+        $datalist = null;
+        $rep_no = null;
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+        $company_id = $req_data['company_id'];
+        $branch_id = $req_data['branch_id'];
+        $datalist = $req_data['data'];
+        $user_id = $req_data['user_id'];
 
+        $data = [];
+        $status = 0;
+        $journal_no = '';
+
+
+        if ($datalist != null) {
+
+            \common\models\DailyCountStock::deleteAll(['company_id' => $company_id, 'branch_id' => $branch_id,'date(trans_date)'=>date('Y-m-d'), 'status' => 0]); // clear before save
+
+            $main_warehouse = \backend\models\Warehouse::findPrimary($company_id, $branch_id);
+
+            for($i=0;$i<=count($datalist)-1;$i++){
+                $model_journal = new \common\models\DailyCountStock();
+
+                $model_journal->trans_date = date('Y-m-d H:i:s');
+                $model_journal->journal_no = 'COUNTED';
+                $model_journal->product_id = $datalist[$i]['product_id'];
+                $model_journal->qty = $datalist[$i]['qty'];
+                $model_journal->warehouse_id = $main_warehouse;
+                $model_journal->company_id = $company_id;
+                $model_journal->branch_id = $branch_id;
+                $model_journal->status = 0;
+                $model_journal->user_id = $user_id;
+                if ($model_journal->save(false)) {
+                    $status = 1;
+                    array_push($data, ['id' => $model_journal->id]);
+                }
+            }
+        }
+
+        return ['status' => $status, 'data' => $data];
+    }
+
+    public function actionAddtftransfer()
+    {
+        $company_id = 0;
+        $branch_id = 0;
+        $warehouse_id = 0;
+        $user_id = 0;
+        $datalist = null;
+        $rep_no = null;
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+        $company_id = $req_data['company_id'];
+        $branch_id = $req_data['branch_id'];
+        $datalist = $req_data['data'];
+        $user_id = $req_data['user_id'];
+
+        $data = [];
+        $status = 0;
+        $journal_no = '';
+
+
+        if ($datalist != null) {
+            $trans_date = date('Y/m/d');
+            $journal_no = \backend\models\Journaltransfer::getLastNo2($trans_date, $company_id, $branch_id);
+
+            $model = new \backend\models\Journaltransfer();
+            $model->journal_no = $journal_no;
+            $model->trans_date = date('Y-m-d H:i:s');
+            $model->order_ref_id = 0;
+            $model->order_target_id = 0;
+            $model->from_car_id = 0;
+            $model->to_car_id = 0;
+            $model->from_route_id = 0;
+            $model->to_route_id = 0;
+            $model->company_id = $company_id;
+            $model->branch_id = $branch_id;
+            //  $model->created_by = $user_id;
+            $model->status = 1;
+            if ($model->save(false)) {
+                for ($i = 0; $i <= count($datalist) - 1; $i++) {
+                    $modelx = new \backend\models\Stocktrans();
+                    $modelx->journal_no = $journal_no;
+                    $modelx->trans_date = date('Y-m-d H:i:s');
+                    $modelx->product_id = $datalist[$i]['product_id'];
+                    $modelx->qty = $datalist[$i]['qty'];
+                    $modelx->warehouse_id = 1;
+                    $modelx->stock_type = 1; // 1 in 2 out
+                    $modelx->created_by = $user_id;
+                    $modelx->activity_type_id = 5; // transfer
+                    $modelx->production_type = 5;
+                    $modelx->status = 0;
+                    $modelx->company_id = $company_id;
+                    $modelx->branch_id = $branch_id;
+                    if ($modelx->save(false)) {
+                        $model_update_stock = \backend\models\Stocksum::find()->where(['product_id' => $datalist[$i]['product_id'], 'warehouse_id' => 1])->one();
+                        if ($model_update_stock) {
+                            $model_update_stock->qty = ($model_update_stock->qty + $datalist[$i]['qty']);
+                            $model_update_stock->save(false);
+                        }
+                        $status = 1;
+                        array_push($data, ['id' => $model->id]);
+                    }
+                }
+            }
+        }
+
+        return ['status' => $status, 'data' => $data];
+    }
 
 }

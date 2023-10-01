@@ -491,12 +491,15 @@ function getPayment($f_date, $t_date, $find_sale_type, $find_user_id, $company_i
 //             AND t1.company_id=" . $company_id . " AND t1.branch_id=" . $branch_id;
 
     $sql = "SELECT t1.id,t1.journal_no,t1.customer_code,t1.customer_name,t1.customer_id,SUM(t1.payment_amount) as amount,t1.trans_date,t1.order_no  from query_payment_receive as t1 INNER JOIN customer as t2 on t2.id = t1.customer_id 
-              WHERE (t1.trans_date>= " . "'" . date('Y-m-d H:i', strtotime($f_date)) . "'" . " 
-              AND t1.trans_date <= " . "'" . date('Y-m-d H:i', strtotime($t_date)) . "'" . " )
+              WHERE (t1.trans_date >= " . "'" . date('Y-m-d H:i:s', strtotime($f_date)) . "'" . " 
+              AND t1.trans_date <= " . "'" . date('Y-m-d H:i:s', strtotime($t_date)) . "'" . " )
               AND t1.status <> 100 
-              AND t1.payment_method_id=2 AND  t1.customer_id =" . $find_user_id . "
+              AND t1.payment_method_id=2
               AND t1.company_id=" . $company_id . " AND t1.branch_id=" . $branch_id;
 
+    if($find_user_id != null){
+        $sql.= " AND t1.customer_id =".$find_user_id;
+    }
 
     $sql .= " GROUP BY t1.id,t1.journal_no";
     $query = \Yii::$app->db->createCommand($sql);

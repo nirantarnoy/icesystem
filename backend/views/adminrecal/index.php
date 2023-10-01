@@ -74,20 +74,20 @@ if (!empty(\Yii::$app->user->identity->branch_id)) {
                     <?php for ($i = 0; $i <= count($user_login) - 1; $i++): ?>
                         <?php
                         $second_user = '';
-                        $second_user_data = findUserSecond($user_login[$i]['id']);
-
-                        if (count($second_user_data) > 0) {
-                            for ($x = 0; $x <= count($second_user_data) - 1; $x++) {
-
-                                if ($x < count($second_user_data)) {
-                                    $second_user .= $second_user_data[$x] . ',';
-                                } else {
-                                    $second_user .= $second_user_data[$x];
-                                }
-                            }
-                        } else {
-                            continue;
-                        }
+//                        $second_user_data = findUserSecond($user_login[$i]['id']);
+//
+//                        if (count($second_user_data) > 0) {
+//                            for ($x = 0; $x <= count($second_user_data) - 1; $x++) {
+//
+//                                if ($x < count($second_user_data)) {
+//                                    $second_user .= $second_user_data[$x] . ',';
+//                                } else {
+//                                    $second_user .= $second_user_data[$x];
+//                                }
+//                            }
+//                        } else {
+//                            continue;
+//                        }
                         ?>
                         <tr>
                             <td><?= \backend\models\User::findName($user_login[$i]['user_id']) ?></td>

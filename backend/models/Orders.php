@@ -14,6 +14,11 @@ class Orders extends \common\models\Orders
      * @var mixed|null
      */
 
+
+    /**
+     * @var mixed|null
+     */
+
     public function behaviors()
     {
         return [

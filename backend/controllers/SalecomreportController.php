@@ -199,9 +199,19 @@ class SalecomreportController extends Controller
 
         \common\models\ComDailyCal::deleteAll(['date(trans_date)'=>date('Y-m-d'),'route_id'=>$id]);
 
-        $line_special = $total_amt >= 3500 && $route_emp_count == 1 ? 30 : 0;
-        $total_special_all = $total_special_all + $line_special;
-        $total_com_sum_all = $total_com_sum_all + ($total_com_all + $line_special);
+        $line_special = 0;
+        $extra_data = $this->getComspecial(date('Y-m-d'),date('Y-m-d'));
+
+        if($extra_data != null){
+           // echo $route_emp_count.' '. $total_amt.' '. $extra_data[0]['sale_price'];return;
+            $line_special = (float)$total_amt >= (float)$extra_data[0]['sale_price'] && $route_emp_count == 1 ? (float)$extra_data[0]['com_extra'] : 0;
+            $total_special_all = $total_special_all + $line_special;
+            $total_com_sum_all = $total_com_sum_all + ($total_com_all + $line_special);
+        }
+
+//        $line_special = $total_amt >= 3500 && $route_emp_count == 1 ? 30 : 0;
+//        $total_special_all = $total_special_all + $line_special;
+//        $total_com_sum_all = $total_com_sum_all + ($total_com_all + $line_special);
 
         $model_com_daily = new \common\models\ComDailyCal();
         $model_com_daily->trans_date = date('Y-m-d H:i:s');
@@ -353,11 +363,21 @@ class SalecomreportController extends Controller
 
                 //echo $xx;return;
 
+//                $line_special = 0;
+
                 \common\models\ComDailyCal::deleteAll(['date(trans_date)'=>date('Y-m-d',strtotime($t_date)),'route_id'=>$val->order_channel_id]);
 
-                $line_special = $total_amt >= 3500 && $route_emp_count == 1 ? 30 : 0;
-                $total_special_all = $total_special_all + $line_special;
-                $total_com_sum_all = $total_com_sum_all + ($line_com + $line_special);
+               $extra_data = $this->getComspecial($t_date,$t_date);
+
+                if($extra_data != null){
+                    $line_special = $total_amt >= (float)$extra_data[0]['sale_price'] && $route_emp_count == 1 ? (float)$extra_data[0]['com_extra'] : 0;
+                    $total_special_all = $total_special_all + $line_special;
+                    $total_com_sum_all = $total_com_sum_all + ($line_com + $line_special);
+                }
+
+//                $line_special = $total_amt >= 3500 && $route_emp_count == 1 ? 30 : 0;
+//                $total_special_all = $total_special_all + $line_special;
+//                $total_com_sum_all = $total_com_sum_all + ($line_com + $line_special);
 
                 $model_com_daily = new \common\models\ComDailyCal();
                 $model_com_daily->trans_date = date('Y-m-d',strtotime($t_date));
@@ -503,8 +523,18 @@ class SalecomreportController extends Controller
         $total_com_sum_all = 0;
         $total_special_all = 0;
         $order_data = getOrderline($route_id, $from_date, $company_id, $branch_id);
+
+        $sale_target = 0;
+        $com_extra = 0;
+        $extra_data = $this->getComspecial($from_date,$to_date);
+        if($extra_data!=null){
+            $sale_target = (float)$extra_data[0]['sale_price'];
+            $com_extra = (float)$extra_data[0]['com_extra'];
+        }
+
         for ($m = 0; $m <= count($order_data) - 1; $m++) {
-            $line_special = $order_data[$m]['total_amt'] >= 3500 && $route_emp_count == 1 ? 30 : 0;
+           // $line_special = $order_data[$m]['total_amt'] >= 3500 && $route_emp_count == 1 ? 30 : 0;
+            $line_special = $order_data[$m]['total_amt'] >= $sale_target && $route_emp_count == 1 ? $com_extra : 0;
             $total_special_all = $total_special_all + $line_special;
         }
         array_push($data, ['special' => $total_special_all]);
@@ -635,5 +665,18 @@ class SalecomreportController extends Controller
         }
 
         return $data;
+    }
+
+    function getComspecial($from_date,$to_date){
+        $com_amt = [];
+        if($from_date != null && $to_date != null){
+            $model  = \common\models\SaleComSummary::find()->select(['id','com_extra','sale_price'])->where(['<=','date(from_date)',date('Y-m-d',strtotime($from_date))])->andFilterWhere(['company_id'=>1,'branch_id'=>1])->orderBy(['id'=>SORT_DESC])->one();
+            if($model){
+
+                   array_push($com_amt,['sale_price'=>$model->sale_price,'com_extra'=>$model->com_extra]);
+
+            }
+        }
+        return $com_amt;
     }
 }
