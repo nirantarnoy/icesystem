@@ -38,6 +38,8 @@ class JournalissueController extends Controller
                     'issueconfirmlasttest' => ['POST'],
                     'createissuebp' => ['POST'],
                     'getproductroute' => ['POST'],
+                    'carissuehistory' => ['POST'],
+                    'cancelissuecar' => ['POST'],
                 ],
             ],
         ];
@@ -1730,7 +1732,7 @@ class JournalissueController extends Controller
                     }
                 }
 
-                $this->createOrderforissue($route_id, $sale_date, $company_id, $branch_id, $default_warehouse, $datalist, $model->id,$user_id);
+                $this->createOrderforissue($route_id, $sale_date, $company_id, $branch_id, $default_warehouse, $datalist, $model->id, $user_id);
                 $this->transfertocarwarehousebp($company_id, $branch_id, $datalist, $default_warehouse, $route_id);
                 $status = 1;
                 array_push($data, ['issue_no' => $model->journal_no]);
@@ -1787,7 +1789,7 @@ class JournalissueController extends Controller
                             $model_stock->branch_id = $branch_id;
                             $model_stock->created_by = $user_id;
                             if ($model_stock->save(false)) {
-                                // $this->updateSummary($product_list[$i], $default_warehouse, $line_qty[$i]);
+                                //  $this->updateSummary($product_data[$i]['product_id'], $default_warehouse, $product_data[$i]['qty']);
                             }
                         }
                     }
@@ -1800,7 +1802,7 @@ class JournalissueController extends Controller
                         $model_update->status = 150; // approved
                         $model_update->save(false);
 
-                        \common\models\Orders::updateAll(['created_by'=>$user_id],['id'=>$model_order->id]);
+                        \common\models\Orders::updateAll(['created_by' => $user_id], ['id' => $model_order->id]);
                     }
                 }
             }
@@ -1944,7 +1946,7 @@ class JournalissueController extends Controller
                                 $new_car_wh->branch_id = $branch_id;
                                 $new_car_wh->save(false);
                             }
-                            return true;
+                            // return true;
                         }
                     } else {
 
@@ -1955,5 +1957,159 @@ class JournalissueController extends Controller
 
         }
         // return false;
+    }
+
+    public function actionCarissuehistory()
+    {
+        $user_id = 0;
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+        $user_id = $req_data['user_id'];
+
+        $status = 0;
+        $data = [];
+
+        if ($user_id > 0) {
+            $check_last_login = $this->findLoginNotLogout($user_id);
+            //return $check_last_login;
+            $sale_date = date('Y-m-d');
+//            $t_date = null;
+//            $exp_order_date = explode(' ', $api_date);
+//            if ($exp_order_date != null) {
+//                if (count($exp_order_date) > 1) {
+//                    $x_date = explode('-', $exp_order_date[0]);
+//                    if (count($x_date) > 1) {
+//                        $t_date = $x_date[0] . "/" . $x_date[1] . "/" . $x_date[2];
+//                      //  $t_date = $x_date[0] . "/" . 10 . "/" . 02;
+//                    }
+//                }
+//            }
+            $t_date = null;
+            $exp_order_date = explode('-', $check_last_login);
+            if ($exp_order_date != null) {
+                if (count($exp_order_date) > 1) {
+                    $t_date = $exp_order_date[0] . "/" . $exp_order_date[1] . "/" . $exp_order_date[2];
+
+                }
+            }
+            if ($t_date != null) {
+                $sale_date = $t_date;
+                // return $t_date;
+            }
+            $sql = "select t1.id as issue_id,t1.trans_date ,t1.journal_no, t1.status , t2.id as line_issue_id,t2.product_id,t2.qty,t1.status,t3.name as product_name,t5.name as route_name,t5.id as route_id";
+            $sql .= " FROM journal_issue as t1 inner join journal_issue_line as t2 on t2.issue_id = t1.id inner join product as t3 on t2.product_id = t3.id inner join orders as t4 on t1.order_ref_id = t4.id";
+            $sql .= " inner join delivery_route as t5 on t1.delivery_route_id=t5.id";
+            $sql .= " WHERE  t4.created_by =" . $user_id;
+            $sql .= " AND date(t1.trans_date) >=" . "'".date('Y-m-d',strtotime($sale_date))."'";
+            $sql .= " AND t4.customer_id=0";
+            $sql .= " AND t1.status in(2,150)";
+            $sql .= " ORDER By  t2.id";
+
+            $sql_query = \Yii::$app->db->createCommand($sql);
+            $stock_data = $sql_query->queryAll();
+            if ($stock_data != null) {
+
+                for ($i = 0; $i <= count($stock_data) - 1; $i++) {
+                    array_push($data, [
+                        'issue_id' => $stock_data[$i]['issue_id'],
+                        'issue_no' => $stock_data[$i]['journal_no'],
+                        'line_issue_id' => $stock_data[$i]['line_issue_id'],
+                        'product_name' => $stock_data[$i]['product_name'],
+                        'qty' => $stock_data[$i]['qty'],
+                        'route_id' => $stock_data[$i]['route_id'],
+                        'route_code' => $stock_data[$i]['route_name'],
+                        'trans_date' => $stock_data[$i]['trans_date'],
+                        'status' => $stock_data[$i]['status'],
+                    ]);
+                }
+            }
+            // }
+        }
+
+        return ['status' => $status, 'data' => $data];
+    }
+
+    public function findLoginNotLogout($id)
+    {
+        if ($id) {
+            $model = \common\models\LoginLog::find()->where(['user_id' => $id, 'status' => 1])->orderBy(['id' => SORT_DESC])->one();
+            return $model != null ? date('Y-m-d', strtotime($model->login_date)) : date('Y-m-d');
+        }
+
+    }
+
+    public function actionCancelissuecar()
+    {
+        $user_id = 0;
+        $issue_id = 0;
+        $route_id = 0;
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+        $user_id = $req_data['user_id'];
+        $issue_id = $req_data['issue_id'];
+        $route_id = $req_data['route_id'];
+
+        $status = 0;
+        $data = [];
+        $issave = 0;
+        if ($user_id && $issue_id) {
+            $model = \backend\models\Journalissueline::find()->where(['issue_id' => $issue_id])->all();
+            $default_wh = \backend\models\Warehouse::findWarehousecar(1, 1);
+            foreach ($model as $value) {
+                $model_trans = new \backend\models\Stocktrans();
+                $model_trans->journal_no = '';
+                $model_trans->trans_date = date('Y-m-d H:i:s');
+                $model_trans->product_id = $value->product_id;
+                $model_trans->qty = $value->qty;
+                $model_trans->warehouse_id = 1;
+                $model_trans->stock_type = 1; // 1 in 2 out
+                $model_trans->activity_type_id = 8; // คืนขาย
+                $model_trans->company_id = 1;
+                $model_trans->branch_id = 1;
+                $model_trans->created_by = \Yii::$app->user->id;
+                if ($model_trans->save(false)) {
+                    $modelx = \backend\models\Stocksum::find()->where(['warehouse_id' => 1, 'product_id' => $value->product_id])->one(); // find warehouse car stock for deduct
+                    if ($modelx) {
+                        $modelx->qty = (int)$modelx->qty + (int)$value->qty;
+                        if ($modelx->save(false)) {
+                            $modelstockcar = \backend\models\Stocksum::find()->where(['warehouse_id' => $default_wh, 'product_id' => $value->product_id])->one(); // find warehouse car stock for deduct
+                            if ($modelstockcar) {
+                                if ($modelstockcar->qty >= (int)$value->qty) {
+                                    $modelstockcar->qty = (int)$modelstockcar->qty - (int)$value->qty;
+                                    if ($modelstockcar->save(false)) {
+
+                                    }
+                                } else {
+                                    $modelstockcar->qty = 0;
+                                    if ($modelstockcar->save(false)) {
+
+                                    }
+                                }
+
+                            }
+
+                            $issave += 1;
+                        }
+                    }
+                }
+
+            }
+            if ($issave) {
+                $model_issue = \backend\models\Journalissue::find()->where(['id'=>$issue_id])->one();
+                if($model_issue){
+                    \backend\models\Orders::updateAll(['status'=>3],['id'=>$model_issue->order_ref_id]);
+                    $model_issue->status = 300;
+                    $model_issue->save(false);
+                }
+              //  \backend\models\Journalissue::updateAll(['status' => 300], ['id' => $issue_id]);
+                $status = 1;
+                array_push($data, ['message' => 'success']);
+            }
+
+        }
+
+        return ['status' => $status, 'data' => $data];
     }
 }

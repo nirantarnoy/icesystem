@@ -74,7 +74,7 @@ class AdminrecalController extends Controller
                 array_push($line_production_qty, $this->getProdDaily($value->product_id, $user_login_datetime, $t_date, $company_id, $branch_id, $user_login_id));
                 array_push($line_cash_qty, $this->getOrderCashQty($value->product_id, $user_id, $user_login_datetime, $t_date, $company_id, $branch_id));
                 array_push($line_credit_qty, $this->getOrderCreditQty($value->product_id, $user_id, $user_login_datetime, $t_date, $company_id, $branch_id));
-                array_push($line_balance_in, $this->getBalancein($value->product_id, $user_login_datetime, $t_date, $company_id, $branch_id));
+                array_push($line_balance_in, $this->getBalanceinnew($value->product_id, $user_login_datetime, $t_date, $company_id, $branch_id));
                 array_push($line_repack_qty, $this->getProdRepackDaily($value->product_id, $user_login_datetime, $t_date, $company_id, $branch_id)); // เบิกแปรสภาพ
                 array_push($line_refill_qty, $this->getIssueRefillDaily($value->product_id, $user_login_datetime, $t_date, $company_id, $branch_id));
                 array_push($line_transfer_qty, $this->getProdTransferDaily($value->product_id, $user_login_datetime, $t_date, $company_id, $branch_id));
@@ -109,7 +109,10 @@ class AdminrecalController extends Controller
         }
         // $user_id = \Yii::$app->user->id;
         // $cal_date = date('Y-m-d',strtotime("2022/06/22"));
-        $cal_date = date('Y-m-d', strtotime($login_date));
+
+      //  $cal_date = date('Y-m-d', strtotime($login_date));
+        $cal_date = date('Y-m-d', strtotime($logout_date));
+
 
         //\common\models\TransactionCarSale::deleteAll(['date(trans_date)'=>date('Y-m-d')]);
         \common\models\TransactionPosSaleSum::deleteAll(['date(trans_date)' => $cal_date, 'user_id' => $user_id]);
@@ -182,6 +185,24 @@ class AdminrecalController extends Controller
             $model = \common\models\BalanceDaily::find()->where(['product_id' => $product_id, 'company_id' => $company_id, 'branch_id' => $branch_id])->one();
             if ($model) {
                 $qty = $model->balance_qty;
+            }
+        }
+
+        return $qty;
+    }
+
+    function getBalanceinnew($product_id, $user_login_datetime, $t_date, $company_id, $branch_id)
+    {
+        $qty = 0;
+        if ($product_id != null) {
+            $new_shift = 0;
+            $cur_shift = $this->getTransShift($company_id, $branch_id);
+            if($cur_shift){
+                $new_shift = ($cur_shift -1);
+            }
+            $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id,'shift'=>$new_shift])->one();
+            if ($model) {
+                $qty = $model->counting_qty;
             }
         }
 

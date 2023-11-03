@@ -902,21 +902,31 @@ class OrderController extends Controller
 
         $data = [];
         if ($user_id) {
-
+            $check_last_login = $this->findLoginNotLogout($user_id);
+           //return $check_last_login;
             $sale_date = date('Y-m-d');
+//            $t_date = null;
+//            $exp_order_date = explode(' ', $api_date);
+//            if ($exp_order_date != null) {
+//                if (count($exp_order_date) > 1) {
+//                    $x_date = explode('-', $exp_order_date[0]);
+//                    if (count($x_date) > 1) {
+//                        $t_date = $x_date[0] . "/" . $x_date[1] . "/" . $x_date[2];
+//                      //  $t_date = $x_date[0] . "/" . 10 . "/" . 02;
+//                    }
+//                }
+//            }
             $t_date = null;
-            $exp_order_date = explode(' ', $api_date);
+            $exp_order_date = explode('-', $check_last_login);
             if ($exp_order_date != null) {
                 if (count($exp_order_date) > 1) {
-                    $x_date = explode('-', $exp_order_date[0]);
-                    if (count($x_date) > 1) {
-                      //  $t_date = $x_date[0] . "/" . $x_date[1] . "/" . $x_date[2];
-                        $t_date = $x_date[0] . "/" . $x_date[1] . "/" . 29;
-                    }
+                    $t_date = $exp_order_date[0] . "/" . $exp_order_date[1] . "/" . $exp_order_date[2];
+
                 }
             }
             if ($t_date != null) {
                 $sale_date = $t_date;
+               // return $t_date;
             }
            // $sale_date = date_create("2023-09-27");
             $model = null;
@@ -957,6 +967,15 @@ class OrderController extends Controller
             }
         }
         return ['status' => $status, 'data' => $data];
+    }
+
+    public function findLoginNotLogout($id)
+    {
+        if($id){
+            $model = \common\models\LoginLog::find()->where(['user_id' => $id, 'status' => 1])->orderBy(['id'=>SORT_DESC])->one();
+            return $model != null ? date('Y-m-d', strtotime($model->login_date)) : date('Y-m-d');
+        }
+
     }
 
     public function checkOrderclosed($user_id)
@@ -2216,7 +2235,7 @@ class OrderController extends Controller
         $total = $credit_total + $cash_total;
 
         $message = '' . "\n";
-        $message .= 'DINDANG:' . \backend\models\Deliveryroute::findName($route_id) . "\n";
+        $message .= 'VORAPAT:' . \backend\models\Deliveryroute::findName($route_id) . "\n";
         $message .= 'User:' . $this->findEmpName($user_id) . "\n";
         //   $message .= 'User:' . \backend\models\User::findName($user_id) . "\n";
         $message .= "รวมยอดขาย วันที่: " . date('Y-m-d') . "(" . date('H:i') . ")" . "\n";
@@ -2232,7 +2251,7 @@ class OrderController extends Controller
         $message .= "เงินโอน: " . number_format(0, 2) . "\n";
 
         // $message .= 'สามารถดูรายละเอียดได้ที่ http://103.253.73.108/icesystem/backend/web/index.php?r=dailysum/indexnew' . "\n"; // nky
-        $message .= 'สามารถดูรายละเอียดได้ที่ http://103.253.73.108/icesystemdindang/backend/web/index.php?r=dailysum/indexnew' . "\n"; // bkt
+        $message .= 'สามารถดูรายละเอียดได้ที่ http://141.98.19.240/icesystem/backend/web/index.php?r=dailysum/indexnew' . "\n"; // bkt
 
 
         $queryData = array('message' => $message);

@@ -259,7 +259,7 @@ class DailysummaryController extends Controller
                         'product_id' => $value->id,
                         'product_code' => $value->code,
                         'product_name' => $value->name,
-                        'qty' => $this->getOrderCashQty($value->id, $user_id, $login_time),
+                        'qty' =>$this->getOrderCashQty($value->id, $user_id, $login_time),
                     ]);
                 }
             }
@@ -303,7 +303,8 @@ class DailysummaryController extends Controller
     {
         $qty = 0;
         if ($user_id != null) {
-            $model = \common\models\SalePosCloseCashQty::find()->select('qty')->where(['user_id' => $user_id, 'product_id' => $product_id])->andFilterWhere(['between', 'start_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s')])->one();
+       //     $model = \common\models\SalePosCloseCashQty::find()->select('qty')->where(['user_id' => $user_id, 'product_id' => $product_id])->andFilterWhere(['between', 'start_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s')])->one();
+            $model = \common\models\SalePosCloseCashQty::find()->select('qty')->where(['user_id' => $user_id, 'product_id' => $product_id])->andFilterWhere(['>=', 'start_date', date('Y-m-d H:i:s', strtotime($user_login_datetime))])->andFilterWhere(['<=','start_date',date('Y-m-d H:i:s')])->one();
             if ($model) {
                 $qty = $model->qty;
             }

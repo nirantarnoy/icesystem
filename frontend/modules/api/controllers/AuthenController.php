@@ -480,7 +480,7 @@ class AuthenController extends Controller
                 $check_is_has_login = \common\models\LoginLogCal::find()->where(['user_id' => $user_id])->limit(1)->orderBy(['id' => SORT_DESC])->one();
                 if ($check_is_has_login) {
                     $check_is_has_login->logout_date = date('Y-m-d H:i:s');
-                    //$check_is_has_login->status = 2;
+                    $check_is_has_login->status = 2;
                     if($check_is_has_login->save(false)){
                         $status = 1;
                         array_push($data,['logout_success'=>1]);

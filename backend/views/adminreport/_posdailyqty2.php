@@ -208,11 +208,11 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
         </form>
     </div>
     <div class="col-lg-3" style="text-align: right;">
-<!--        <form action="--><?//= \yii\helpers\Url::to(['site/transaction'], true) ?><!--" method="post">-->
-<!--            <button class="btn btn-outline-success">-->
-<!--                <i class="fa fa-refresh"></i> ประมวลผล-->
-<!--            </button>-->
-<!--        </form>-->
+        <!--        <form action="--><?//= \yii\helpers\Url::to(['site/transaction'], true) ?><!--" method="post">-->
+        <!--            <button class="btn btn-outline-success">-->
+        <!--                <i class="fa fa-refresh"></i> ประมวลผล-->
+        <!--            </button>-->
+        <!--        </form>-->
 
     </div>
 </div>
@@ -279,7 +279,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
 
             <?php
 
-          $sum_date = $line_value->login_datetime;
+            $sum_date = $line_value->login_datetime;
 
             $balance_in_qty[0] = 0;
             $balance_in_qty[1] = 0;
@@ -487,7 +487,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                 <td style="text-align: center;padding: 8px;border: 1px solid grey;width:10%">รายการ</td>
                 <!--            <td style="text-align: center;padding: 0px;border: 1px solid grey">จำนวน</td>-->
                 <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;font-size: 18px;width: 10%"><b><?= \backend\models\Product::findCode($product_header[$y]) ?></b></td>
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;font-size: 18px;width: 7%"><b><?= \backend\models\Product::findCode($product_header[$y]) ?></b></td>
                 <?php endfor; ?>
             </tr>
             <tr>
@@ -498,7 +498,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                     $balance_in_qty[$y] = ($balance_in_qty[$y] + $qty);
                     $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                     ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $balance_in_qty[$y]==0?'-':number_format($balance_in_qty[$y], 0) ?></td>
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $balance_in_qty[$y]==0?'-':number_format($balance_in_qty[$y], 0) ?></td>
                 <?php endfor; ?>
             </tr>
             <tr>
@@ -510,7 +510,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                     $balance_in_qty[$y] = ($balance_in_qty[$y] + $qty);
                     $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                     ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $prodrec_qty[$y]==0?'-':number_format($prodrec_qty[$y], 0) ?></td>
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $prodrec_qty[$y]==0?'-':number_format($prodrec_qty[$y], 0) ?></td>
                 <?php endfor; ?>
             </tr>
             <tr>
@@ -522,7 +522,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                     $balance_in_qty[$y] = ($balance_in_qty[$y] + $qty);
                     $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                     ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $prodrec_re_qty[$y]==0?'-':number_format($prodrec_re_qty[$y], 0) ?></td>
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $prodrec_re_qty[$y]==0?'-':number_format($prodrec_re_qty[$y], 0) ?></td>
                 <?php endfor; ?>
             </tr>
             <tr>
@@ -535,21 +535,21 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                     $qty_reprocess_car = getReturnQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
                     $issue_car_total_qty[$y] = ($issue_car_total_qty[$y] + $qty_reprocess_car);
                     $balance_in_qty[$y] = ($balance_in_qty[$y] + $qty_reprocess_car);
-                   $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty_reprocess_car);
+                    $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty_reprocess_car);
                     ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $issue_car_total_qty[$y]==0?'-':number_format($issue_car_total_qty[$y], 0) ?></td>
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $issue_car_total_qty[$y]==0?'-':number_format($issue_car_total_qty[$y], 0) ?></td>
                 <?php endfor; ?>
                 </tr>
                 <tr>
                     <td style="padding: 8px;border: 1px solid grey;width: 10%">รับโอนต่างสาขา</td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                    <?php
+                        <?php
                         $qty = getIssueTransferQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
                         $issue_transfer_total_qty[$y] = ( $issue_transfer_total_qty[$y] + $qty);
                         $balance_in_qty[$y] = ($balance_in_qty[$y] + $qty);
                         $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                         ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%">
                             <b><?= $issue_transfer_total_qty[$y]==0?'-':number_format($issue_transfer_total_qty[$y], 0) ?></b>
                         </td>
                     <?php endfor; ?>
@@ -558,7 +558,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                     <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>ยอดรวม</b></td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                         <?php $balance_in_total_qty[$y] = $balance_in_qty[$y];?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%">
                             <b><?= ($balance_in_total_qty[$y])==0?'-':number_format($balance_in_total_qty[$y], 0) ?></b>
                         </td>
                     <?php endfor; ?>
@@ -571,7 +571,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                         $sale_total_qty[$y] = ($sale_total_qty[$y] + $qty);
                         $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
                         ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $qty==0?'-':number_format($qty, 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $qty==0?'-':number_format($qty, 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
@@ -587,7 +587,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                             $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($qty-$car_issue_qty));
                         }else{
                             $show_qty = ($qty);
-                           $sale_total_qty[$y] = ($sale_total_qty[$y] + ($qty));
+                            $sale_total_qty[$y] = ($sale_total_qty[$y] + ($qty));
                             $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($car_issue_qty));
                         }
 
@@ -644,7 +644,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                 <tr style="background-color: orange">
                     <td style="padding: 8px;border: 1px solid grey;"><b>ยอดรวมออกน้ำแข็ง</b></td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                    <?php $balance_out_total_qty[$y] =($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y]) ?>
+                        <?php $balance_out_total_qty[$y] =($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y]) ?>
                         <td style="text-align: center;padding: 8px;border: 1px solid grey;">
                             <b><?=($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y])==0?'-': number_format($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y], 0) ?></b>
                         </td>
@@ -679,9 +679,9 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
         <?php endforeach; ?>
     </table>
     <br />
-        <label for=""><h3>สรุปรวม</h3></label>
+    <label for=""><h3>สรุปรวม</h3></label>
     <br />
-        <table id="table-data">
+    <table id="table-data">
         <tr style="font-weight: bold;background-color: deeppink;color: white;">
             <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">รายการ</td>
             <!--            <td style="text-align: center;padding: 0px;border: 1px solid grey">จำนวน</td>-->
@@ -690,373 +690,373 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
             <?php endfor; ?>
         </tr>
 
-            <?php
-            $balance_in_qty[0] = 0;
-            $balance_in_qty[1] = 0;
-            $balance_in_qty[2] = 0;
-            $balance_in_qty[3] = 0;
-            $balance_in_qty[4] = 0;
-            $balance_in_qty[5] = 0;
-            $balance_in_qty[6] = 0;
-            $balance_in_qty[7] = 0;
-            $balance_in_qty[8] = 0;
-            $balance_in_qty[9] = 0;
-            $balance_in_qty[10] = 0;
-            $balance_in_qty[11] = 0;
-            $balance_in_qty[12] = 0;
-            $balance_in_qty[13] = 0;
-            $balance_in_qty[14] = 0;
+        <?php
+        $balance_in_qty[0] = 0;
+        $balance_in_qty[1] = 0;
+        $balance_in_qty[2] = 0;
+        $balance_in_qty[3] = 0;
+        $balance_in_qty[4] = 0;
+        $balance_in_qty[5] = 0;
+        $balance_in_qty[6] = 0;
+        $balance_in_qty[7] = 0;
+        $balance_in_qty[8] = 0;
+        $balance_in_qty[9] = 0;
+        $balance_in_qty[10] = 0;
+        $balance_in_qty[11] = 0;
+        $balance_in_qty[12] = 0;
+        $balance_in_qty[13] = 0;
+        $balance_in_qty[14] = 0;
 
-            $prodrec_qty[0] = 0;
-            $prodrec_qty[1] = 0;
-            $prodrec_qty[2] = 0;
-            $prodrec_qty[3] = 0;
-            $prodrec_qty[4] = 0;
-            $prodrec_qty[5] = 0;
-            $prodrec_qty[6] = 0;
-            $prodrec_qty[7] = 0;
-            $prodrec_qty[8] = 0;
-            $prodrec_qty[9] = 0;
-            $prodrec_qty[10] = 0;
-            $prodrec_qty[11] = 0;
-            $prodrec_qty[12] = 0;
-            $prodrec_qty[13] = 0;
-            $prodrec_qty[14] = 0;
+        $prodrec_qty[0] = 0;
+        $prodrec_qty[1] = 0;
+        $prodrec_qty[2] = 0;
+        $prodrec_qty[3] = 0;
+        $prodrec_qty[4] = 0;
+        $prodrec_qty[5] = 0;
+        $prodrec_qty[6] = 0;
+        $prodrec_qty[7] = 0;
+        $prodrec_qty[8] = 0;
+        $prodrec_qty[9] = 0;
+        $prodrec_qty[10] = 0;
+        $prodrec_qty[11] = 0;
+        $prodrec_qty[12] = 0;
+        $prodrec_qty[13] = 0;
+        $prodrec_qty[14] = 0;
 
-            $prodrec_re_qty[0] = 0;
-            $prodrec_re_qty[1] = 0;
-            $prodrec_re_qty[2] = 0;
-            $prodrec_re_qty[3] = 0;
-            $prodrec_re_qty[4] = 0;
-            $prodrec_re_qty[5] = 0;
-            $prodrec_re_qty[6] = 0;
-            $prodrec_re_qty[7] = 0;
-            $prodrec_re_qty[8] = 0;
-            $prodrec_re_qty[9] = 0;
-            $prodrec_re_qty[10] = 0;
-            $prodrec_re_qty[11] = 0;
-            $prodrec_re_qty[12] = 0;
-            $prodrec_re_qty[13] = 0;
-            $prodrec_re_qty[14] = 0;
-            ?>
-            <?php
-            $sale_total_qty[0] = 0;
-            $sale_total_qty[1] = 0;
-            $sale_total_qty[2] = 0;
-            $sale_total_qty[3] = 0;
-            $sale_total_qty[4] = 0;
-            $sale_total_qty[5] = 0;
-            $sale_total_qty[6] = 0;
-            $sale_total_qty[7] = 0;
-            $sale_total_qty[8] = 0;
-            $sale_total_qty[9] = 0;
-            $sale_total_qty[10] = 0;
-            $sale_total_qty[11] = 0;
-            $sale_total_qty[12] = 0;
-            $sale_total_qty[13] = 0;
-            $sale_total_qty[14] = 0;
+        $prodrec_re_qty[0] = 0;
+        $prodrec_re_qty[1] = 0;
+        $prodrec_re_qty[2] = 0;
+        $prodrec_re_qty[3] = 0;
+        $prodrec_re_qty[4] = 0;
+        $prodrec_re_qty[5] = 0;
+        $prodrec_re_qty[6] = 0;
+        $prodrec_re_qty[7] = 0;
+        $prodrec_re_qty[8] = 0;
+        $prodrec_re_qty[9] = 0;
+        $prodrec_re_qty[10] = 0;
+        $prodrec_re_qty[11] = 0;
+        $prodrec_re_qty[12] = 0;
+        $prodrec_re_qty[13] = 0;
+        $prodrec_re_qty[14] = 0;
+        ?>
+        <?php
+        $sale_total_qty[0] = 0;
+        $sale_total_qty[1] = 0;
+        $sale_total_qty[2] = 0;
+        $sale_total_qty[3] = 0;
+        $sale_total_qty[4] = 0;
+        $sale_total_qty[5] = 0;
+        $sale_total_qty[6] = 0;
+        $sale_total_qty[7] = 0;
+        $sale_total_qty[8] = 0;
+        $sale_total_qty[9] = 0;
+        $sale_total_qty[10] = 0;
+        $sale_total_qty[11] = 0;
+        $sale_total_qty[12] = 0;
+        $sale_total_qty[13] = 0;
+        $sale_total_qty[14] = 0;
 
 
-            $sale_refill_qty[0] = 0;
-            $sale_refill_qty[1] = 0;
-            $sale_refill_qty[2] = 0;
-            $sale_refill_qty[3] = 0;
-            $sale_refill_qty[4] = 0;
-            $sale_refill_qty[5] = 0;
-            $sale_refill_qty[6] = 0;
-            $sale_refill_qty[7] = 0;
-            $sale_refill_qty[8] = 0;
-            $sale_refill_qty[9] = 0;
-            $sale_refill_qty[10] = 0;
-            $sale_refill_qty[11] = 0;
-            $sale_refill_qty[12] = 0;
-            $sale_refill_qty[13] = 0;
-            $sale_refill_qty[14] = 0;
+        $sale_refill_qty[0] = 0;
+        $sale_refill_qty[1] = 0;
+        $sale_refill_qty[2] = 0;
+        $sale_refill_qty[3] = 0;
+        $sale_refill_qty[4] = 0;
+        $sale_refill_qty[5] = 0;
+        $sale_refill_qty[6] = 0;
+        $sale_refill_qty[7] = 0;
+        $sale_refill_qty[8] = 0;
+        $sale_refill_qty[9] = 0;
+        $sale_refill_qty[10] = 0;
+        $sale_refill_qty[11] = 0;
+        $sale_refill_qty[12] = 0;
+        $sale_refill_qty[13] = 0;
+        $sale_refill_qty[14] = 0;
 
-            $scrap_total_qty[0] = 0;
-            $scrap_total_qty[1] = 0;
-            $scrap_total_qty[2] = 0;
-            $scrap_total_qty[3] = 0;
-            $scrap_total_qty[4] = 0;
-            $scrap_total_qty[5] = 0;
-            $scrap_total_qty[6] = 0;
-            $scrap_total_qty[7] = 0;
-            $scrap_total_qty[8] = 0;
-            $scrap_total_qty[9] = 0;
-            $scrap_total_qty[10] = 0;
-            $scrap_total_qty[11] = 0;
-            $scrap_total_qty[12] = 0;
-            $scrap_total_qty[13] = 0;
-            $scrap_total_qty[14] = 0;
+        $scrap_total_qty[0] = 0;
+        $scrap_total_qty[1] = 0;
+        $scrap_total_qty[2] = 0;
+        $scrap_total_qty[3] = 0;
+        $scrap_total_qty[4] = 0;
+        $scrap_total_qty[5] = 0;
+        $scrap_total_qty[6] = 0;
+        $scrap_total_qty[7] = 0;
+        $scrap_total_qty[8] = 0;
+        $scrap_total_qty[9] = 0;
+        $scrap_total_qty[10] = 0;
+        $scrap_total_qty[11] = 0;
+        $scrap_total_qty[12] = 0;
+        $scrap_total_qty[13] = 0;
+        $scrap_total_qty[14] = 0;
 
-            $issue_car_total_qty[0] = 0;
-            $issue_car_total_qty[1] = 0;
-            $issue_car_total_qty[2] = 0;
-            $issue_car_total_qty[3] = 0;
-            $issue_car_total_qty[4] = 0;
-            $issue_car_total_qty[5] = 0;
-            $issue_car_total_qty[6] = 0;
-            $issue_car_total_qty[7] = 0;
-            $issue_car_total_qty[8] = 0;
-            $issue_car_total_qty[9] = 0;
-            $issue_car_total_qty[10] = 0;
-            $issue_car_total_qty[11] = 0;
-            $issue_car_total_qty[12] = 0;
-            $issue_car_total_qty[13] = 0;
-            $issue_car_total_qty[14] = 0;
+        $issue_car_total_qty[0] = 0;
+        $issue_car_total_qty[1] = 0;
+        $issue_car_total_qty[2] = 0;
+        $issue_car_total_qty[3] = 0;
+        $issue_car_total_qty[4] = 0;
+        $issue_car_total_qty[5] = 0;
+        $issue_car_total_qty[6] = 0;
+        $issue_car_total_qty[7] = 0;
+        $issue_car_total_qty[8] = 0;
+        $issue_car_total_qty[9] = 0;
+        $issue_car_total_qty[10] = 0;
+        $issue_car_total_qty[11] = 0;
+        $issue_car_total_qty[12] = 0;
+        $issue_car_total_qty[13] = 0;
+        $issue_car_total_qty[14] = 0;
 
-            $issue_transfer_total_qty[0] = 0;
-            $issue_transfer_total_qty[1] = 0;
-            $issue_transfer_total_qty[2] = 0;
-            $issue_transfer_total_qty[3] = 0;
-            $issue_transfer_total_qty[4] = 0;
-            $issue_transfer_total_qty[5] = 0;
-            $issue_transfer_total_qty[6] = 0;
-            $issue_transfer_total_qty[7] = 0;
-            $issue_transfer_total_qty[8] = 0;
-            $issue_transfer_total_qty[9] = 0;
-            $issue_transfer_total_qty[10] = 0;
-            $issue_transfer_total_qty[11] = 0;
-            $issue_transfer_total_qty[12] = 0;
-            $issue_transfer_total_qty[13] = 0;
-            $issue_transfer_total_qty[14] = 0;
+        $issue_transfer_total_qty[0] = 0;
+        $issue_transfer_total_qty[1] = 0;
+        $issue_transfer_total_qty[2] = 0;
+        $issue_transfer_total_qty[3] = 0;
+        $issue_transfer_total_qty[4] = 0;
+        $issue_transfer_total_qty[5] = 0;
+        $issue_transfer_total_qty[6] = 0;
+        $issue_transfer_total_qty[7] = 0;
+        $issue_transfer_total_qty[8] = 0;
+        $issue_transfer_total_qty[9] = 0;
+        $issue_transfer_total_qty[10] = 0;
+        $issue_transfer_total_qty[11] = 0;
+        $issue_transfer_total_qty[12] = 0;
+        $issue_transfer_total_qty[13] = 0;
+        $issue_transfer_total_qty[14] = 0;
 
-            $balance_out_total_qty[0] = 0;
-            $balance_out_total_qty[1] = 0;
-            $balance_out_total_qty[2] = 0;
-            $balance_out_total_qty[3] = 0;
-            $balance_out_total_qty[4] = 0;
-            $balance_out_total_qty[5] = 0;
-            $balance_out_total_qty[6] = 0;
-            $balance_out_total_qty[7] = 0;
-            $balance_out_total_qty[8] = 0;
-            $balance_out_total_qty[9] = 0;
-            $balance_out_total_qty[10] = 0;
-            $balance_out_total_qty[11] = 0;
-            $balance_out_total_qty[12] = 0;
-            $balance_out_total_qty[13] = 0;
-            $balance_out_total_qty[14] = 0;
+        $balance_out_total_qty[0] = 0;
+        $balance_out_total_qty[1] = 0;
+        $balance_out_total_qty[2] = 0;
+        $balance_out_total_qty[3] = 0;
+        $balance_out_total_qty[4] = 0;
+        $balance_out_total_qty[5] = 0;
+        $balance_out_total_qty[6] = 0;
+        $balance_out_total_qty[7] = 0;
+        $balance_out_total_qty[8] = 0;
+        $balance_out_total_qty[9] = 0;
+        $balance_out_total_qty[10] = 0;
+        $balance_out_total_qty[11] = 0;
+        $balance_out_total_qty[12] = 0;
+        $balance_out_total_qty[13] = 0;
+        $balance_out_total_qty[14] = 0;
 
-            $count_total_qty[0] = 0;
-            $count_total_qty[1] = 0;
-            $count_total_qty[2] = 0;
-            $count_total_qty[3] = 0;
-            $count_total_qty[4] = 0;
-            $count_total_qty[5] = 0;
-            $count_total_qty[6] = 0;
-            $count_total_qty[7] = 0;
-            $count_total_qty[8] = 0;
-            $count_total_qty[9] = 0;
-            $count_total_qty[10] = 0;
-            $count_total_qty[11] = 0;
-            $count_total_qty[12] = 0;
-            $count_total_qty[13] = 0;
-            $count_total_qty[14] = 0;
+        $count_total_qty[0] = 0;
+        $count_total_qty[1] = 0;
+        $count_total_qty[2] = 0;
+        $count_total_qty[3] = 0;
+        $count_total_qty[4] = 0;
+        $count_total_qty[5] = 0;
+        $count_total_qty[6] = 0;
+        $count_total_qty[7] = 0;
+        $count_total_qty[8] = 0;
+        $count_total_qty[9] = 0;
+        $count_total_qty[10] = 0;
+        $count_total_qty[11] = 0;
+        $count_total_qty[12] = 0;
+        $count_total_qty[13] = 0;
+        $count_total_qty[14] = 0;
 
-            $diff_total_qty[0] = 0;
-            $diff_total_qty[1] = 0;
-            $diff_total_qty[2] = 0;
-            $diff_total_qty[3] = 0;
-            $diff_total_qty[4] = 0;
-            $diff_total_qty[5] = 0;
-            $diff_total_qty[6] = 0;
-            $diff_total_qty[7] = 0;
-            $diff_total_qty[8] = 0;
-            $diff_total_qty[9] = 0;
-            $diff_total_qty[10] = 0;
-            $diff_total_qty[11] = 0;
-            $diff_total_qty[12] = 0;
-            $diff_total_qty[13] = 0;
-            $diff_total_qty[14] = 0;
+        $diff_total_qty[0] = 0;
+        $diff_total_qty[1] = 0;
+        $diff_total_qty[2] = 0;
+        $diff_total_qty[3] = 0;
+        $diff_total_qty[4] = 0;
+        $diff_total_qty[5] = 0;
+        $diff_total_qty[6] = 0;
+        $diff_total_qty[7] = 0;
+        $diff_total_qty[8] = 0;
+        $diff_total_qty[9] = 0;
+        $diff_total_qty[10] = 0;
+        $diff_total_qty[11] = 0;
+        $diff_total_qty[12] = 0;
+        $diff_total_qty[13] = 0;
+        $diff_total_qty[14] = 0;
 
-            ?>
+        ?>
 
-            <tr>
-                <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดยกมา</td>
-                <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                    <?php
-                    $qty = getBalanceInQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y], 1);
-                    $balance_in_qty[$y] = ($balance_in_qty[$y] + $qty);
-                    $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
-                    ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $balance_in_qty[$y]==0?'-':number_format($balance_in_qty[$y], 0) ?></td>
-                <?php endfor; ?>
-            </tr>
-            <tr>
-                <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดผลิต</td>
-                <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                    <?php
-                    $qty = getProdrecQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
-                    $prodrec_qty[$y] = ($prodrec_qty[$y] + $qty);
-                    $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
-                    ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?=$prodrec_qty[$y] ==0?'-': number_format($prodrec_qty[$y], 0) ?></td>
-                <?php endfor; ?>
-            </tr>
-            <tr>
-                <td style="padding: 8px;border: 1px solid grey;width: 10%">รับ Reprocess</td>
-                <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                    <?php
-                    $qty = getProdReprocessSum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
-                    $prodrec_re_qty[$y] = ($prodrec_re_qty[$y] + $qty);
-                    $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
-                    ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $prodrec_re_qty[$y]==0?'-':number_format($prodrec_re_qty[$y], 0) ?></td>
-                <?php endfor; ?>
-            </tr>
-            <tr>
+        <tr>
+            <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดยกมา</td>
+            <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
+                <?php
+                $qty = getBalanceInQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y], 1);
+                $balance_in_qty[$y] = ($balance_in_qty[$y] + $qty);
+                $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
+                ?>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $balance_in_qty[$y]==0?'-':number_format($balance_in_qty[$y], 0) ?></td>
+            <?php endfor; ?>
+        </tr>
+        <tr>
+            <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดผลิต</td>
+            <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
+                <?php
+                $qty = getProdrecQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
+                $prodrec_qty[$y] = ($prodrec_qty[$y] + $qty);
+                $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
+                ?>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?=$prodrec_qty[$y] ==0?'-': number_format($prodrec_qty[$y], 0) ?></td>
+            <?php endfor; ?>
+        </tr>
+        <tr>
+            <td style="padding: 8px;border: 1px solid grey;width: 10%">รับ Reprocess</td>
+            <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
+                <?php
+                $qty = getProdReprocessSum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
+                $prodrec_re_qty[$y] = ($prodrec_re_qty[$y] + $qty);
+                $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
+                ?>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $prodrec_re_qty[$y]==0?'-':number_format($prodrec_re_qty[$y], 0) ?></td>
+            <?php endfor; ?>
+        </tr>
+        <tr>
             <td style="padding: 8px;border: 1px solid grey;width: 10%">รับ Reprocess รถ + อื่นๆ</td>
             <?php for ($y = 0;
-                       $y <= count($product_header) - 1;
-                       $y++): ?>
-                <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                    <?php
-                    $qty_reprocess_car = getReturnQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
-                    $issue_car_total_qty[$y] = ($issue_car_total_qty[$y] + $qty_reprocess_car);
-                    $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty_reprocess_car);
-                    ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $issue_car_total_qty[$y]==0?'-':number_format($issue_car_total_qty[$y], 0) ?></td>
-                <?php endfor; ?>
-                </tr>
-            <tr>
-                <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>รับโอนต่างสาขา</b></td>
-                <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                    <?php
-                    $qty = getIssueTransferQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
-                    $issue_transfer_total_qty[$y] = ( $issue_transfer_total_qty[$y] + $qty);
-                    $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
-                    ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
-                        <b><?= $issue_transfer_total_qty[$y]==0?'-':number_format($issue_transfer_total_qty[$y], 0) ?></b>
-                    </td>
-                <?php endfor; ?>
-            </tr>
-                <tr style="background-color: lightblue">
-                    <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>ยอดรวม</b></td>
-                    <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                    <?php $balance_in_qty[$y] = ($balance_in_qty[$y] + $prodrec_qty[$y] + $prodrec_re_qty[$y] + $issue_car_total_qty[$y] + $issue_transfer_total_qty[$y])?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
-                            <b><?= $balance_in_qty[$y]==0?'-':number_format($balance_in_qty[$y], 0) ?></b>
-                        </td>
-                    <?php endfor; ?>
-                </tr>
-                <tr>
-                    <td style="padding: 8px;border: 1px solid grey;width: 10%">หน้าบ้าน เงินสด</td>
-                    <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <?php
-                        $qty = getCashQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
-                        $sale_total_qty[$y] = ($sale_total_qty[$y] + $qty);
-                        $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
-                        ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $qty==0?'-':number_format($qty, 0) ?></td>
-                    <?php endfor; ?>
-                </tr>
-                <tr>
-                    <td style="padding: 8px;border: 1px solid grey;width: 10%">หน้าบ้าน เงินเชื่อ</td>
-                    <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <?php
-                        $car_issue_qty = getIssueCarQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y],$line_value->user_id);
-                        $qty = getCreditQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
+            $y <= count($product_header) - 1;
+            $y++): ?>
+            <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
+                <?php
+                $qty_reprocess_car = getReturnQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
+                $issue_car_total_qty[$y] = ($issue_car_total_qty[$y] + $qty_reprocess_car);
+                $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty_reprocess_car);
+                ?>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $issue_car_total_qty[$y]==0?'-':number_format($issue_car_total_qty[$y], 0) ?></td>
+            <?php endfor; ?>
+        </tr>
+        <tr>
+            <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>รับโอนต่างสาขา</b></td>
+            <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
+                <?php
+                $qty = getIssueTransferQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
+                $issue_transfer_total_qty[$y] = ( $issue_transfer_total_qty[$y] + $qty);
+                $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
+                ?>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
+                    <b><?= $issue_transfer_total_qty[$y]==0?'-':number_format($issue_transfer_total_qty[$y], 0) ?></b>
+                </td>
+            <?php endfor; ?>
+        </tr>
+        <tr style="background-color: lightblue">
+            <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>ยอดรวม</b></td>
+            <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
+                <?php $balance_in_qty[$y] = ($balance_in_qty[$y] + $prodrec_qty[$y] + $prodrec_re_qty[$y] + $issue_car_total_qty[$y] + $issue_transfer_total_qty[$y])?>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
+                    <b><?= $balance_in_qty[$y]==0?'-':number_format($balance_in_qty[$y], 0) ?></b>
+                </td>
+            <?php endfor; ?>
+        </tr>
+        <tr>
+            <td style="padding: 8px;border: 1px solid grey;width: 10%">หน้าบ้าน เงินสด</td>
+            <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
+                <?php
+                $qty = getCashQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
+                $sale_total_qty[$y] = ($sale_total_qty[$y] + $qty);
+                $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
+                ?>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $qty==0?'-':number_format($qty, 0) ?></td>
+            <?php endfor; ?>
+        </tr>
+        <tr>
+            <td style="padding: 8px;border: 1px solid grey;width: 10%">หน้าบ้าน เงินเชื่อ</td>
+            <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
+                <?php
+                $car_issue_qty = getIssueCarQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y],$line_value->user_id);
+                $qty = getCreditQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
 //                        $sale_total_qty[$y] = ($sale_total_qty[$y] + ($qty - $issue_car_x));
 //                        $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($qty - $issue_car_x));
 
-                        $show_qty  = 0;
-                        if($qty > 0 && $qty >=$car_issue_qty){
-                            $show_qty = ($qty-$car_issue_qty);
-                            $sale_total_qty[$y] = ($sale_total_qty[$y] + ($qty-$car_issue_qty));
-                            $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($qty-$car_issue_qty));
-                        }else{
-                            $show_qty = ($qty);
-                            $sale_total_qty[$y] = ($sale_total_qty[$y] + ($qty));
-                            $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($car_issue_qty));
-                        }
-                        ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= ($show_qty)==0?'-':number_format(($show_qty), 0) ?></td>
-                    <?php endfor; ?>
-                </tr>
-                <tr>
-                    <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดเบิกคนรถ</td>
-                    <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <?php
-                        $qty = getIssueCarQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y],$line_value->user_id);
-                        $issue_car_total_qty[$y] = $qty;
-                        $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
-                        ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $issue_car_total_qty[$y]==0?'-':number_format($issue_car_total_qty[$y], 0) ?></td>
-                    <?php endfor; ?>
-                </tr>
-                <tr>
-                    <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดเบิกต่างสาขา</td>
-                    <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= 10>1?'-':number_format(0, 0) ?></td>
-                    <?php endfor; ?>
-                </tr>
-                <tr style="background-color: yellow">
-                    <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>ยอดรวม</b></td>
-                    <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
-                            <b><?= ($issue_car_total_qty[$y] +$sale_total_qty[$y] )==0?'-':number_format(($sale_total_qty[$y] + $issue_car_total_qty[$y]), 0) ?></b></td>
-                    <?php endfor; ?>
-                </tr>
-                <tr>
-                    <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดเบิกเติม</td>
-                    <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <?php
-                        $qty = getIssueRefillQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
-                        $sale_refill_qty[$y] = ($sale_refill_qty[$y] + $qty);
-                        $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
-                        ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $sale_refill_qty[$y]==0?'-':number_format($sale_refill_qty[$y], 0) ?></td>
-                    <?php endfor; ?>
-                </tr>
-                <tr>
-                    <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดเสีย</td>
-                    <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <?php
-                        $qty = getScrapQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
-                        $scrap_total_qty[$y] = ($scrap_total_qty[$y] + $qty);
-                        $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
-                        ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $scrap_total_qty[$y]==0?'-':number_format($scrap_total_qty[$y], 0) ?></td>
-                    <?php endfor; ?>
-                </tr>
-                <tr style="background-color: orange">
-                    <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>ยอดรวมออกน้ำแข็ง</b></td>
-                    <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                    <?php $balance_out_total_qty[$y] = ($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y]);?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
-                            <b><?= $balance_out_total_qty[$y]==0?'-':number_format($balance_out_total_qty[$y], 0) ?></b>
-                        </td>
-                    <?php endfor; ?>
-                </tr>
-                <tr>
-                    <td style="padding: 8px;border: 1px solid grey;width: 10%">เหลือยกไป</td>
-                    <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= ($balance_in_qty[$y]-$balance_out_total_qty[$y])==0?'-':number_format(($balance_in_qty[$y]-$balance_out_total_qty[$y]), 0) ?></td>
-                    <?php endfor; ?>
-                </tr>
-                <tr>
-                    <td style="padding: 8px;border: 1px solid grey;width: 10%">นับจริง</td>
-                    <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <?php
-                       // $qty = getDailycountSum($product_header[$y], date('Y-m-d', strtotime($from_date)));
-                        $qty = getDailycountLasted($product_header[$y], date('Y-m-d', strtotime($from_date)));
-                        $count_total_qty[$y] = ($count_total_qty[$y] + $qty);
-                        ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $count_total_qty[$y]==0?'-':number_format($count_total_qty[$y], 0) ?></td>
-                    <?php endfor; ?>
-                </tr>
-                <tr style="background-color: lightgreen">
-                    <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>เกิน-ขาด</b></td>
-                    <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
-                            <b><?= ($count_total_qty[$y] - ($balance_in_qty[$y]-$balance_out_total_qty[$y]))==0?'-':number_format(($count_total_qty[$y] - ($balance_in_qty[$y]-$balance_out_total_qty[$y])), 0) ?></b>
-                        </td>
-                    <?php endfor; ?>
-                </tr>
+                $show_qty  = 0;
+                if($qty > 0 && $qty >=$car_issue_qty){
+                    $show_qty = ($qty-$car_issue_qty);
+                    $sale_total_qty[$y] = ($sale_total_qty[$y] + ($qty-$car_issue_qty));
+                    $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($qty-$car_issue_qty));
+                }else{
+                    $show_qty = ($qty);
+                    $sale_total_qty[$y] = ($sale_total_qty[$y] + ($qty));
+                    $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($car_issue_qty));
+                }
+                ?>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= ($show_qty)==0?'-':number_format(($show_qty), 0) ?></td>
             <?php endfor; ?>
+        </tr>
+        <tr>
+            <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดเบิกคนรถ</td>
+            <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
+                <?php
+                $qty = getIssueCarQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y],$line_value->user_id);
+                $issue_car_total_qty[$y] = $qty;
+                $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
+                ?>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $issue_car_total_qty[$y]==0?'-':number_format($issue_car_total_qty[$y], 0) ?></td>
+            <?php endfor; ?>
+        </tr>
+        <tr>
+            <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดเบิกต่างสาขา</td>
+            <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= 10>1?'-':number_format(0, 0) ?></td>
+            <?php endfor; ?>
+        </tr>
+        <tr style="background-color: yellow">
+            <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>ยอดรวม</b></td>
+            <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
+                    <b><?= ($issue_car_total_qty[$y] +$sale_total_qty[$y] )==0?'-':number_format(($sale_total_qty[$y] + $issue_car_total_qty[$y]), 0) ?></b></td>
+            <?php endfor; ?>
+        </tr>
+        <tr>
+            <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดเบิกเติม</td>
+            <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
+                <?php
+                $qty = getIssueRefillQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
+                $sale_refill_qty[$y] = ($sale_refill_qty[$y] + $qty);
+                $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
+                ?>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $sale_refill_qty[$y]==0?'-':number_format($sale_refill_qty[$y], 0) ?></td>
+            <?php endfor; ?>
+        </tr>
+        <tr>
+            <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดเสีย</td>
+            <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
+                <?php
+                $qty = getScrapQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
+                $scrap_total_qty[$y] = ($scrap_total_qty[$y] + $qty);
+                $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
+                ?>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $scrap_total_qty[$y]==0?'-':number_format($scrap_total_qty[$y], 0) ?></td>
+            <?php endfor; ?>
+        </tr>
+        <tr style="background-color: orange">
+            <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>ยอดรวมออกน้ำแข็ง</b></td>
+            <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
+                <?php $balance_out_total_qty[$y] = ($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y]);?>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
+                    <b><?= $balance_out_total_qty[$y]==0?'-':number_format($balance_out_total_qty[$y], 0) ?></b>
+                </td>
+            <?php endfor; ?>
+        </tr>
+        <tr>
+            <td style="padding: 8px;border: 1px solid grey;width: 10%">เหลือยกไป</td>
+            <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= ($balance_in_qty[$y]-$balance_out_total_qty[$y])==0?'-':number_format(($balance_in_qty[$y]-$balance_out_total_qty[$y]), 0) ?></td>
+            <?php endfor; ?>
+        </tr>
+        <tr>
+            <td style="padding: 8px;border: 1px solid grey;width: 10%">นับจริง</td>
+            <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
+                <?php
+                // $qty = getDailycountSum($product_header[$y], date('Y-m-d', strtotime($from_date)));
+                $qty = getDailycountLasted($product_header[$y], date('Y-m-d', strtotime($from_date)));
+                $count_total_qty[$y] = ($count_total_qty[$y] + $qty);
+                ?>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $count_total_qty[$y]==0?'-':number_format($count_total_qty[$y], 0) ?></td>
+            <?php endfor; ?>
+        </tr>
+        <tr style="background-color: lightgreen">
+            <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>เกิน-ขาด</b></td>
+            <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
+                    <b><?= ($count_total_qty[$y] - ($balance_in_qty[$y]-$balance_out_total_qty[$y]))==0?'-':number_format(($count_total_qty[$y] - ($balance_in_qty[$y]-$balance_out_total_qty[$y])), 0) ?></b>
+                </td>
+            <?php endfor; ?>
+        </tr>
+    <?php endfor; ?>
 
-                </table>
+    </table>
 </div>
 
 <br/>
@@ -1160,7 +1160,7 @@ function getCreditQty($trans_date, $product_id, $shift)
             $qty = $model;
         }
     }
-   return $qty;
+    return $qty;
 }
 
 function getIssueCarQty($trans_date, $product_id, $user_id)
@@ -1186,7 +1186,7 @@ function getIssueTransferQty($trans_date, $product_id, $shift)
     $qty = 0;
     if ($product_id && $trans_date != null) {
         $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date,'shift'=>$shift])->sum('issue_transfer_qty');
-      //  $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date])->sum('issue_transfer_qty');
+        //  $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date])->sum('issue_transfer_qty');
         if ($model) {
             $qty = $model;
         }
@@ -1198,7 +1198,7 @@ function getIssueTransferQtySum($trans_date, $product_id, $shift)
 {
     $qty = 0;
     if ($product_id && $trans_date != null) {
-       // $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date,'shift'=>$shift])->sum('issue_transfer_qty');
+        // $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date,'shift'=>$shift])->sum('issue_transfer_qty');
         $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date])->sum('issue_transfer_qty');
         if ($model) {
             $qty = $model;
@@ -1329,14 +1329,14 @@ function getIssueCarQtySum($trans_date, $product_id, $user_id)
 {
     $qty = 0;
     if ($product_id && $trans_date != null) {
-        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date])->sum('issue_car_qty');
-        if ($model) {
-            $qty = $model;
-        }
-//        $model2 = \common\models\SalePosCloseIssueCarQty::find()->where(['product_id' => $product_id])->andFilterWhere(['date(trans_date)'=>$trans_date])->sum('qty');
-//        if ($model2) {
-//            $qty = $model2;
+//        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date])->sum('issue_car_qty');
+//        if ($model) {
+//            $qty = $model;
 //        }
+        $model2 = \common\models\SalePosCloseIssueCarQty::find()->where(['product_id' => $product_id])->andFilterWhere(['date(trans_date)'=>$trans_date])->sum('qty');
+        if ($model2) {
+            $qty = $model2;
+        }
     }
     return $qty;
 }
