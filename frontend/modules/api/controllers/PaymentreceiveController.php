@@ -71,8 +71,8 @@ class PaymentreceiveController extends Controller
             $sql .= " FROM query_sale_by_customer_car as t1 LEFT JOIN query_sale_customer_pay_summary as t2 ON t2.order_ref_id=t1.order_id and t2.customer_id=t1.customer_id";
             $sql .= " WHERE t1.customer_id=" . $customer_id;
             $sql .= " AND t1.payment_method_id=2";
-            // $sql .= " AND t1.payment_status=0";
-            $sql .= " AND date(t1.order_date) >='2022-06-01'";
+           // $sql .= " AND t2.status=1";
+            $sql .= " AND date(t1.order_date) >='2023-07-01'";
             $sql .= " GROUP BY t1.customer_id,t1.order_id";
             $sql .= " ORDER BY t1.order_id";
 
@@ -424,7 +424,8 @@ class PaymentreceiveController extends Controller
             $sql .= " FROM query_payment_receive as t1 INNER JOIN customer as t2 ON t1.customer_id = t2.id";
             $sql .= " WHERE  date(t1.trans_date) =" . "'" . date('Y-m-d') . "'" . " ";
             $sql .= " AND t1.payment_method_id = 2";
-            $sql .= " AND t1.order_status = 1";
+          //  $sql .= " AND t1.order_status = 1"; // other
+            $sql .= " AND t1.order_status in (1,100)"; // for dindang and borplub
             $sql .= " AND t2.delivery_route_id=" . $route_id;
             $sql .= " GROUP BY t2.delivery_route_id";
             $query = \Yii::$app->db->createCommand($sql);
@@ -436,9 +437,7 @@ class PaymentreceiveController extends Controller
             }
             //return $pay_amount;
 
-
-
-            $order_close_count = \backend\models\Orders::find()->where(['order_channel_id' => $route_id, 'date(order_date)' => date('Y-m-d'), 'status' => 100])->count();
+            $order_close_count = \backend\models\Orders::find()->where(['order_channel_id' => $route_id, 'date(order_date)' => date('Y-m-d'), 'status' => [1,100]])->count();
             array_push($data, [
                 'payment_amount' => $pay_amount == null ? 0 : $pay_amount,
                 'order_close_status' => 0, //$order_close_count,

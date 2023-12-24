@@ -486,6 +486,8 @@ class AuthenController extends Controller
                         array_push($data,['logout_success'=>1]);
                     }
                 }
+            }else{
+                array_push($data,['logout_success'=>1]);
             }
         }
 

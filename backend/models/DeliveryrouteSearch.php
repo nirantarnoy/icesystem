@@ -67,17 +67,19 @@ class DeliveryrouteSearch extends Deliveryroute
 //            'updated_by' => $this->updated_by,
 //        ]);
 
-        if (!empty(\Yii::$app->user->identity->company_id)) {
-            $query->andFilterWhere(['company_id' => \Yii::$app->user->identity->company_id]);
-        }
-        if (!empty(\Yii::$app->user->identity->branch_id)) {
-            $query->andFilterWhere(['branch_id' => \Yii::$app->user->identity->branch_id]);
-        }
         if($this->globalSearch != ''){
             $query->orFilterWhere(['like', 'code', $this->globalSearch])
                 ->orFilterWhere(['like', 'name', $this->globalSearch])
                 ->orFilterWhere(['like', 'description', $this->globalSearch]);
         }
+
+        if (!empty(\Yii::$app->user->identity->company_id) && !empty(\Yii::$app->user->identity->branch_id)) {
+            $query->andFilterWhere(['company_id' => \Yii::$app->user->identity->company_id,'branch_id' => \Yii::$app->user->identity->branch_id]);
+        }
+//        if (!empty(\Yii::$app->user->identity->branch_id)) {
+//            $query->filterWhere(['branch_id' => \Yii::$app->user->identity->branch_id]);
+//        }
+
 
         return $dataProvider;
     }

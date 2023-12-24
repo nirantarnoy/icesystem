@@ -51,7 +51,7 @@ if ($is_admin == 1) {
             ?>
 
             <?= $form->field($model, 'customer_id')->widget(\kartik\select2\Select2::className(), [
-                'data' => \yii\helpers\ArrayHelper::map(\backend\models\Customer::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'is_show_pos' => 1])->all(), 'id', function ($data) {
+                'data' => \yii\helpers\ArrayHelper::map(\backend\models\Customer::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'is_show_pos' => 1,'status'=>1])->all(), 'id', function ($data) {
                     return $data->code . ' ' . $data->name;
                 }),
                 'options' => [
@@ -69,7 +69,7 @@ if ($is_admin == 1) {
 
             echo \kartik\select2\Select2::widget([
                 'name' => 'customer_car_id',
-                'data' => \yii\helpers\ArrayHelper::map(\backend\models\Customer::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'is_show_pos' => 0])->all(), 'id', function ($data) {
+                'data' => \yii\helpers\ArrayHelper::map(\backend\models\Customer::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'is_show_pos' => 0,'status'=>1])->all(), 'id', function ($data) {
                     return $data->code . ' ' . $data->name;
                 }),
                 'options' => [

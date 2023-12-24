@@ -98,13 +98,13 @@ class ProductionController extends Controller
             $warehouse_id = 6; // หนองขาหยั่ง
             $model_journal = new \backend\models\Stockjournal();
             if ($production_type == 1) {
-                sleep(1);
+                sleep(3);
                 $model_journal->journal_no = $model_journal->getLastNo($company_id, $branch_id);
             } else if ($production_type == 5) {
-                sleep(1);
+                sleep(2);
                 $model_journal->journal_no = $model_journal->getLastNoReceiveTransfer($company_id, $branch_id);
             } else {
-                sleep(1);
+                sleep(2);
                 //       $model_journal->journal_no = $model_journal->getLastNoNew($company_id, $branch_id, $act_id, $production_type);
                 $model_journal->journal_no = $model_journal->getLastNoCarreprocess($company_id, $branch_id);
             }

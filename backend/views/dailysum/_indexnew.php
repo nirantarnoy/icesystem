@@ -634,6 +634,7 @@ function getSalecar($route_id, $product_id, $order_date, $user_id)
     $sql = "SELECT id,product_id, SUM(qty) as qty";
     $sql .= " FROM query_sale_mobile_data_new";
     $sql .= " WHERE  product_id =" . $product_id;
+    //$sql .= " AND  order_line_status <> 500";
     $sql .= " AND date(order_date) =" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " ";
     if ($route_id != null) {
         $sql .= " AND route_id=" . $route_id;

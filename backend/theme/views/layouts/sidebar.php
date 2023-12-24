@@ -5,7 +5,7 @@
 <!--             class="brand-image img-circle elevation-3"-->
 <!--             style="opacity: .8">-->
         <span class="brand-text font-weight-light">VORAPAT</span>
-<!--        <span class="brand-text font-weight-light">NPT</span>-->
+<!--        <span class="brand-text font-weight-light">TARAICE</span>-->
     </a>
 
     <!-- Sidebar -->
@@ -409,7 +409,7 @@
                         <?php endif; ?>
                         <?php if (\Yii::$app->user->can('pos/index')): ?>
                             <li class="nav-item">
-                                <a href="index.php?r=pos/indextest&id=0" class="nav-link pos">
+                                <a href="index.php?r=pos/index&id=0" class="nav-link pos">
                                     <i class="far fa-circlez nav-icon"></i>
                                     <p>ขาย POS</p>
                                 </a>
@@ -453,6 +453,14 @@
                                 <a href="index.php?r=customerinvoice/index" class="nav-link customerinvoice">
                                     <i class="far fa-circlez nav-icon"></i>
                                     <p>วางบิล</p>
+                                </a>
+                            </li>
+                        <?php endif; ?>
+                        <?php if (\Yii::$app->user->can('customerinvoice/index')): ?>
+                            <li class="nav-item">
+                                <a href="index.php?r=customerinvoicecash/index" class="nav-link customerinvoicecash">
+                                    <i class="far fa-circlez nav-icon"></i>
+                                    <p>วางบิลเงินสด</p>
                                 </a>
                             </li>
                         <?php endif; ?>
@@ -742,6 +750,14 @@
                                 <a href="index.php?r=adminrecal/index" class="nav-link adminrecal">
                                     <i class="far fa-circlez nav-icon"></i>
                                     <p>ประมวลขายหน้าบ้าน</p>
+                                </a>
+                            </li>
+                        <?php endif;?>
+                        <?php if (\Yii::$app->user->can('adminreport/summaryall')): ?>
+                            <li class="nav-item">
+                                <a href="index.php?r=adminreport/summaryall" class="nav-link adminreport">
+                                    <i class="far fa-circlez nav-icon"></i>
+                                    <p>ประวัติสรุปขาย</p>
                                 </a>
                             </li>
                         <?php endif;?>

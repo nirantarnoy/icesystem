@@ -212,7 +212,7 @@ if ($model_c_login != null) {
                     <?php
                     echo \kartik\select2\Select2::widget([
                         'name' => 'find_user_id',
-                        'data' => \yii\helpers\ArrayHelper::map(\backend\models\User::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id])->all(), 'id', 'username'),
+                        'data' => \yii\helpers\ArrayHelper::map(\backend\models\User::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id,'status'=>1])->all(), 'id', 'username'),
                         'value' => $find_user_id,
                         'options' => [
                             'placeholder' => '--พนักงานขาย--'
@@ -399,7 +399,7 @@ function getOrder($product_id, $f_date, $t_date, $find_sale_type, $find_user_id,
             $sql .= " AND t2.payment_method_id=" . $find_sale_type;
         }
         if ($find_sale_type == 2) {
-            $sql .= " AND t2.order_channel_id = 0 AND t2.payment_method_id=" . $find_sale_type;
+            $sql .= " AND (t2.order_channel_id = 0 OR t2.order_channel_id is null) AND t2.payment_method_id=" . $find_sale_type;
         }
         if ($find_sale_type == 3) {
             $sql .= " AND t2.order_channel_id > 0";

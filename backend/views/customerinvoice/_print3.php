@@ -8,7 +8,6 @@ if($cnt_arr > 0){
     $from_date = date('Y-m-d', strtotime($model_min_max[0]['date']));
     $to_date = date('Y-m-d', strtotime($model_min_max[$cnt_arr-1]['date']));
 }
-
 ?>
 <html>
 <head>
@@ -100,7 +99,6 @@ if($cnt_arr > 0){
 
         <tr>
             <td colspan="2" style="text-align: left;border: none">วันที่เริ่ม <span><b><?=date('d-m-Y', strtotime('+543 years',strtotime($from_date)))?></b></span> ถึงวันที่ <span><b><?=date('d-m-Y', strtotime('+543 years',strtotime($to_date)))?></b></td>
-
         </tr>
     </table>
     <br/>
@@ -116,20 +114,46 @@ if($cnt_arr > 0){
     $total_all_line_qty_data = [];
 
 
+    $product_check = [];
     $product_header = [];
+    $product_header_new = [];
 
     foreach ($model_line as $valuex) {
-        $modelx = \backend\models\Orderline::find()->join('inner join','product','order_line.product_id=product.id')->where(['order_id' => $valuex->order_id])->orderBy(['product.item_pos_seq' => SORT_ASC])->all();
+        $modelx = \backend\models\Orderline::find()->join('inner join','product','order_line.product_id=product.id')->where(['order_id' => $valuex->order_id])->orderBy(['product.item_pos_seq' => SORT_DESC])->all();
         if ($modelx) {
             foreach ($modelx as $valuexx) {
-                if (!in_array($valuexx->product_id, $product_header)) {
-                    array_push($product_header, $valuexx->product_id);
+                if (!in_array($valuexx->product_id, $product_check)) {
+                    array_push($product_check, $valuexx->product_id);
+                    $item_seq = \backend\models\Product::find()->select('item_pos_seq')->where(['id'=>$valuexx->product_id])->one();
+                    array_push($product_header_new,$item_seq->item_pos_seq);
+
                 }
             }
         }
     }
+   // asort($product_header_new);
+   // print_r($product_header_new);return;
 
-    // print_r($product_header);
+    if($product_header_new!=null){
+        asort($product_header_new);
+      //  print_r($product_header_new);echo"<br />";
+        $new_arr = [];
+        foreach ($product_header_new as $keys=>$value){
+            $product_x = \backend\models\Product::find()->select('id')->where(['item_pos_seq' => $value,'branch_id'=>1])->one();
+            array_push($product_header, $product_x->id);
+        }
+//        for($c=0;$c<=count($product_header_new)-1;$c++){
+////            array_push($new_arr,$product_header_new[])
+//          //  echo $product_header_new[$c];
+//          //  if (!in_array($product_header_new[$c], $product_header)) {
+//                $product_x = \backend\models\Product::find()->select('id')->where(['item_pos_seq' => $product_header_new[$c],'branch_id'=>1])->one();
+//                array_push($product_header, $product_x->id);
+//          //  }
+//        }
+
+    }
+
+//print_r($product_header);return;
 
 
     ?>

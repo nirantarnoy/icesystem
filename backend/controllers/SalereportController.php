@@ -39,6 +39,45 @@ class SalereportController extends Controller{
             'find_customer_id'=>$id,
         ]);
     }
+    public function actionIndexupdate(){
+
+        $id = \Yii::$app->request->post('find_customer_id');
+        $from_date = \Yii::$app->request->post('from_date');
+        $to_date = \Yii::$app->request->post('to_date');
+
+        // $model = \backend\models\Orders::find()->where(['customer_id' => $id])->all();
+        return $this->render('_print_update', [
+            //    'model' => $model,
+            'find_from_date' => $from_date,
+            'find_to_date'=> $to_date,
+            'find_customer_id'=>$id,
+        ]);
+    }
+    public function actionSaveupdate()
+    {
+        $company_id = 0;
+        $branch_id = 0;
+
+        if (!empty(\Yii::$app->user->identity->company_id)) {
+            $company_id = \Yii::$app->user->identity->company_id;
+        }
+        if (!empty(\Yii::$app->user->identity->branch_id)) {
+            $branch_id = \Yii::$app->user->identity->branch_id;
+        }
+        $order_id = \Yii::$app->request->post('order_id');
+        $delivery_no = \Yii::$app->request->post('delivery_no');
+        if ($order_id != null) {
+            for ($i = 0; $i <= count($order_id) - 1; $i++) {
+                if ($delivery_no[$i] == null) continue;
+                $model = \backend\models\Orders::find()->where(['id' => $order_id[$i]])->one();
+                if ($model) {
+                    $model->customer_ref_no = $delivery_no[$i];
+                    $model->save(false);
+                }
+            }
+        }
+        return $this->redirect(['salereport/indexupdate']);
+    }
     public function actionIndexcar(){
 
         $id = \Yii::$app->request->post('find_customer_id');
@@ -52,6 +91,45 @@ class SalereportController extends Controller{
             'find_to_date'=> $to_date,
             'find_customer_id'=>$id,
         ]);
+    }
+    public function actionIndexcarupdate(){
+
+        $id = \Yii::$app->request->post('find_customer_id');
+        $from_date = \Yii::$app->request->post('from_date');
+        $to_date = \Yii::$app->request->post('to_date');
+
+        // $model = \backend\models\Orders::find()->where(['customer_id' => $id])->all();
+        return $this->render('_printcar_update', [
+            //    'model' => $model,
+            'find_from_date' => $from_date,
+            'find_to_date'=> $to_date,
+            'find_customer_id'=>$id,
+        ]);
+    }
+    public function actionSaveupdatecar()
+    {
+        $company_id = 0;
+        $branch_id = 0;
+
+        if (!empty(\Yii::$app->user->identity->company_id)) {
+            $company_id = \Yii::$app->user->identity->company_id;
+        }
+        if (!empty(\Yii::$app->user->identity->branch_id)) {
+            $branch_id = \Yii::$app->user->identity->branch_id;
+        }
+        $order_id = \Yii::$app->request->post('order_id');
+        $delivery_no = \Yii::$app->request->post('delivery_no');
+        if ($order_id != null) {
+            for ($i = 0; $i <= count($order_id) - 1; $i++) {
+                if ($delivery_no[$i] == null) continue;
+                $model = \backend\models\Orders::find()->where(['id' => $order_id[$i]])->one();
+                if ($model) {
+                    $model->customer_ref_no = $delivery_no[$i];
+                    $model->save(false);
+                }
+            }
+        }
+        return $this->redirect(['salereport/indexcarupdate']);
     }
     public function actionComsale(){
         $company_id = 0;

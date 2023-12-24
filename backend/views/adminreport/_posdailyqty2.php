@@ -39,9 +39,8 @@ $mpdf->AddPageByArray([
     'margin-bottom' => 1,
 ]);
 
-$model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','shift','date(login_datetime) as login_datetime'])->where(['BETWEEN', 'date(trans_date)', date('Y-m-d', strtotime($from_date)), date('Y-m-d', strtotime($to_date))])
+$model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id', 'shift', 'date(login_datetime) as login_datetime'])->where(['BETWEEN', 'date(trans_date)', date('Y-m-d', strtotime($from_date)), date('Y-m-d', strtotime($to_date))])
     ->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id])->orderBy(['shift' => SORT_ASC])->groupBy('shift')->all();
-
 
 
 ?>
@@ -208,7 +207,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
         </form>
     </div>
     <div class="col-lg-3" style="text-align: right;">
-        <!--        <form action="--><?//= \yii\helpers\Url::to(['site/transaction'], true) ?><!--" method="post">-->
+        <!--        <form action="--><? //= \yii\helpers\Url::to(['site/transaction'], true) ?><!--" method="post">-->
         <!--            <button class="btn btn-outline-success">-->
         <!--                <i class="fa fa-refresh"></i> ประมวลผล-->
         <!--            </button>-->
@@ -479,7 +478,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
 
             <tr>
                 <td colspan="<?= count($product_header) + 1 ?>" style="padding: 8px;border: 1px solid grey;color: red;">
-                    <span style="font-size: 18px;"><b>พนักงาน <?=\backend\models\User::findName($line_value->user_id);?></b></span>
+                    <span style="font-size: 18px;"><b>พนักงาน <?= \backend\models\User::findName($line_value->user_id); ?></b></span>
                 </td>
 
             </tr>
@@ -487,7 +486,8 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                 <td style="text-align: center;padding: 8px;border: 1px solid grey;width:10%">รายการ</td>
                 <!--            <td style="text-align: center;padding: 0px;border: 1px solid grey">จำนวน</td>-->
                 <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;font-size: 18px;width: 7%"><b><?= \backend\models\Product::findCode($product_header[$y]) ?></b></td>
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;font-size: 18px;width: 7%">
+                        <b><?= \backend\models\Product::findCode($product_header[$y]) ?></b></td>
                 <?php endfor; ?>
             </tr>
             <tr>
@@ -498,7 +498,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                     $balance_in_qty[$y] = ($balance_in_qty[$y] + $qty);
                     $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                     ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $balance_in_qty[$y]==0?'-':number_format($balance_in_qty[$y], 0) ?></td>
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $balance_in_qty[$y] == 0 ? '-' : number_format($balance_in_qty[$y], 0) ?></td>
                 <?php endfor; ?>
             </tr>
             <tr>
@@ -510,7 +510,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                     $balance_in_qty[$y] = ($balance_in_qty[$y] + $qty);
                     $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                     ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $prodrec_qty[$y]==0?'-':number_format($prodrec_qty[$y], 0) ?></td>
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $prodrec_qty[$y] == 0 ? '-' : number_format($prodrec_qty[$y], 0) ?></td>
                 <?php endfor; ?>
             </tr>
             <tr>
@@ -522,7 +522,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                     $balance_in_qty[$y] = ($balance_in_qty[$y] + $qty);
                     $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                     ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $prodrec_re_qty[$y]==0?'-':number_format($prodrec_re_qty[$y], 0) ?></td>
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $prodrec_re_qty[$y] == 0 ? '-' : number_format($prodrec_re_qty[$y], 0) ?></td>
                 <?php endfor; ?>
             </tr>
             <tr>
@@ -537,7 +537,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                     $balance_in_qty[$y] = ($balance_in_qty[$y] + $qty_reprocess_car);
                     $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty_reprocess_car);
                     ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $issue_car_total_qty[$y]==0?'-':number_format($issue_car_total_qty[$y], 0) ?></td>
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $issue_car_total_qty[$y] == 0 ? '-' : number_format($issue_car_total_qty[$y], 0) ?></td>
                 <?php endfor; ?>
                 </tr>
                 <tr>
@@ -545,21 +545,21 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                         <?php
                         $qty = getIssueTransferQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
-                        $issue_transfer_total_qty[$y] = ( $issue_transfer_total_qty[$y] + $qty);
+                        $issue_transfer_total_qty[$y] = ($issue_transfer_total_qty[$y] + $qty);
                         $balance_in_qty[$y] = ($balance_in_qty[$y] + $qty);
                         $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                         ?>
                         <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%">
-                            <b><?= $issue_transfer_total_qty[$y]==0?'-':number_format($issue_transfer_total_qty[$y], 0) ?></b>
+                            <b><?= $issue_transfer_total_qty[$y] == 0 ? '-' : number_format($issue_transfer_total_qty[$y], 0) ?></b>
                         </td>
                     <?php endfor; ?>
                 </tr>
                 <tr style="background-color: lightblue">
                     <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>ยอดรวม</b></td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <?php $balance_in_total_qty[$y] = $balance_in_qty[$y];?>
+                        <?php $balance_in_total_qty[$y] = $balance_in_qty[$y]; ?>
                         <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%">
-                            <b><?= ($balance_in_total_qty[$y])==0?'-':number_format($balance_in_total_qty[$y], 0) ?></b>
+                            <b><?= ($balance_in_total_qty[$y]) == 0 ? '-' : number_format($balance_in_total_qty[$y], 0) ?></b>
                         </td>
                     <?php endfor; ?>
                 </tr>
@@ -568,55 +568,57 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                         <?php
                         $qty = getCashQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
-                        $sale_total_qty[$y] = ($sale_total_qty[$y] + $qty);
-                        $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
+                        $free_qty = getFreeQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
+                        $sale_total_qty[$y] = ($sale_total_qty[$y] + $qty + $free_qty);
+                        $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($qty + $free_qty));
                         ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $qty==0?'-':number_format($qty, 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $qty == 0 ? '-' : number_format(($qty + $free_qty), 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
                     <td style="padding: 8px;border: 1px solid grey;">หน้าบ้าน เงินเชื่อ</td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                         <?php
-                        $car_issue_qty = getIssueCarQty(date('Y-m-d', strtotime($from_date)), $product_header[$y],$line_value->user_id);
+                        $car_issue_qty = getIssueCarQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->user_id);
                         $qty = getCreditQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
-                        $show_qty  = 0;
-                        if($qty > 0 && $qty >=$car_issue_qty){
-                            $show_qty = ($qty-$car_issue_qty);
-                            $sale_total_qty[$y] = ($sale_total_qty[$y] + ($qty-$car_issue_qty));
-                            $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($qty-$car_issue_qty));
-                        }else{
+                        $show_qty = 0;
+                        if ($qty > 0 && $qty >= $car_issue_qty) {
+                            $show_qty = ($qty - $car_issue_qty);
+                            $sale_total_qty[$y] = ($sale_total_qty[$y] + ($qty - $car_issue_qty));
+                            $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($qty - $car_issue_qty));
+                        } else {
                             $show_qty = ($qty);
                             $sale_total_qty[$y] = ($sale_total_qty[$y] + ($qty));
                             $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($car_issue_qty));
                         }
 
                         ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= ($show_qty)==0?'-':number_format(($show_qty), 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= ($show_qty) == 0 ? '-' : number_format(($show_qty), 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
                     <td style="padding: 8px;border: 1px solid grey;">ยอดเบิกคนรถ</td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                         <?php
-                        $qty = getIssueCarQty(date('Y-m-d', strtotime($from_date)), $product_header[$y],$line_value->user_id);
+                        $qty = getIssueCarQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->user_id);
                         $issue_car_total_qty[$y] = $qty;
                         $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
                         ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $issue_car_total_qty[$y]==0?'-':number_format($issue_car_total_qty[$y], 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $issue_car_total_qty[$y] == 0 ? '-' : number_format($issue_car_total_qty[$y], 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
                     <td style="padding: 8px;border: 1px solid grey;">ยอดเบิกต่างสาขา</td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= 10>0?'-':number_format(0, 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= 10 > 0 ? '-' : number_format(0, 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr style="background-color: yellow">
                     <td style="padding: 8px;border: 1px solid grey;"><b>ยอดรวม</b></td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                         <td style="text-align: center;padding: 8px;border: 1px solid grey;">
-                            <b><?= ($sale_total_qty[$y] + $issue_car_total_qty[$y])==0?'-':number_format(($sale_total_qty[$y] + $issue_car_total_qty[$y]), 0) ?></b></td>
+                            <b><?= ($sale_total_qty[$y] + $issue_car_total_qty[$y]) == 0 ? '-' : number_format(($sale_total_qty[$y] + $issue_car_total_qty[$y]), 0) ?></b>
+                        </td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
@@ -627,7 +629,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                         $sale_refill_qty[$y] = ($sale_refill_qty[$y] + $qty);
                         $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
                         ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $sale_refill_qty[$y]==0?'-':number_format($sale_refill_qty[$y], 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $sale_refill_qty[$y] == 0 ? '-' : number_format($sale_refill_qty[$y], 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
@@ -638,39 +640,39 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                         $scrap_total_qty[$y] = ($scrap_total_qty[$y] + $qty);
                         $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
                         ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $scrap_total_qty[$y]==0?'-':number_format($scrap_total_qty[$y], 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $scrap_total_qty[$y] == 0 ? '-' : number_format($scrap_total_qty[$y], 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr style="background-color: orange">
                     <td style="padding: 8px;border: 1px solid grey;"><b>ยอดรวมออกน้ำแข็ง</b></td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <?php $balance_out_total_qty[$y] =($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y]) ?>
+                        <?php $balance_out_total_qty[$y] = ($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y]) ?>
                         <td style="text-align: center;padding: 8px;border: 1px solid grey;">
-                            <b><?=($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y])==0?'-': number_format($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y], 0) ?></b>
+                            <b><?= ($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y]) == 0 ? '-' : number_format($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y], 0) ?></b>
                         </td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
                     <td style="padding: 8px;border: 1px solid grey;">เหลือยกไป</td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= ($balance_in_total_qty[$y] - $balance_out_total_qty[$y])==0?'-':number_format(($balance_in_total_qty[$y] - $balance_out_total_qty[$y]), 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= ($balance_in_total_qty[$y] - $balance_out_total_qty[$y]) == 0 ? '-' : number_format(($balance_in_total_qty[$y] - $balance_out_total_qty[$y]), 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
                     <td style="padding: 8px;border: 1px solid grey;">นับจริง</td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                         <?php
-                        $qty = getDailycount($product_header[$y], date('Y-m-d', strtotime($from_date)),$line_value->shift);
+                        $qty = getDailycount($product_header[$y], date('Y-m-d', strtotime($from_date)), $line_value->shift);
                         $count_total_qty[$y] = ($count_total_qty[$y] + $qty);
                         ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $count_total_qty[$y]==0?'-':number_format($count_total_qty[$y], 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $count_total_qty[$y] == 0 ? '-' : number_format($count_total_qty[$y], 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr style="background-color: lightgreen">
                     <td style="padding: 8px;border: 1px solid grey;"><b>เกิน-ขาด</b></td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                         <td style="text-align: center;padding: 8px;border: 1px solid grey;">
-                            <b><?= ($count_total_qty[$y] - ($balance_in_total_qty[$y] - $balance_out_total_qty[$y]))==0?'-':number_format(($count_total_qty[$y] - ($balance_in_total_qty[$y] - $balance_out_total_qty[$y])), 0) ?></b>
+                            <b><?= ($count_total_qty[$y] - ($balance_in_total_qty[$y] - $balance_out_total_qty[$y])) == 0 ? '-' : number_format(($count_total_qty[$y] - ($balance_in_total_qty[$y] - $balance_out_total_qty[$y])), 0) ?></b>
                         </td>
                     <?php endfor; ?>
                 </tr>
@@ -678,15 +680,15 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
 
         <?php endforeach; ?>
     </table>
-    <br />
+    <br/>
     <label for=""><h3>สรุปรวม</h3></label>
-    <br />
+    <br/>
     <table id="table-data">
         <tr style="font-weight: bold;background-color: deeppink;color: white;">
             <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">รายการ</td>
             <!--            <td style="text-align: center;padding: 0px;border: 1px solid grey">จำนวน</td>-->
             <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= \backend\models\Product::findCode($product_header[$y]) ?></td>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= \backend\models\Product::findCode($product_header[$y]) ?></td>
             <?php endfor; ?>
         </tr>
 
@@ -879,7 +881,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                 $balance_in_qty[$y] = ($balance_in_qty[$y] + $qty);
                 $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                 ?>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $balance_in_qty[$y]==0?'-':number_format($balance_in_qty[$y], 0) ?></td>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $balance_in_qty[$y] == 0 ? '-' : number_format($balance_in_qty[$y], 0) ?></td>
             <?php endfor; ?>
         </tr>
         <tr>
@@ -890,7 +892,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                 $prodrec_qty[$y] = ($prodrec_qty[$y] + $qty);
                 $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                 ?>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?=$prodrec_qty[$y] ==0?'-': number_format($prodrec_qty[$y], 0) ?></td>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $prodrec_qty[$y] == 0 ? '-' : number_format($prodrec_qty[$y], 0) ?></td>
             <?php endfor; ?>
         </tr>
         <tr>
@@ -901,7 +903,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                 $prodrec_re_qty[$y] = ($prodrec_re_qty[$y] + $qty);
                 $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                 ?>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $prodrec_re_qty[$y]==0?'-':number_format($prodrec_re_qty[$y], 0) ?></td>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $prodrec_re_qty[$y] == 0 ? '-' : number_format($prodrec_re_qty[$y], 0) ?></td>
             <?php endfor; ?>
         </tr>
         <tr>
@@ -911,11 +913,11 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
             $y++): ?>
             <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                 <?php
-                $qty_reprocess_car = getReturnQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
+                $qty_reprocess_car = getReturnQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
                 $issue_car_total_qty[$y] = ($issue_car_total_qty[$y] + $qty_reprocess_car);
                 $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty_reprocess_car);
                 ?>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $issue_car_total_qty[$y]==0?'-':number_format($issue_car_total_qty[$y], 0) ?></td>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $issue_car_total_qty[$y] == 0 ? '-' : number_format($issue_car_total_qty[$y], 0) ?></td>
             <?php endfor; ?>
         </tr>
         <tr>
@@ -923,20 +925,20 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
             <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                 <?php
                 $qty = getIssueTransferQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
-                $issue_transfer_total_qty[$y] = ( $issue_transfer_total_qty[$y] + $qty);
+                $issue_transfer_total_qty[$y] = ($issue_transfer_total_qty[$y] + $qty);
                 $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                 ?>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
-                    <b><?= $issue_transfer_total_qty[$y]==0?'-':number_format($issue_transfer_total_qty[$y], 0) ?></b>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%">
+                    <b><?= $issue_transfer_total_qty[$y] == 0 ? '-' : number_format($issue_transfer_total_qty[$y], 0) ?></b>
                 </td>
             <?php endfor; ?>
         </tr>
         <tr style="background-color: lightblue">
             <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>ยอดรวม</b></td>
             <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                <?php $balance_in_qty[$y] = ($balance_in_qty[$y] + $prodrec_qty[$y] + $prodrec_re_qty[$y] + $issue_car_total_qty[$y] + $issue_transfer_total_qty[$y])?>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
-                    <b><?= $balance_in_qty[$y]==0?'-':number_format($balance_in_qty[$y], 0) ?></b>
+                <?php $balance_in_qty[$y] = ($balance_in_qty[$y] + $prodrec_qty[$y] + $prodrec_re_qty[$y] + $issue_car_total_qty[$y] + $issue_transfer_total_qty[$y]) ?>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%">
+                    <b><?= $balance_in_qty[$y] == 0 ? '-' : number_format($balance_in_qty[$y], 0) ?></b>
                 </td>
             <?php endfor; ?>
         </tr>
@@ -948,54 +950,55 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                 $sale_total_qty[$y] = ($sale_total_qty[$y] + $qty);
                 $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
                 ?>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $qty==0?'-':number_format($qty, 0) ?></td>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $qty == 0 ? '-' : number_format($qty, 0) ?></td>
             <?php endfor; ?>
         </tr>
         <tr>
             <td style="padding: 8px;border: 1px solid grey;width: 10%">หน้าบ้าน เงินเชื่อ</td>
             <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                 <?php
-                $car_issue_qty = getIssueCarQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y],$line_value->user_id);
+                $car_issue_qty = getIssueCarQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->user_id);
                 $qty = getCreditQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
 //                        $sale_total_qty[$y] = ($sale_total_qty[$y] + ($qty - $issue_car_x));
 //                        $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($qty - $issue_car_x));
 
-                $show_qty  = 0;
-                if($qty > 0 && $qty >=$car_issue_qty){
-                    $show_qty = ($qty-$car_issue_qty);
-                    $sale_total_qty[$y] = ($sale_total_qty[$y] + ($qty-$car_issue_qty));
-                    $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($qty-$car_issue_qty));
-                }else{
+                $show_qty = 0;
+                if ($qty > 0 && $qty >= $car_issue_qty) {
+                    $show_qty = ($qty - $car_issue_qty);
+                    $sale_total_qty[$y] = ($sale_total_qty[$y] + ($qty - $car_issue_qty));
+                    $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($qty - $car_issue_qty));
+                } else {
                     $show_qty = ($qty);
                     $sale_total_qty[$y] = ($sale_total_qty[$y] + ($qty));
                     $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($car_issue_qty));
                 }
                 ?>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= ($show_qty)==0?'-':number_format(($show_qty), 0) ?></td>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= ($show_qty) == 0 ? '-' : number_format(($show_qty), 0) ?></td>
             <?php endfor; ?>
         </tr>
         <tr>
             <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดเบิกคนรถ</td>
             <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                 <?php
-                $qty = getIssueCarQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y],$line_value->user_id);
+                $qty = getIssueCarQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->user_id);
                 $issue_car_total_qty[$y] = $qty;
                 $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
                 ?>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $issue_car_total_qty[$y]==0?'-':number_format($issue_car_total_qty[$y], 0) ?></td>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $issue_car_total_qty[$y] == 0 ? '-' : number_format($issue_car_total_qty[$y], 0) ?></td>
             <?php endfor; ?>
         </tr>
         <tr>
             <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดเบิกต่างสาขา</td>
             <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= 10>1?'-':number_format(0, 0) ?></td>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= 10 > 1 ? '-' : number_format(0, 0) ?></td>
             <?php endfor; ?>
         </tr>
         <tr style="background-color: yellow">
             <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>ยอดรวม</b></td>
             <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
-                    <b><?= ($issue_car_total_qty[$y] +$sale_total_qty[$y] )==0?'-':number_format(($sale_total_qty[$y] + $issue_car_total_qty[$y]), 0) ?></b></td>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%">
+                    <b><?= ($issue_car_total_qty[$y] + $sale_total_qty[$y]) == 0 ? '-' : number_format(($sale_total_qty[$y] + $issue_car_total_qty[$y]), 0) ?></b>
+                </td>
             <?php endfor; ?>
         </tr>
         <tr>
@@ -1006,7 +1009,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                 $sale_refill_qty[$y] = ($sale_refill_qty[$y] + $qty);
                 $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
                 ?>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $sale_refill_qty[$y]==0?'-':number_format($sale_refill_qty[$y], 0) ?></td>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $sale_refill_qty[$y] == 0 ? '-' : number_format($sale_refill_qty[$y], 0) ?></td>
             <?php endfor; ?>
         </tr>
         <tr>
@@ -1017,22 +1020,22 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                 $scrap_total_qty[$y] = ($scrap_total_qty[$y] + $qty);
                 $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
                 ?>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $scrap_total_qty[$y]==0?'-':number_format($scrap_total_qty[$y], 0) ?></td>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $scrap_total_qty[$y] == 0 ? '-' : number_format($scrap_total_qty[$y], 0) ?></td>
             <?php endfor; ?>
         </tr>
         <tr style="background-color: orange">
             <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>ยอดรวมออกน้ำแข็ง</b></td>
             <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                <?php $balance_out_total_qty[$y] = ($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y]);?>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
-                    <b><?= $balance_out_total_qty[$y]==0?'-':number_format($balance_out_total_qty[$y], 0) ?></b>
+                <?php $balance_out_total_qty[$y] = ($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y]); ?>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%">
+                    <b><?= $balance_out_total_qty[$y] == 0 ? '-' : number_format($balance_out_total_qty[$y], 0) ?></b>
                 </td>
             <?php endfor; ?>
         </tr>
         <tr>
             <td style="padding: 8px;border: 1px solid grey;width: 10%">เหลือยกไป</td>
             <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= ($balance_in_qty[$y]-$balance_out_total_qty[$y])==0?'-':number_format(($balance_in_qty[$y]-$balance_out_total_qty[$y]), 0) ?></td>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= ($balance_in_qty[$y] - $balance_out_total_qty[$y]) == 0 ? '-' : number_format(($balance_in_qty[$y] - $balance_out_total_qty[$y]), 0) ?></td>
             <?php endfor; ?>
         </tr>
         <tr>
@@ -1043,14 +1046,14 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                 $qty = getDailycountLasted($product_header[$y], date('Y-m-d', strtotime($from_date)));
                 $count_total_qty[$y] = ($count_total_qty[$y] + $qty);
                 ?>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $count_total_qty[$y]==0?'-':number_format($count_total_qty[$y], 0) ?></td>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%"><?= $count_total_qty[$y] == 0 ? '-' : number_format($count_total_qty[$y], 0) ?></td>
             <?php endfor; ?>
         </tr>
         <tr style="background-color: lightgreen">
             <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>เกิน-ขาด</b></td>
             <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
-                    <b><?= ($count_total_qty[$y] - ($balance_in_qty[$y]-$balance_out_total_qty[$y]))==0?'-':number_format(($count_total_qty[$y] - ($balance_in_qty[$y]-$balance_out_total_qty[$y])), 0) ?></b>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 7%">
+                    <b><?= ($count_total_qty[$y] - ($balance_in_qty[$y] - $balance_out_total_qty[$y])) == 0 ? '-' : number_format(($count_total_qty[$y] - ($balance_in_qty[$y] - $balance_out_total_qty[$y])), 0) ?></b>
                 </td>
             <?php endfor; ?>
         </tr>
@@ -1085,7 +1088,7 @@ function getBalanceInQtySum($trans_date, $product_id, $shift)
 {
     $qty = 0;
     if ($product_id && $trans_date != null) {
-        $model = \common\models\TransactionPosSaleSum::find()->select(['balance_in_qty'])->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date])->orderBy(['id'=>SORT_ASC])->one();
+        $model = \common\models\TransactionPosSaleSum::find()->select(['balance_in_qty'])->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date])->orderBy(['id' => SORT_ASC])->one();
         if ($model) {
             $qty = $model->balance_in_qty;
         }
@@ -1097,7 +1100,7 @@ function getBalanceInQty($trans_date, $product_id, $shift)
 {
     $qty = 0;
     if ($product_id && $trans_date != null) {
-        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date,'shift'=>$shift])->sum('balance_in_qty');
+        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date, 'shift' => $shift])->sum('balance_in_qty');
         if ($model) {
             $qty = $model;
         }
@@ -1109,7 +1112,7 @@ function getProdrecQty($trans_date, $product_id, $shift)
 {
     $qty = 0;
     if ($product_id && $trans_date != null) {
-        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date,'shift'=>$shift])->sum('prodrec_qty');
+        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date, 'shift' => $shift])->sum('prodrec_qty');
         if ($model) {
             $qty = $model;
         }
@@ -1121,7 +1124,7 @@ function getProdreprocess($trans_date, $product_id, $shift)
 {
     $qty = 0;
     if ($product_id && $trans_date != null) {
-        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date,'shift'=>$shift])->sum('reprocess_qty');
+        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date, 'shift' => $shift])->sum('reprocess_qty');
         if ($model) {
             $qty = $model;
         }
@@ -1129,21 +1132,36 @@ function getProdreprocess($trans_date, $product_id, $shift)
     return $qty;
 }
 
-function getReturnQty($trans_date,$product_id,$shift){
+function getReturnQty($trans_date, $product_id, $shift)
+{
     $qty = 0;
-    if($product_id && $trans_date != null){
-        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id'=>$product_id,'date(trans_date)'=>$trans_date,'shift'=>$shift])->sum('return_qty');
-        if($model){
+    if ($product_id && $trans_date != null) {
+        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date, 'shift' => $shift])->sum('return_qty');
+        if ($model) {
             $qty = $model;
         }
     }
     return $qty;
 }
-function getCashQty($trans_date,$product_id,$shift){
+
+function getCashQty($trans_date, $product_id, $shift)
+{
 
     $qty = 0;
     if ($product_id && $trans_date != null) {
-        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date,'shift'=>$shift])->sum('cash_qty');
+        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date, 'shift' => $shift])->sum('cash_qty');
+        if ($model) {
+            $qty = $model;
+        }
+    }
+    return $qty;
+}
+function getFreeQty($trans_date, $product_id, $shift)
+{
+
+    $qty = 0;
+    if ($product_id && $trans_date != null) {
+        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date, 'shift' => $shift])->sum('free_qty');
         if ($model) {
             $qty = $model;
         }
@@ -1155,7 +1173,7 @@ function getCreditQty($trans_date, $product_id, $shift)
 {
     $qty = 0;
     if ($product_id && $trans_date != null) {
-        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date,'shift'=>$shift])->sum('credit_qty');
+        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date, 'shift' => $shift])->sum('credit_qty');
         if ($model) {
             $qty = $model;
         }
@@ -1167,7 +1185,7 @@ function getIssueCarQty($trans_date, $product_id, $user_id)
 {
     $qty = 0;
     if ($product_id && $trans_date != null) {
-        $model = \common\models\TransactionPosSaleSum::find()->select('issue_car_qty')->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date,'user_id'=>$user_id])->one();
+        $model = \common\models\TransactionPosSaleSum::find()->select('issue_car_qty')->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date, 'user_id' => $user_id])->one();
         if ($model) {
             $qty = $model->issue_car_qty;
         }
@@ -1185,7 +1203,7 @@ function getIssueTransferQty($trans_date, $product_id, $shift)
 {
     $qty = 0;
     if ($product_id && $trans_date != null) {
-        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date,'shift'=>$shift])->sum('issue_transfer_qty');
+        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date, 'shift' => $shift])->sum('issue_transfer_qty');
         //  $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date])->sum('issue_transfer_qty');
         if ($model) {
             $qty = $model;
@@ -1211,7 +1229,7 @@ function getIssueRefillQty($trans_date, $product_id, $shift)
 {
     $qty = 0;
     if ($product_id && $trans_date != null) {
-        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date,'shift'=>$shift])->sum('issue_refill_qty');
+        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date, 'shift' => $shift])->sum('issue_refill_qty');
         if ($model) {
             $qty = $model;
         }
@@ -1223,18 +1241,7 @@ function getScrapQty($trans_date, $product_id, $shift)
 {
     $qty = 0;
     if ($product_id && $trans_date != null) {
-        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date,'shift'=>$shift])->sum('scrap_qty');
-        if ($model) {
-            $qty = $model;
-        }
-    }
-    return $qty;
-}
-function getDailycount($product_id,$trans_date,$shift)
-{
-    $qty = 0;
-    if ($product_id && $trans_date != null) {
-        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date,'shift'=>$shift])->sum('counting_qty');
+        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date, 'shift' => $shift])->sum('scrap_qty');
         if ($model) {
             $qty = $model;
         }
@@ -1242,17 +1249,30 @@ function getDailycount($product_id,$trans_date,$shift)
     return $qty;
 }
 
-function getDailycountLasted($product_id,$trans_date)
+function getDailycount($product_id, $trans_date, $shift)
 {
     $qty = 0;
     if ($product_id && $trans_date != null) {
-        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date])->orderBy(['id'=>SORT_DESC])->one();
+        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date, 'shift' => $shift])->sum('counting_qty');
+        if ($model) {
+            $qty = $model;
+        }
+    }
+    return $qty;
+}
+
+function getDailycountLasted($product_id, $trans_date)
+{
+    $qty = 0;
+    if ($product_id && $trans_date != null) {
+        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date])->orderBy(['id' => SORT_DESC])->one();
         if ($model) {
             $qty = $model->counting_qty;
         }
     }
     return $qty;
 }
+
 //function getDailycount($product_id, $t_date)
 //{
 //    $qty = 0;
@@ -1291,17 +1311,21 @@ function getProdreprocessSum($trans_date, $product_id)
     }
     return $qty;
 }
-function getReturnQtySum($trans_date,$product_id){
+
+function getReturnQtySum($trans_date, $product_id)
+{
     $qty = 0;
-    if($product_id && $trans_date != null){
-        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id'=>$product_id,'date(trans_date)'=>$trans_date])->sum('return_qty');
-        if($model){
+    if ($product_id && $trans_date != null) {
+        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date])->sum('return_qty');
+        if ($model) {
             $qty = $model;
         }
     }
     return $qty;
 }
-function getCashQtySum($trans_date,$product_id){
+
+function getCashQtySum($trans_date, $product_id)
+{
 
     $qty = 0;
     if ($product_id && $trans_date != null) {
@@ -1329,14 +1353,14 @@ function getIssueCarQtySum($trans_date, $product_id, $user_id)
 {
     $qty = 0;
     if ($product_id && $trans_date != null) {
-//        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date])->sum('issue_car_qty');
-//        if ($model) {
-//            $qty = $model;
-//        }
-        $model2 = \common\models\SalePosCloseIssueCarQty::find()->where(['product_id' => $product_id])->andFilterWhere(['date(trans_date)'=>$trans_date])->sum('qty');
-        if ($model2) {
-            $qty = $model2;
+        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date])->sum('issue_car_qty');
+        if ($model) {
+            $qty = $model;
         }
+//        $model2 = \common\models\SalePosCloseIssueCarQty::find()->where(['product_id' => $product_id])->andFilterWhere(['date(trans_date)' => $trans_date])->sum('qty');
+//        if ($model2) {
+//            $qty = $model2;
+//        }
     }
     return $qty;
 }
@@ -1376,7 +1400,8 @@ function getScrapQtySum($trans_date, $product_id)
     }
     return $qty;
 }
-function getDailycountSum($product_id,$trans_date)
+
+function getDailycountSum($product_id, $trans_date)
 {
     $qty = 0;
     if ($product_id && $trans_date != null) {
@@ -1389,7 +1414,7 @@ function getDailycountSum($product_id,$trans_date)
 }
 
 
-function getOrder($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req,$btn_order_type)
+function getOrder($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type)
 {
     $data = [];
     $sql = "SELECT t2.order_no, t3.code , t3.name, t1.qty, t1.price, t2.order_date, t2.order_channel_id 
@@ -1419,11 +1444,11 @@ function getOrder($product_id, $f_date, $t_date, $find_sale_type, $find_user_id,
         $sql .= " AND t3.is_invoice_req =" . $is_invoice_req;
     }
     // $sql .=" ORDER BY t1.price ASC";
-    if($btn_order_type == 1){
+    if ($btn_order_type == 1) {
         $sql .= " ORDER BY t2.order_no ASC";
-    }else if($btn_order_type == 2){
+    } else if ($btn_order_type == 2) {
         $sql .= " ORDER BY t1.price ASC";
-    }else{
+    } else {
         $sql .= " ORDER BY t2.order_no ASC";
     }
 

@@ -148,6 +148,7 @@ class PricegroupController extends Controller
             $recid2 = \Yii::$app->request->post('line_rec_type_id');
             $customer_type_id = \Yii::$app->request->post('line_type_id');
             $removelist2 = \Yii::$app->request->post('removelist2');
+            $line_haft_cal = \Yii::$app->request->post('line_haft_cal');
 
             // print_r($removelist2);return;
             $model->status = $status;
@@ -160,6 +161,7 @@ class PricegroupController extends Controller
                         $model_update = \common\models\PriceGroupLine::find()->where(['product_id' => $prod_id[$i], 'price_group_id' => $model->id])->one();
                         if ($model_update) {
                             $model_update->sale_price = $prod_price[$i] == null ? 0 : $prod_price[$i];
+                            $model_update->haft_cal = $line_haft_cal[$i];
                             $model_update->save(false);
                         } else {
                             $model_line = new \common\models\PriceGroupLine();
@@ -167,7 +169,8 @@ class PricegroupController extends Controller
                             $model_line->product_id = $prod_id[$i];
                             $model_line->sale_price = $prod_price[$i] == null ? 0 : $prod_price[$i];
                             $model_line->status = 1;
-                            $model_line->save();
+                            $model_line->haft_cal = $line_haft_cal[$i];
+                            $model_line->save(false);
                         }
                     }
                 }

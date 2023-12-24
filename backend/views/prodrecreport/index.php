@@ -88,7 +88,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 'headerOptions' => ['style' => 'text-align: center'],
                 'contentOptions' => ['style' => 'text-align: center'],
                 'value' => function ($data) {
-                    if ($data->status == 3) {
+                    if ($data->status == 3 || $data->status == 500) {
                         return '<div class="badge badge-warning">Cencel</div>';
                     } else {
                         return '';

@@ -104,7 +104,7 @@ class User extends \common\models\User
 
     public static function findLogintime($id)
     {
-        $model = LoginLog::find()->select('MAX(login_date) as login_date')->where(['user_id' => $id])->one();
+        $model = LoginLog::find()->select('MIN(login_date) as login_date')->where(['user_id' => $id,'status'=>1])->one();
         return $model != null ? date('H:i', strtotime($model->login_date)) : '';
     }
     public static function findLogintimeNew($id)

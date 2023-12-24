@@ -1559,16 +1559,16 @@ class PosController extends Controller
         if ($line_prod_id != null) {
             if (count($line_prod_id)) {
                 for ($i = 0; $i <= count($line_prod_id) - 1; $i++) {
-                    $new_line_credit_qty = 0;
-                    $isssue_car_qty = 0;
-                    if ($line_credit_qty[$i] > 0) {
-                        $isssue_car_qty = $this->getIssueCarQty($line_prod_id[$i], $user_id, $login_date, date('Y-m-d H:i:s'), $company_id, $branch_id);
-                        if ($line_credit_qty[$i] > $isssue_car_qty) {
-                            $new_line_credit_qty = ($line_credit_qty[$i] - $isssue_car_qty);
-                        } else {
-                            $new_line_credit_qty = ($isssue_car_qty - $line_credit_qty[$i]);
-                        }
-                    }
+//                    $new_line_credit_qty = 0;
+//                    $isssue_car_qty = 0;
+//                    if ($line_credit_qty[$i] > 0) {
+//                        $isssue_car_qty = $this->getIssueCarQty($line_prod_id[$i], $user_id, $login_date, date('Y-m-d H:i:s'), $company_id, $branch_id);
+//                        if ($line_credit_qty[$i] > $isssue_car_qty) {
+//                            $new_line_credit_qty = ($line_credit_qty[$i] - $isssue_car_qty);
+//                        } else {
+//                            $new_line_credit_qty = ($isssue_car_qty - $line_credit_qty[$i]);
+//                        }
+//                    }
 
 
                     $model_trans = new \common\models\TransactionPosSaleSum();
@@ -1576,13 +1576,13 @@ class PosController extends Controller
                     $model_trans->product_id = $line_prod_id[$i];
                     $model_trans->cash_qty = $line_cash_qty[$i];
                     $model_trans->credit_qty = $line_credit_qty[$i];//$new_line_credit_qty;
-                    $model_trans->free_qty = 0;
+                    $model_trans->free_qty = $this->getFreeQty($line_prod_id[$i], $user_id, $login_date, date('Y-m-d H:i:s'), $company_id, $branch_id); //0;
                     $model_trans->balance_in_qty = $line_balance_in[$i];
                     $model_trans->balance_out_qty = 0;
                     $model_trans->prodrec_qty = $line_production_qty[$i];
                     $model_trans->reprocess_qty = $line_repack_qty[$i];
                     $model_trans->return_qty = $this->getProdReprocessCarDaily($line_prod_id[$i], $login_date, date('Y-m-d H:i:s'), $company_id, $branch_id);
-                    $model_trans->issue_car_qty = $line_car_issue_qty[$i];//$isssue_car_qty;
+                    $model_trans->issue_car_qty = $this->getIssueCarQty($line_prod_id[$i], $user_id, $login_date, date('Y-m-d H:i:s'), $company_id, $branch_id); //$line_car_issue_qty[$i];//$isssue_car_qty;
                     $model_trans->issue_transfer_qty = $line_transfer_qty[$i];// $this->getTransferout($value->product_id, $cal_date);
                     $model_trans->issue_refill_qty = $line_refill_qty[$i];
                     $model_trans->scrap_qty = $line_scrap_qty[$i];//$this->getScrapDaily($value->product_id, $user_login_datetime, $cal_date);
@@ -1610,6 +1610,16 @@ class PosController extends Controller
             $qty = \common\models\QuerySalePosData::find()->where(['created_by' => $user_id, 'product_id' => $product_id])
                 ->andFilterWhere(['between', 'order_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])
                 ->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id, 'payment_method_id' => 2])->andFilterWhere(['>', 'order_channel_id', 0])->sum('line_qty_credit');
+        }
+        return $qty;
+    }
+    function getFreeQty($product_id, $user_id, $user_login_datetime, $t_date, $company_id, $branch_id)
+    {
+        $qty = 0;
+        if ($user_id != null) {
+            $qty = \common\models\QuerySalePosData::find()->where(['created_by' => $user_id, 'product_id' => $product_id])
+                ->andFilterWhere(['between', 'order_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])
+                ->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id,'price'=>0])->sum('qty');
         }
         return $qty;
     }
@@ -1652,7 +1662,7 @@ class PosController extends Controller
     public function getTransShift($company_id, $branch_id)
     {
         $nums = 1;
-        $model = \common\models\SaleDailySum::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id])->max('trans_shift');
+        $model = \common\models\TransactionPosSaleSum::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id])->max('shift');
         if ($model) {
             $nums = $model + 1;
         }
@@ -2370,7 +2380,7 @@ class PosController extends Controller
             $sql2 .= " FROM orders inner join order_line on orders.id = order_line.order_id";
             $sql2 .= " WHERE orders.sale_channel_id = 2 and orders.status <> 3 ";
             $sql2 .= " AND orders.payment_method_id = 2";
-            $sql2 .= " AND orders.order_channel_id = 0";
+            //$sql2 .= " AND orders.order_channel_id = 0";
             $sql2 .= " AND orders.order_date>=" . "'" . date('Y-m-d H:i:s', strtotime($user_login_datetime)) . "'";
             $sql2 .= " AND orders.order_date<=" . "'" . date('Y-m-d H:i:s') . "'";
             //$sql .= " AND orders.created_by=181";

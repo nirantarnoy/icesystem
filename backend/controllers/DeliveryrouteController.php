@@ -205,8 +205,8 @@ class DeliveryrouteController extends Controller
         echo $html;
     }
     public function actionRoutestock($id){
-        $model = \common\models\OrderStock::find()->where(['route_id'=>$id])->all();
-        return $this->render('_currentstock',['model'=>$model]);
+        $model = \common\models\OrderStock::find()->where(['route_id'=>$id])->andFilterWhere(['date(trans_date)'=>date('Y-m-d')])->all();
+        return $this->render('_currentstock',['route_id'=>$id,'model'=>$model]);
     }
     public function actionUpdateroutestock(){
        $id = \Yii::$app->request->post('line_id');

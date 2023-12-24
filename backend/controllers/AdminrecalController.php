@@ -159,7 +159,7 @@ class AdminrecalController extends Controller
     public function getTransShift($company_id, $branch_id)
     {
         $nums = 1;
-        $model = \common\models\SaleDailySum::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id])->max('trans_shift');
+        $model = \common\models\TransactionPosSaleSum::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id])->max('shift');
         if ($model) {
             $nums = $model + 1;
         }
@@ -200,7 +200,8 @@ class AdminrecalController extends Controller
             if($cur_shift){
                 $new_shift = ($cur_shift -1);
             }
-            $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id,'shift'=>$new_shift])->one();
+         //   $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id,'shift'=>$new_shift])->one();
+            $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id,'date(trans_date)'=>date('Y-m-d',strtotime($user_login_datetime))])->andFilterWhere(['<','shift',$cur_shift])->orderBy(['id'=>SORT_DESC])->one();
             if ($model) {
                 $qty = $model->counting_qty;
             }

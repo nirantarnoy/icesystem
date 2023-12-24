@@ -356,6 +356,7 @@ if ($model_c_login != null) {
 </html>
 
 <?php
+
 function getOrder($customer_id, $f_date, $t_date, $company_id, $branch_id)
 {
 

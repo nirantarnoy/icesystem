@@ -469,7 +469,8 @@ class CustomerController extends Controller
         $data = [];
         $status = false;
         if ($route_id) {
-            $model = \common\models\DeliveryRoute::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'status' => 1,])->andFilterWhere(['>','id',1])->all();
+         //   $model = \common\models\DeliveryRoute::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'status' => 1,])->andFilterWhere(['>','id',1])->all();
+            $model = \common\models\DeliveryRoute::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'status' => 1])->all();
             if ($model) {
                 $status = true;
                 foreach ($model as $value) {

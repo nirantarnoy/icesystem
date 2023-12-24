@@ -321,6 +321,9 @@ if ($find_from_date != null) {
     <!--    <td>-->
     <!--        <button class="btn btn-info" onclick="printContent('div1')">พิมพ์ใบวางบิล</button>-->
     <!--    </td>-->
+    <td>
+        <a class="btn btn-info" href="<?= \yii\helpers\Url::to(['salereport/indexcarupdate'], true) ?>">อัพเดทใบส่งของ</a>
+    </td>
     <td style="text-align: right">
         <button id="btn-export-excel-top" class="btn btn-secondary">Export Excel</button>
         <!--            <button id="btn-print" class="btn btn-warning" onclick="printContent('div1')">Print</button>-->

@@ -92,7 +92,7 @@ class CustomerinvoiceController extends Controller
         $pageSize = \Yii::$app->request->post("perpage");
         $searchModel = new CustomerinvoiceSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        $dataProvider->query->andFilterWhere(['customer_invoice.status' => 0]);
+        $dataProvider->query->andFilterWhere(['customer_invoice.status' => 0,'invoice_type'=>1]);
         $dataProvider->setSort(['defaultOrder' => ['id' => SORT_DESC]]);
         $dataProvider->pagination->pageSize = $pageSize;
 
@@ -151,6 +151,7 @@ class CustomerinvoiceController extends Controller
             $model->status = 0;
             $model->company_id = $company_id;
             $model->branch_id = $branch_id;
+            $model->invoice_type = 1;
             if ($model->save()) {
                 $xlist = explode(',', $list_order);
                 if ($xlist != null) {

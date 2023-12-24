@@ -56,6 +56,7 @@ class ProductController extends Controller
                         'code' => $product_info->code,
                         'name' => $product_info->name,
                         'sale_price' => $value->sale_price,
+                        'haft_cal' => $value->haft_cal,
                     ]);
                 }
             }
@@ -88,6 +89,7 @@ class ProductController extends Controller
                         'code' => $product_info->code,
                         'name' => $product_info->name,
                         'sale_price' => $value->sale_price,
+                        'haft_cal' => $value->haft_cal,
                     ]);
                 }
             }
@@ -133,7 +135,7 @@ class ProductController extends Controller
                 $qty = 0;
             }
         }
-        return $qty;
+        return (float)$qty;
     }
 
     public function actionItemcodelist()
@@ -462,7 +464,7 @@ class ProductController extends Controller
                 $model_journal->trans_date = date('Y-m-d H:i:s');
                 $model_journal->journal_no = 'COUNTED';
                 $model_journal->product_id = $datalist[$i]['product_id'];
-                $model_journal->qty = $datalist[$i]['qty'];
+                $model_journal->qty = (float)$datalist[$i]['qty'];
                 $model_journal->warehouse_id = $main_warehouse;
                 $model_journal->company_id = $company_id;
                 $model_journal->branch_id = $branch_id;

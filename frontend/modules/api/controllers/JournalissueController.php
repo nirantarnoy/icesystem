@@ -478,8 +478,14 @@ class JournalissueController extends Controller
                     //$model_check_has_old_product = \common\models\OrderStock::find()->where(['product_id' => $val2->product_id, 'route_id' => $route_id])->orderBy(['id'=>SORT_DESC])->one();
                     $model_check_has_old_product = \common\models\OrderStock::find()->where(['product_id' => $val2->product_id, 'route_id' => $route_id])->one();
                     if ($model_check_has_old_product != null) {
+                        $new_qty = 0;
                         $old_qty = $model_check_has_old_product->avl_qty;
-                        $new_qty = ($old_qty + ($val2->origin_qty));
+                        if($old_qty <=0 || $old_qty == null){
+                            $new_qty = $val2->origin_qty;
+                        }else{
+                            $new_qty = (($old_qty) + ($val2->origin_qty));
+                        }
+
                         $model_check_has_old_product->qty = $val2->origin_qty;
                         $model_check_has_old_product->avl_qty = $new_qty;
                         $model_check_has_old_product->trans_date = date('Y-m-d H:i:s');
@@ -1774,6 +1780,7 @@ class JournalissueController extends Controller
                         $model_order_line->price_group_id = 0;
                         $model_order_line->line_total = ($product_data[$i]['price'] * $product_data[$i]['qty']);
                         $model_order_line->status = 1;
+                        $model_order_line->sale_payment_method_id = 2;
                         if ($model_order_line->save(false)) {
                             $res += 1;
                             $model_stock = new \backend\models\Stocktrans();
