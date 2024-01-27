@@ -78,7 +78,7 @@ class Orders extends \common\models\Orders
     {
         $current_date = date('Y-m-d');
         //   $model = Orders::find()->MAX('order_no');
-    //    $model = Orders::find()->where(['date(order_date)' => date('Y-m-d', strtotime($date))])->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id])->MAX('order_no');
+        //    $model = Orders::find()->where(['date(order_date)' => date('Y-m-d', strtotime($date))])->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id])->MAX('order_no');
         $model = Orders::find()->where(['date(order_date)' => $current_date])->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id])->MAX('order_no');
 
 //        $model_seq = \backend\models\Sequence::find()->where(['module_id'=>4])->one();
@@ -157,9 +157,10 @@ class Orders extends \common\models\Orders
             return $prefix . '0001';
         }
     }
+
     public static function getLastNoPos($date, $company_id, $branch_id, $order_date)
     {
-        $current_date = date('Y-m-d',strtotime($order_date));
+        $current_date = date('Y-m-d', strtotime($order_date));
         //   $model = Orders::find()->MAX('order_no');
         //    $model = Orders::find()->where(['date(order_date)' => date('Y-m-d', strtotime($date))])->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id])->MAX('order_no');
         $model = Orders::find()->where(['date(order_date)' => $current_date])->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id])->MAX('order_no');
@@ -182,11 +183,12 @@ class Orders extends \common\models\Orders
             return $prefix . '0001';
         }
     }
+
     public static function getLastNoCarPos($date, $company_id, $branch_id)
     {
         //   $model = Orders::find()->MAX('order_no');
         //    $model = Orders::find()->where(['date(order_date)' => date('Y-m-d', strtotime($date))])->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id])->MAX('order_no');
-        $model = Orders::find()->where(['date(order_date)' => date('Y-m-d')])->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id])->andFilterWhere(['like','order_no','SO'])->MAX('order_no');
+        $model = Orders::find()->where(['date(order_date)' => date('Y-m-d')])->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id])->andFilterWhere(['like', 'order_no', 'SO'])->MAX('order_no');
 
 //        $model_seq = \backend\models\Sequence::find()->where(['module_id'=>4])->one();
 //        //$pre = \backend\models\Sequence::find()->where(['module_id'=>15])->one();
@@ -300,15 +302,15 @@ class Orders extends \common\models\Orders
     {
         $total = 0;
         if ($sale_type == 1) {
-          //  $total = \common\models\QueryApiOrderDailySummary::find()->where(['id' => $order_id, 'sale_payment_method_id' => 1])->sum('line_total');
-            $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('line_total')->where(['id' => $order_id, 'sale_payment_method_id' => 1])->andFilterWhere(['!=','order_line_status',500])->all();
-            if($x){
-                foreach ($x as $value){
+            //  $total = \common\models\QueryApiOrderDailySummary::find()->where(['id' => $order_id, 'sale_payment_method_id' => 1])->sum('line_total');
+            $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('line_total')->where(['id' => $order_id, 'sale_payment_method_id' => 1])->andFilterWhere(['!=', 'order_line_status', 500])->all();
+            if ($x) {
+                foreach ($x as $value) {
                     $total = $total + $value->line_total;
                 }
             }
         } else {
-            $model = \backend\models\Orderline::find()->select(['qty','price','customer_id'])->where(['order_id' => $order_id])->all();
+            $model = \backend\models\Orderline::find()->select(['qty', 'price', 'customer_id'])->where(['order_id' => $order_id])->all();
             if ($model) {
                 foreach ($model as $value) {
                     $cus_pay_method = \backend\models\Customer::findPayMethod($value->customer_id);
@@ -348,10 +350,11 @@ class Orders extends \common\models\Orders
         }
         return $total;
     }
+
     public static function getlinesumcredit($order_id)
     {
         $total = 0;
-        $model = \backend\models\Orderline::find()->where(['order_id' => $order_id,'sale_payment_method_id'=>2])->all();
+        $model = \backend\models\Orderline::find()->where(['order_id' => $order_id, 'sale_payment_method_id' => 2])->all();
         if ($model) {
             foreach ($model as $value) {
                 $total = $total + ($value->qty * $value->price);
@@ -364,11 +367,11 @@ class Orders extends \common\models\Orders
     public static function getlineremainsum($order_id, $customer_id)
     {
         $total = 0;
-        $model =\common\models\QuerySalePaySummary::find()->where(['order_id' => $order_id,'customer_id'=>$customer_id])->one();
+        $model = \common\models\QuerySalePaySummary::find()->where(['order_id' => $order_id, 'customer_id' => $customer_id])->one();
         if ($model) {
             $total = $model->remain_amount;
-        }else{
-            $model =\common\models\QuerySalePosPaySummary::find()->where(['order_id' => $order_id,'customer_id'=>$customer_id])->one();
+        } else {
+            $model = \common\models\QuerySalePosPaySummary::find()->where(['order_id' => $order_id, 'customer_id' => $customer_id])->one();
             if ($model) {
                 $total = $model->remain_amount;
             }
@@ -381,15 +384,15 @@ class Orders extends \common\models\Orders
     {
         $total = 0;
         if ($sale_type == 1) { // 1 sale from mobile
-          //  $total = \common\models\QueryApiOrderDailySummary::find()->where(['id' => $order_id, 'sale_payment_method_id' => 2])->sum('line_total');
-            $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('line_total')->where(['id' => $order_id, 'sale_payment_method_id' => 2])->andFilterWhere(['!=','order_line_status',500])->all();
-            if($x){
-                foreach ($x as $value){
+            //  $total = \common\models\QueryApiOrderDailySummary::find()->where(['id' => $order_id, 'sale_payment_method_id' => 2])->sum('line_total');
+            $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('line_total')->where(['id' => $order_id, 'sale_payment_method_id' => 2])->andFilterWhere(['!=', 'order_line_status', 500])->all();
+            if ($x) {
+                foreach ($x as $value) {
                     $total = $total + $value->line_total;
                 }
             }
         } else {
-            $model = \backend\models\Orderline::find()->select(['qty','price','customer_id'])->where(['order_id' => $order_id])->all();
+            $model = \backend\models\Orderline::find()->select(['qty', 'price', 'customer_id'])->where(['order_id' => $order_id])->all();
             if ($model) {
                 foreach ($model as $value) {
                     $cus_pay_method = \backend\models\Customer::findPayMethod($value->customer_id);
@@ -409,42 +412,44 @@ class Orders extends \common\models\Orders
 //        }
         return $total;
     }
+
     public static function findordercredit2($route_id, $sale_type)
     {
         $total = 0;
         if ($sale_type == 1) { // 1 sale from mobile
             $x = null;
             //  $total = \common\models\QueryApiOrderDailySummary::find()->where(['id' => $order_id, 'sale_payment_method_id' => 2])->sum('line_total');
-            $order_shift = \common\models\QueryApiOrderDailySummaryNew::find()->where(['order_channel_id' => $route_id,'date(order_date)'=>date('Y-m-d'), 'sale_payment_method_id' => 2])->andFilterWhere(['!=','order_line_status',500])->max('order_shift');
-            if($order_shift){
-                $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('line_total')->where(['order_channel_id' => $route_id,'date(order_date)'=>date('Y-m-d'), 'sale_payment_method_id' => 2,'order_shift'=>$order_shift])->andFilterWhere(['!=','order_line_status',500])->all();
-            }else{
-                $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('line_total')->where(['order_channel_id' => $route_id,'date(order_date)'=>date('Y-m-d'), 'sale_payment_method_id' => 2])->andFilterWhere(['!=','order_line_status',500])->all();
+            $order_shift = \common\models\QueryApiOrderDailySummaryNew::find()->where(['order_channel_id' => $route_id, 'date(order_date)' => date('Y-m-d'), 'sale_payment_method_id' => 2])->andFilterWhere(['!=', 'order_line_status', 500])->max('order_shift');
+            if ($order_shift) {
+                $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('line_total')->where(['order_channel_id' => $route_id, 'date(order_date)' => date('Y-m-d'), 'sale_payment_method_id' => 2, 'order_shift' => $order_shift])->andFilterWhere(['!=', 'order_line_status', 500])->all();
+            } else {
+                $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('line_total')->where(['order_channel_id' => $route_id, 'date(order_date)' => date('Y-m-d'), 'sale_payment_method_id' => 2])->andFilterWhere(['!=', 'order_line_status', 500])->all();
             }
 
-            if($x){
-                foreach ($x as $value){
+            if ($x) {
+                foreach ($x as $value) {
                     $total = $total + $value->line_total;
                 }
             }
         }
         return $total;
     }
+
     public static function findordercash2($route_id, $sale_type)
     {
         $total = 0;
         if ($sale_type == 1) {
             $x = null;
             //  $total = \common\models\QueryApiOrderDailySummary::find()->where(['id' => $order_id, 'sale_payment_method_id' => 1])->sum('line_total');
-            $order_shift = \common\models\QueryApiOrderDailySummaryNew::find()->where(['order_channel_id' => $route_id,'date(order_date)'=>date('Y-m-d'), 'sale_payment_method_id' => 1])->andFilterWhere(['!=','order_line_status',500])->max('order_shift');
-            if($order_shift){
-                $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('line_total')->where(['order_channel_id' => $route_id,'date(order_date)'=>date('Y-m-d'), 'sale_payment_method_id' => 1,'order_shift'=>$order_shift])->andFilterWhere(['!=','order_line_status',500])->all();
-            }else{
-                $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('line_total')->where(['order_channel_id' => $route_id,'date(order_date)'=>date('Y-m-d'), 'sale_payment_method_id' => 1])->andFilterWhere(['!=','order_line_status',500])->all();
+            $order_shift = \common\models\QueryApiOrderDailySummaryNew::find()->where(['order_channel_id' => $route_id, 'date(order_date)' => date('Y-m-d'), 'sale_payment_method_id' => 1])->andFilterWhere(['!=', 'order_line_status', 500])->max('order_shift');
+            if ($order_shift) {
+                $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('line_total')->where(['order_channel_id' => $route_id, 'date(order_date)' => date('Y-m-d'), 'sale_payment_method_id' => 1, 'order_shift' => $order_shift])->andFilterWhere(['!=', 'order_line_status', 500])->all();
+            } else {
+                $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('line_total')->where(['order_channel_id' => $route_id, 'date(order_date)' => date('Y-m-d'), 'sale_payment_method_id' => 1])->andFilterWhere(['!=', 'order_line_status', 500])->all();
             }
 
-            if($x){
-                foreach ($x as $value){
+            if ($x) {
+                foreach ($x as $value) {
                     $total = $total + $value->line_total;
                 }
             }
@@ -458,36 +463,37 @@ class Orders extends \common\models\Orders
         if ($sale_type == 1) { // 1 sale from mobile
             $x = null;
             //  $total = \common\models\QueryApiOrderDailySummary::find()->where(['id' => $order_id, 'sale_payment_method_id' => 2])->sum('line_total');
-            $order_shift = \common\models\QueryApiOrderDailySummaryNew::find()->where(['order_channel_id' => $route_id,'date(order_date)'=>date('Y-m-d'), 'sale_payment_method_id' => 2])->andFilterWhere(['!=','order_line_status',500])->max('order_shift');
-            if($order_shift){
-                $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('discount_amt')->where(['order_channel_id' => $route_id,'date(order_date)'=>date('Y-m-d'), 'sale_payment_method_id' => 2,'order_shift'=>$order_shift])->andFilterWhere(['!=','order_line_status',500])->all();
-            }else{
-                $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('discount_amt')->where(['order_channel_id' => $route_id,'date(order_date)'=>date('Y-m-d'), 'sale_payment_method_id' => 2])->andFilterWhere(['!=','order_line_status',500])->all();
+            $order_shift = \common\models\QueryApiOrderDailySummaryNew::find()->where(['order_channel_id' => $route_id, 'date(order_date)' => date('Y-m-d'), 'sale_payment_method_id' => 2])->andFilterWhere(['!=', 'order_line_status', 500])->max('order_shift');
+            if ($order_shift) {
+                $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('discount_amt')->where(['order_channel_id' => $route_id, 'date(order_date)' => date('Y-m-d'), 'sale_payment_method_id' => 2, 'order_shift' => $order_shift])->andFilterWhere(['!=', 'order_line_status', 500])->all();
+            } else {
+                $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('discount_amt')->where(['order_channel_id' => $route_id, 'date(order_date)' => date('Y-m-d'), 'sale_payment_method_id' => 2])->andFilterWhere(['!=', 'order_line_status', 500])->all();
             }
 
-            if($x){
-                foreach ($x as $value){
+            if ($x) {
+                foreach ($x as $value) {
                     $total = $total + $value->discount_amt;
                 }
             }
         }
         return $total;
     }
+
     public static function findordercashdiscount($route_id, $sale_type)
     {
         $total = 0;
         if ($sale_type == 1) {
             $x = null;
             //  $total = \common\models\QueryApiOrderDailySummary::find()->where(['id' => $order_id, 'sale_payment_method_id' => 1])->sum('line_total');
-            $order_shift = \common\models\QueryApiOrderDailySummaryNew::find()->where(['order_channel_id' => $route_id,'date(order_date)'=>date('Y-m-d'), 'sale_payment_method_id' => 1])->andFilterWhere(['!=','order_line_status',500])->max('order_shift');
-            if($order_shift){
-                $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('discount_amt')->where(['order_channel_id' => $route_id,'date(order_date)'=>date('Y-m-d'), 'sale_payment_method_id' => 1,'order_shift'=>$order_shift])->andFilterWhere(['!=','order_line_status',500])->all();
-            }else{
-                $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('discount_amt')->where(['order_channel_id' => $route_id,'date(order_date)'=>date('Y-m-d'), 'sale_payment_method_id' => 1])->andFilterWhere(['!=','order_line_status',500])->all();
+            $order_shift = \common\models\QueryApiOrderDailySummaryNew::find()->where(['order_channel_id' => $route_id, 'date(order_date)' => date('Y-m-d'), 'sale_payment_method_id' => 1])->andFilterWhere(['!=', 'order_line_status', 500])->max('order_shift');
+            if ($order_shift) {
+                $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('discount_amt')->where(['order_channel_id' => $route_id, 'date(order_date)' => date('Y-m-d'), 'sale_payment_method_id' => 1, 'order_shift' => $order_shift])->andFilterWhere(['!=', 'order_line_status', 500])->all();
+            } else {
+                $x = \common\models\QueryApiOrderDailySummaryNew::find()->select('discount_amt')->where(['order_channel_id' => $route_id, 'date(order_date)' => date('Y-m-d'), 'sale_payment_method_id' => 1])->andFilterWhere(['!=', 'order_line_status', 500])->all();
             }
 
-            if($x){
-                foreach ($x as $value){
+            if ($x) {
+                foreach ($x as $value) {
                     $total = $total + $value->discount_amt;
                 }
             }
@@ -501,11 +507,13 @@ class Orders extends \common\models\Orders
         $model = Orders::find()->where(['id' => $id])->one();
         return $model != null ? $model->order_no : '';
     }
+
     public static function getCustomerrefno($id)
     {
         $model = Orders::find()->where(['id' => $id])->one();
         return $model != null ? $model->customer_ref_no : '';
     }
+
     public static function findId($order_no)
     {
         $model = Orders::find()->where(['order_no' => $order_no])->one();
@@ -521,5 +529,45 @@ class Orders extends \common\models\Orders
 //        $model = Unit::find()->where(['name'=>$code])->one();
 //        return count($model)>0?$model->id:0;
 //    }
+
+    public static function findordercreditPos($user_id)
+    {
+        $total = 0;
+        //if ($user_id > 0) {
+        $sql = "SELECT SUM(line_total) as line_total";
+        $sql .= " FROM query_order_data";
+        $sql .= " WHERE  created_by =" . $user_id;
+        $sql .= " AND  sale_payment_method_id = 2";
+        $sql .= " AND  date(order_date) = " . "'" . date('Y-m-d') . "'";
+        $sql .= " AND  order_status in(1,100)";
+        $sql .= " AND  sale_channel_id = 2";
+        $query = \Yii::$app->db->createCommand($sql);
+        $modelx = $query->queryAll();
+        if ($modelx) {
+            $total = $modelx[0]['line_total'];
+        }
+        //}
+        return $total;
+    }
+
+    public static function findordercashPos($user_id)
+    {
+        $total = 0;
+        //if ($user_id > 0) {
+        $sql = "SELECT SUM(line_total) as line_total";
+        $sql .= " FROM query_order_data";
+        $sql .= " WHERE  created_by =" . $user_id;
+        $sql .= " AND  sale_payment_method_id = 1";
+        $sql .= " AND  date(order_date) = " . "'" . date('Y-m-d') . "'";
+        $sql .= " AND  order_status in(1,100)";
+        $sql .= " AND  sale_channel_id = 2";
+        $query = \Yii::$app->db->createCommand($sql);
+        $modelx = $query->queryAll();
+        if ($modelx) {
+            $total = $modelx[0]['line_total'];
+        }
+        // }
+        return $total;
+    }
 
 }

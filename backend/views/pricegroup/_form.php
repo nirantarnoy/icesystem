@@ -80,6 +80,7 @@ $harf_select = [['id'=>1,'name'=>'Yes'],['id'=>0,'name'=>'No']];
                                         <th>ชื่อสินค้า</th>
                                         <th style="width: 10%">ราคาขาย</th>
                                         <th style="width: 10%">คิดครึ่งถัง</th>
+                                        <th style="width: 10%">ราคาครึ่งถัง</th>
                                         <th style="text-align: center">ลบ</th>
                                     </tr>
                                     </thead>
@@ -107,6 +108,8 @@ $harf_select = [['id'=>1,'name'=>'Yes'],['id'=>0,'name'=>'No']];
                                                     <?php endfor;?>
                                                 </select>
                                             </td>
+                                            <td><input type="number" class="form-control line-haft-price" name="line_haft_price[]"
+                                                       style="text-align: right" value="0" min="0" step="0.01"></td>
                                             <td style="text-align: center">
                                                 <div class="btn btn-danger btn-sm" onclick="removeline($(this))"><i
                                                             class="fa fa-trash"></i></div>
@@ -151,6 +154,8 @@ $harf_select = [['id'=>1,'name'=>'Yes'],['id'=>0,'name'=>'No']];
                                                             <?php endfor;?>
                                                         </select>
                                                     </td>
+                                                    <td><input type="number" class="form-control line-haft-price" name="line_haft_price[]"
+                                                               style="text-align: right" value="<?= $value->sale_haft_price ?>" min="0" step="0.01"></td>
                                                     <td style="text-align: center">
                                                         <div class="btn btn-danger btn-sm"
                                                              onclick="removeline($(this))"><i
@@ -182,6 +187,8 @@ $harf_select = [['id'=>1,'name'=>'Yes'],['id'=>0,'name'=>'No']];
                                                         <?php endfor;?>
                                                     </select>
                                                 </td>
+                                                <td><input type="number" class="form-control line-haft-price" name="line_haft_price[]"
+                                                           style="text-align: right" value="0" min="0" step="0.01"></td>
                                                 <td style="text-align: center">
                                                     <div class="btn btn-danger btn-sm" onclick="removeline($(this))"><i
                                                                 class="fa fa-trash"></i></div>

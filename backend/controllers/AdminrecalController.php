@@ -111,7 +111,7 @@ class AdminrecalController extends Controller
         // $cal_date = date('Y-m-d',strtotime("2022/06/22"));
 
       //  $cal_date = date('Y-m-d', strtotime($login_date));
-        $cal_date = date('Y-m-d', strtotime($logout_date));
+        $cal_date = date('Y-m-d', strtotime($login_date));
 
 
         //\common\models\TransactionCarSale::deleteAll(['date(trans_date)'=>date('Y-m-d')]);

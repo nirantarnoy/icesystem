@@ -56,7 +56,21 @@ $this->params['breadcrumbs'][] = $this->title;
             'code',
             'name',
             'emp_qty',
+            'first_emp',
+            'second_emp',
             'com_extra',
+            [
+                'attribute' => 'from_date',
+                'value' => function ($data) {
+                    return date('d-m-Y', strtotime($data->from_date));
+                }
+            ],
+            [
+                'attribute' => 'to_date',
+                'value' => function ($data) {
+                    return date('d-m-Y', strtotime($data->to_date));
+                }
+            ],
             [
                 'attribute' => 'status',
                 'format' => 'raw',

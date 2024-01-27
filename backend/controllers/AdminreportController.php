@@ -138,18 +138,20 @@ class AdminreportController extends Controller
         $refill_qty = \Yii::$app->request->post('refill_qty');
         $reprocess_qty = \Yii::$app->request->post('reprocess_qty');
         $data_type_selected = \Yii::$app->request->post('data_type_selected');
+        $balance_in_qty = \Yii::$app->request->post('balance_in_qty');
+        $sale_qty = \Yii::$app->request->post('sale_qty');
 
         if ($find_product_id == null || $find_product_id == '') {
             $find_product_id = 1;
         }
 
-       // if ($prod_rec_qty || $return_qty || $scrap_qty || $counting_qty) {
-            $model_shift_all = \common\models\TransactionPosSaleSum::find()->select(['distinct(shift)','trans_date'])->where(['date(trans_date)' => date('Y-m-d', strtotime($trans_date))])->all();
-            // $model_shift_all = \common\models\TransactionPosSaleSum::find()->where(['>=','id',25663])->all();
-            if ($model_shift_all) {
-                $loop = -1;
-                foreach ($model_shift_all as $value) {
-                    $loop += 1;
+        // if ($prod_rec_qty || $return_qty || $scrap_qty || $counting_qty) {
+        $model_shift_all = \common\models\TransactionPosSaleSum::find()->select(['distinct(shift)', 'trans_date'])->where(['date(trans_date)' => date('Y-m-d', strtotime($trans_date))])->all();
+        // $model_shift_all = \common\models\TransactionPosSaleSum::find()->where(['>=','id',25663])->all();
+        if ($model_shift_all) {
+            $loop = -1;
+            foreach ($model_shift_all as $value) {
+                $loop += 1;
 //                    if ($loop == $shift_seq) {
 //                        $model_update = \common\models\TransactionPosSaleSum::find()->where(['shift'=>$value->shift,'product_id'=>$find_product_id])->one();
 //                        if($model_update){
@@ -160,55 +162,103 @@ class AdminreportController extends Controller
 //                            $model_update->save(false);
 //                        }
 //                    }
-                    if ($loop == $shift_seq) {
-                        $model_update = \common\models\CloseDailyAdjust::find()->where(['shift' => $value->shift, 'product_id' => $find_product_id])->one();
-                        if ($model_update) {
-                            $model_update->shift_seq = $loop;
+                if ($loop == $shift_seq) {
+                    $model_update = \common\models\CloseDailyAdjust::find()->where(['shift' => $value->shift, 'product_id' => $find_product_id])->one();
+                    if ($model_update) {
+                        $model_update->shift_seq = $loop;
+                        if ($transfer_qty != null || $transfer_qty != '') {
                             $model_update->transfer_qty = (float)$transfer_qty;
+                        }
+                        if ($prod_rec_qty != null || $prod_rec_qty != '') {
                             $model_update->prodrec_qty = (float)$prod_rec_qty;
+                        }
+                        if ($return_qty != null || $return_qty != '') {
                             $model_update->return_qty = (float)$return_qty;
+                        }
+                        if ($scrap_qty != null || $scrap_qty != '') {
                             $model_update->scrap_qty = (float)$scrap_qty;
+                        }
+                        if ($counting_qty != null || $counting_qty != '') {
                             $model_update->counting_qty = (float)$counting_qty;
+                        }
+                        if ($refill_qty != null || $refill_qty != '') {
                             $model_update->refill_qty = (float)$refill_qty;
+                        }
+                        if ($reprocess_qty != null || $reprocess_qty != '') {
                             $model_update->reprocess_qty = (float)$reprocess_qty;
-                            $model_update->save(false);
-                        } else {
-                            $model_new = new \common\models\CloseDailyAdjust();
-                            $model_new->product_id = $find_product_id;
-                            $model_new->emp_id = 0;
-                            $model_new->shift_seq = $loop;
-                            $model_new->trans_date = date('Y-m-d H:i:s');
-                            $model_new->shift = $value->shift;
-                            $model_new->shift_date = date('Y-m-d H:i:s', strtotime($value->trans_date));
-                            $model_new->transfer_qty = (float)$transfer_qty;
-                            $model_new->prodrec_qty = (float)$prod_rec_qty;
-                            $model_new->return_qty = (float)$return_qty;
-                            $model_new->scrap_qty = (float)$scrap_qty;
-                            $model_new->counting_qty = (float)$counting_qty;
-                            $model_new->refill_qty = (float)$refill_qty;
-                            $model_new->reprocess_qty = (float)$reprocess_qty;
-                            $model_new->save(false);
+                        }
+                        if ($balance_in_qty != null || $balance_in_qty != '') {
+                            $model_update->balance_in_qty = (float)$balance_in_qty;
+                        }
+                        if ($sale_qty != null || $sale_qty != '') {
+                            $model_update->sale_qty = (float)$sale_qty;
                         }
 
-                        if($counting_qty > 0){
-                            $model_updatex = \common\models\TransactionPosSaleSum::find()->where(['shift' => $value->shift, 'product_id' => $find_product_id])->one();
-                            if ($model_updatex) {
-                                $model_updatex->counting_qty = (float)$counting_qty;
-                                if($model_updatex->save(false)){
-                                    $model_update_balance_in = \common\models\TransactionPosSaleSum::find()->where(['shift' => ($value->shift + 1), 'product_id' => $find_product_id])->one();
-                                    if($model_update_balance_in){
-                                        $model_update_balance_in->balance_in_qty = (float)$counting_qty;
-                                        $model_update_balance_in->save(false);
-                                    }
-                                }
-                            }
+                        $model_update->save(false);
+                    } else {
+                        $model_new = new \common\models\CloseDailyAdjust();
+                        $model_new->product_id = $find_product_id;
+                        $model_new->emp_id = 0;
+                        $model_new->shift_seq = $loop;
+                        $model_new->trans_date = date('Y-m-d H:i:s');
+                        $model_new->shift = $value->shift;
+                        $model_new->shift_date = date('Y-m-d H:i:s', strtotime($value->trans_date));
+                        if ($transfer_qty != null || $transfer_qty != '') {
+                            $model_new->transfer_qty = (float)$transfer_qty;
                         }
+                        if ($prod_rec_qty != null || $prod_rec_qty != '') {
+                            $model_new->prodrec_qty = (float)$prod_rec_qty;
+                        }
+                        if ($return_qty != null || $return_qty != '') {
+                            $model_new->return_qty = (float)$return_qty;
+                        }
+                        if ($scrap_qty != null || $scrap_qty != '') {
+                            $model_new->scrap_qty = (float)$scrap_qty;
+                        }
+                        if ($counting_qty != null || $counting_qty != '') {
+                            $model_new->counting_qty = (float)$counting_qty;
+                        }
+                        if ($refill_qty != null || $refill_qty != '') {
+                            $model_new->refill_qty = (float)$refill_qty;
+                        }
+                        if ($reprocess_qty != null || $reprocess_qty != '') {
+                            $model_new->reprocess_qty = (float)$reprocess_qty;
+                        }
+                        if ($balance_in_qty != null || $balance_in_qty != '') {
+                            $model_new->balance_in_qty = (float)$balance_in_qty;
+                        }
+                        if ($sale_qty != null || $sale_qty != '') {
+                            $model_new->sale_qty = (float)$sale_qty;
+                        }
+//                            $model_new->transfer_qty = (float)$transfer_qty;
+//                            $model_new->prodrec_qty = (float)$prod_rec_qty;
+//                            $model_new->return_qty = (float)$return_qty;
+//                            $model_new->scrap_qty = (float)$scrap_qty;
+//                            $model_new->counting_qty = (float)$counting_qty;
+//                            $model_new->refill_qty = (float)$refill_qty;
+//                            $model_new->reprocess_qty = (float)$reprocess_qty;
+                        $model_new->save(false);
                     }
-                    //echo $value->shift . ' '. date('Y-m-d',strtotime($value->trans_date)) . "<br />";
+
+//                        if($counting_qty > 0){
+//                            $model_updatex = \common\models\TransactionPosSaleSum::find()->where(['shift' => $value->shift, 'product_id' => $find_product_id])->one();
+//                            if ($model_updatex) {
+//                                $model_updatex->counting_qty = (float)$counting_qty;
+//                                if($model_updatex->save(false)){
+//                                    $model_update_balance_in = \common\models\TransactionPosSaleSum::find()->where(['shift' => ($value->shift + 1), 'product_id' => $find_product_id])->one();
+//                                    if($model_update_balance_in){
+//                                        $model_update_balance_in->balance_in_qty = (float)$counting_qty;
+//                                        $model_update_balance_in->save(false);
+//                                    }
+//                                }
+//                            }
+//                        }
                 }
+                //echo $value->shift . ' '. date('Y-m-d',strtotime($value->trans_date)) . "<br />";
             }
-            // echo $shift_seq;
-            //return;
+        }
+        // echo $shift_seq;
+        //return;
         //}
 
 

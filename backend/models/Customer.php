@@ -192,7 +192,7 @@ class Customer extends \common\models\Customer
         //   $model = Orders::find()->MAX('order_no');
         $model = Customer::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id])->MAX('code');
 
-        $pre = "BT";
+        $pre = "BP";
 
         //if($branch_id==1){
             if ($model != null) {
@@ -203,7 +203,7 @@ class Customer extends \common\models\Customer
 //            $loop = $len - $clen;
              //   $prefix = $pre . '-' . substr(date("Y"), 2, 2);
                 $prefix = $pre;
-               //    $cnum = substr((string)$model, 5, strlen($model)); // omnoi
+                 //  $cnum = substr((string)$model, 5, strlen($model)); // omnoi
                 $cnum = substr((string)$model, 2, strlen($model)); // bkt
 
                 $len = strlen($cnum);

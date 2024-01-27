@@ -156,7 +156,22 @@ class EmployeeController extends Controller
                 $photo->saveAs(Yii::getAlias('@backend') . '/web/uploads/images/employee/' . $photo_name);
                 $model->photo = $photo_name;
             }
-            if($model->save()){
+            if($model->emp_start == null){
+                $model->emp_start = date('Y-m-d');
+            }else{
+                $s_date = date('Y-m-d');
+                $xdata = explode('/',$model->emp_start);
+                if(count($xdata)>1){
+                    $s_date = $xdata[2].'-'.$xdata[1].'-'.$xdata[0];
+                }
+                $model->emp_start = date('Y-m-d',strtotime($s_date));
+            }
+            if($model->salary_type == null || $model->salary_type=''){
+                $model->salary_type = 2;
+            }
+            $model->fname = (string)$model->fname;
+            $model->lname = (string)$model->lname;
+            if($model->save(false)){
                 $session = Yii::$app->session;
                 $session->setFlash('msg', 'บันทึกข้อมูลเรียบร้อย');
                 return $this->redirect(['index']);

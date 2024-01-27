@@ -900,10 +900,10 @@ class JournalissueController extends Controller
                 $car_warehouse = \backend\models\Warehouse::findWarehousecar($company_id, $branch_id);
                 $model = \backend\models\Stocksum::find()->where(['warehouse_id' => $car_warehouse, 'product_id' => $product_id, 'route_id' => $route_id])->one(); // find warehouse car stock for deduct
                 if ($model) {
-                    if ((int)$model->qty < (int)$qty) {
+                    if ((float)$model->qty < (float)$qty) {
                         return false;
                     } else {
-                        $model->qty = (int)$model->qty - (int)$qty;
+                        $model->qty = (float)$model->qty - (float)$qty;
                         $model->save(false);
                     }
 
@@ -1246,10 +1246,10 @@ class JournalissueController extends Controller
         if ($wh_id != null && $product_id != null && $qty > 0) {
             $model = \backend\models\Stocksum::find()->where(['warehouse_id' => $wh_id, 'product_id' => $product_id])->one();
             if ($model) {
-                if ((int)$model->qty < (int)$qty) {
+                if ((float)$model->qty < (float)$qty) {
                     return false;
                 }
-                $model->qty = (int)$model->qty - (int)$qty;
+                $model->qty = (float)$model->qty - (float)$qty;
                 if ($model->save(false)) {
                     return true;
                 }
@@ -1271,20 +1271,20 @@ class JournalissueController extends Controller
             if ($car_warehouse > 0) {
                 $model = \backend\models\Stocksum::find()->where(['warehouse_id' => $wh_id, 'product_id' => $product_id])->one();
                 if ($model) {
-                    if ((int)$model->qty < (int)$qty) {
+                    if ((float)$model->qty < (float)$qty) {
                         return false;
                     }
-                    $model->qty = (int)$model->qty - (int)$qty; // cut stock from main warehouse
+                    $model->qty = (float)$model->qty - (float)$qty; // cut stock from main warehouse
                     if ($model->save(false)) {
                         $check_car_wh = \backend\models\Stocksum::find()->where(['route_id' => $route_id, 'product_id' => $product_id, 'warehouse_id' => $car_warehouse])->one();
                         if ($check_car_wh) {
-                            $check_car_wh->qty = (int)$check_car_wh->qty + (int)$qty; // add stock
+                            $check_car_wh->qty = (float)$check_car_wh->qty + (float)$qty; // add stock
                             $check_car_wh->save(false);
                         } else {
                             $new_car_wh = new \backend\models\Stocksum(); // add new line stock
                             $new_car_wh->product_id = $product_id;
                             $new_car_wh->warehouse_id = $car_warehouse;
-                            $new_car_wh->qty = $qty;
+                            $new_car_wh->qty = (float)$qty;
                             $new_car_wh->route_id = $route_id;
                             $new_car_wh->company_id = $company_id;
                             $new_car_wh->branch_id = $branch_id;
@@ -1385,10 +1385,10 @@ class JournalissueController extends Controller
             if ($model_trans->save(false)) {
                 $model = \backend\models\Stocksum::find()->where(['warehouse_id' => $wh_id, 'product_id' => $product_id])->andFilterWhere(['>', 'qty', 0])->one(); // find warehouse car stock for deduct
                 if ($model) {
-                    if ((int)$model->qty < (int)$qty) {
+                    if ((float)$model->qty < (float)$qty) {
                         return false;
                     } else {
-                        $model->qty = (int)$model->qty - (int)$qty;
+                        $model->qty = (float)$model->qty - (float)$qty;
                         $model->save(false);
                     }
 
@@ -1934,20 +1934,20 @@ class JournalissueController extends Controller
                 for ($i = 0; $i <= count($data) - 1; $i++) {
                     $model = \backend\models\Stocksum::find()->where(['warehouse_id' => $wh_id, 'product_id' => $data[$i]['product_id']])->one();
                     if ($model) {
-                        if ((int)$model->qty < (int)$data[$i]['qty']) {
+                        if ((float)$model->qty < (float)$data[$i]['qty']) {
                             return false;
                         }
-                        $model->qty = (int)$model->qty - (int)$data[$i]['qty']; // cut stock from main warehouse
+                        $model->qty = (float)$model->qty - (float)$data[$i]['qty']; // cut stock from main warehouse
                         if ($model->save(false)) {
                             $check_car_wh = \backend\models\Stocksum::find()->where(['route_id' => $route_id, 'product_id' => $data[$i]['product_id'], 'warehouse_id' => $car_warehouse])->one();
                             if ($check_car_wh) {
-                                $check_car_wh->qty = (int)$check_car_wh->qty + (int)$data[$i]['qty']; // add stock
+                                $check_car_wh->qty = (float)$check_car_wh->qty + (float)$data[$i]['qty']; // add stock
                                 $check_car_wh->save(false);
                             } else {
                                 $new_car_wh = new \backend\models\Stocksum(); // add new line stock
                                 $new_car_wh->product_id = $data[$i]['product_id'];
                                 $new_car_wh->warehouse_id = $car_warehouse;
-                                $new_car_wh->qty = $data[$i]['qty'];
+                                $new_car_wh->qty = (float)$data[$i]['qty'];
                                 $new_car_wh->route_id = $route_id;
                                 $new_car_wh->company_id = $company_id;
                                 $new_car_wh->branch_id = $branch_id;
@@ -2079,12 +2079,12 @@ class JournalissueController extends Controller
                 if ($model_trans->save(false)) {
                     $modelx = \backend\models\Stocksum::find()->where(['warehouse_id' => 1, 'product_id' => $value->product_id])->one(); // find warehouse car stock for deduct
                     if ($modelx) {
-                        $modelx->qty = (int)$modelx->qty + (int)$value->qty;
+                        $modelx->qty = (float)$modelx->qty + (float)$value->qty;
                         if ($modelx->save(false)) {
                             $modelstockcar = \backend\models\Stocksum::find()->where(['warehouse_id' => $default_wh, 'product_id' => $value->product_id])->one(); // find warehouse car stock for deduct
                             if ($modelstockcar) {
-                                if ($modelstockcar->qty >= (int)$value->qty) {
-                                    $modelstockcar->qty = (int)$modelstockcar->qty - (int)$value->qty;
+                                if ($modelstockcar->qty >= (float)$value->qty) {
+                                    $modelstockcar->qty = (float)$modelstockcar->qty - (float)$value->qty;
                                     if ($modelstockcar->save(false)) {
 
                                     }

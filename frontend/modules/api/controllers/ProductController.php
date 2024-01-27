@@ -49,13 +49,17 @@ class ProductController extends Controller
                 $status = true;
                 foreach ($model as $value) {
                     $product_info = \backend\models\Product::findInfo($value->product_id);
+                    $new_price = $value->sale_price;
+                    if($value->haft_cal == 1){
+                        $new_price = $value->sale_haft_price;
+                    }
                     array_push($data, [
                         'id' => $value->product_id,
                         //'image' => 'http://192.168.1.120/icesystem/backend/web/uploads/images/products/' . $product_info->photo,
                         'image' => 'http://119.59.100.74/icesystem/backend/web/uploads/images/products/' . $product_info->photo,
                         'code' => $product_info->code,
                         'name' => $product_info->name,
-                        'sale_price' => $value->sale_price,
+                        'sale_price' => $new_price,
                         'haft_cal' => $value->haft_cal,
                     ]);
                 }
@@ -82,13 +86,17 @@ class ProductController extends Controller
                 $status = true;
                 foreach ($model as $value) {
                     $product_info = \backend\models\Product::findInfo($value->product_id);
+                    $new_price = $value->sale_price;
+                    if($value->haft_cal == 1){
+                        $new_price = $value->sale_haft_price;
+                    }
                     array_push($data, [
                         'id' => $value->product_id,
                         //'image' => 'http://192.168.1.120/icesystem/backend/web/uploads/images/products/' . $product_info->photo,
                         'image' => 'http://119.59.100.74/icesystem/backend/web/uploads/images/products/' . $product_info->photo,
                         'code' => $product_info->code,
                         'name' => $product_info->name,
-                        'sale_price' => $value->sale_price,
+                        'sale_price' => $new_price,
                         'haft_cal' => $value->haft_cal,
                     ]);
                 }

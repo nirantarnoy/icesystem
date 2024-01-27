@@ -405,7 +405,7 @@ function myPrint(){
 
 function showfindorder(){
     var customer_id = $('.selected-customer-id').val();
-   alert(customer_id);
+  // alert(customer_id);
     $.ajax({
       type: 'post',
       dataType: 'html',
@@ -413,7 +413,7 @@ function showfindorder(){
       async: false,
       data: {'customer_id': customer_id},
       success: function(data){
-          alert(data);
+       //   alert(data);
           $(".table-find-list tbody").html(data);
           $("#findModal").modal("show");
       },
@@ -448,7 +448,7 @@ function addselecteditem(e) {
                 obj['product_group_id'] = order_line_product_group_id;
                 obj['qty'] = order_line_qty;
                 obj['price'] = order_line_price;
-               obj['total'] = (order_line_qty * order_line_price);
+                obj['total'] = (order_line_qty * order_line_price);
                 selecteditem.push(obj);
                 selectedorderlineid.push(obj['id']);
                     var obj_after = {};

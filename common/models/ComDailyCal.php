@@ -37,7 +37,7 @@ class ComDailyCal extends \yii\db\ActiveRecord
         return [
             [['trans_date'], 'safe'],
             [['emp_1', 'emp_2', 'created_at', 'route_id'], 'integer'],
-            [['total_qty', 'total_amt', 'line_com_amt', 'line_com_special_amt', 'line_total_amt'], 'number'],
+            [['total_qty', 'total_amt', 'line_com_amt', 'line_com_special_amt', 'line_total_amt','line_com_amt_2'], 'number'],
         ];
     }
 
@@ -54,6 +54,7 @@ class ComDailyCal extends \yii\db\ActiveRecord
             'total_qty' => 'Total Qty',
             'total_amt' => 'Total Amt',
             'line_com_amt' => 'Line Com Amt',
+            'line_com_amt_2' => 'Line Com Amt 2',
             'line_com_special_amt' => 'Line Com Special Amt',
             'line_total_amt' => 'Line Total Amt',
             'created_at' => 'Created At',

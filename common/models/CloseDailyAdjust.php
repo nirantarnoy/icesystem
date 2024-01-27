@@ -36,7 +36,7 @@ class CloseDailyAdjust extends \yii\db\ActiveRecord
         return [
             [['trans_date', 'shift_date'], 'safe'],
             [['shift', 'emp_id'], 'integer'],
-            [['prodrec_qty', 'return_qty', 'transfer_qty', 'scrap_qty', 'counting_qty','refill_qty','reprocess_qty'], 'number'],
+            [['prodrec_qty', 'return_qty', 'transfer_qty', 'scrap_qty', 'counting_qty','refill_qty','reprocess_qty','balance_in_qty','sale_qty'], 'number'],
         ];
     }
 

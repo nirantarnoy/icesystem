@@ -144,6 +144,7 @@ class CustomerinvoiceController extends Controller
             $list_order = \Yii::$app->request->post('list_order');
             $list_note = \Yii::$app->request->post('note');
 
+            //print_r($list_order);return;
          //   print_r(\Yii::$app->request->post());return;
 
             $model->journal_no = \backend\models\Customerinvoice::getLastNo($company_id, $branch_id);
@@ -152,7 +153,7 @@ class CustomerinvoiceController extends Controller
             $model->company_id = $company_id;
             $model->branch_id = $branch_id;
             $model->invoice_type = 1;
-            if ($model->save()) {
+            if ($model->save(false)) {
                 $xlist = explode(',', $list_order);
                 if ($xlist != null) {
                     for ($i = 0; $i <= count($xlist) - 1; $i++) {
@@ -183,33 +184,69 @@ class CustomerinvoiceController extends Controller
 //                                        $model_update_order->save(false);
 //                                    }
 
+                                    $model_wait_pey = new \common\models\OrderWaitPayment();
+                                    $model_wait_pey->order_id = $xlist[$i];
+                                    $model_wait_pey->created_at = time();
+                                    $model_wait_pey->created_by = \Yii::$app->user->id;
+                                    $model_wait_pey->save(false);
+                                }
+                            }
+                        } else {
+//                            $customer_remain_amount = \common\models\Orders::find()->where(['customer_id' => $model->customer_id, 'id' => $xlist[$i]])->one();
+                            $is_payment = 0;
+//                            if ($customer_remain_amount) {
+//                                $remain_amt = $customer_remain_amount->order_total_amt;
+//                                $model_line = new \common\models\CustomerInvoiceLine();
+//                                $model_line->customer_invoice_id = $model->id;
+//                                $model_line->order_id = $xlist[$i];
+//                                $model_line->amount = $remain_amt;
+//                                $model_line->remain_amount = $remain_amt;
+//                                $model_line->status = 1;
+//                               // $model_line->note = $list_note[$i]==null?'':$list_note[$i];
+//                                if ($model_line->save(false)) {
+//                                    $is_payment += 1;
+//
 //                                    $model_wait_pey = new \common\models\OrderWaitPayment();
 //                                    $model_wait_pey->order_id = $xlist[$i];
 //                                    $model_wait_pey->created_at = time();
 //                                    $model_wait_pey->created_by = \Yii::$app->user->id;
 //                                    $model_wait_pey->save(false);
+//                                }
+//                            }
+//                            if ($is_payment > 0) {
+////                                $customer_remain_amount->payment_status = 1; // update payment status
+////                                $customer_remain_amount->save(false);
+//                            }
+
+                            $sql = "select distinct(t1.order_total_amt) as order_total_amt";
+                            $sql .= " FROM orders as t1 INNER JOIN order_line as t2 ON t2.order_id = t1.id ";
+                            $sql .= " WHERE (t1.customer_id =" . $model->customer_id." OR t2.customer_id=".$model->customer_id.")";
+                            $sql .= " AND t1.id =". $xlist[$i];
+
+                            $sql_query = \Yii::$app->db->createCommand($sql);
+                            $modelcheck = $sql_query->queryAll();
+                            if($modelcheck){
+                                for($x=0;$x<=count($modelcheck)-1;$x++){
+                                    $remain_amt = $modelcheck[$x]['order_total_amt'];
+                                    $model_line = new \common\models\CustomerInvoiceLine();
+                                    $model_line->customer_invoice_id = $model->id;
+                                    $model_line->order_id = $xlist[$i];
+                                    $model_line->amount = $remain_amt;
+                                    $model_line->remain_amount = $remain_amt;
+                                    $model_line->status = 1;
+                                    // $model_line->note = $list_note[$i]==null?'':$list_note[$i];
+                                    if ($model_line->save(false)) {
+                                        $is_payment += 1;
+
+                                        $model_wait_pey = new \common\models\OrderWaitPayment();
+                                        $model_wait_pey->order_id = $xlist[$i];
+                                        $model_wait_pey->created_at = time();
+                                        $model_wait_pey->created_by = \Yii::$app->user->id;
+                                        $model_wait_pey->save(false);
+                                    }
                                 }
                             }
-                        } else {
-                            $customer_remain_amount = \common\models\Orders::find()->where(['customer_id' => $model->customer_id, 'id' => $xlist[$i]])->one();
-                            $is_payment = 0;
-                            if ($customer_remain_amount) {
-                                $remain_amt = $customer_remain_amount->order_total_amt;
-                                $model_line = new \common\models\CustomerInvoiceLine();
-                                $model_line->customer_invoice_id = $model->id;
-                                $model_line->order_id = $xlist[$i];
-                                $model_line->amount = $remain_amt;
-                                $model_line->remain_amount = $remain_amt;
-                                $model_line->status = 1;
-                               // $model_line->note = $list_note[$i]==null?'':$list_note[$i];
-                                if ($model_line->save(false)) {
-                                    $is_payment += 1;
-                                }
-                            }
-                            if ($is_payment > 0) {
-//                                $customer_remain_amount->payment_status = 1; // update payment status
-//                                $customer_remain_amount->save(false);
-                            }
+
                         }
                     }
                 }
@@ -521,6 +558,7 @@ class CustomerinvoiceController extends Controller
             }
         }
         if($res > 0){
+           // $this->del
             echo "success ".$res.' records';
         }else{
             echo "not success";

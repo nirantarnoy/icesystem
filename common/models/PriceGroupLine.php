@@ -34,7 +34,7 @@ class PriceGroupLine extends \yii\db\ActiveRecord
     {
         return [
             [['price_group_id', 'product_id', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'], 'integer'],
-            [['sale_price'], 'number'],
+            [['sale_price','sale_haft_price'], 'number'],
         ];
     }
 

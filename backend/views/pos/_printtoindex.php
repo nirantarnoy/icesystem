@@ -128,12 +128,12 @@ $mpdf->AddPageByArray([
         <td style="width: 2%">
             <div style="height: 20px;width: 20px;">
                 <?php
-//                \Yii::$app->response->format = Response::FORMAT_HTML;
-//                $data = $model->order_no;
-//                $qr = new QRCode();
-//                echo '<img src="' . $qr->render($data) . '" />';
+                \Yii::$app->response->format = Response::FORMAT_HTML;
+                $data = $model->order_no;
+                $qr = new QRCode();
+                echo '<img src="' . $qr->render($data) . '" />';
                 ?>
-                <img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=<?=$model->order_no?>&choe=UTF-8" alt="">
+<!--                <img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=--><?//=$model->order_no?><!--&choe=UTF-8" alt="">-->
             </div>
         </td>
         <td style="width: 98%">

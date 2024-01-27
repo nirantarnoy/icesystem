@@ -39,8 +39,10 @@ $mpdf->AddPageByArray([
     'margin-bottom' => 1,
 ]);
 
+//$model_line = \common\models\StockTrans::find()->select(['trans_ref_id'])->where(['BETWEEN', 'date(trans_date)', date('Y-m-d', strtotime($from_date)), date('Y-m-d', strtotime($to_date))])
+//    ->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id, 'activity_type_id' => 7])->orderBy(['trans_ref_id' => SORT_ASC])->groupBy('trans_ref_id')->all();
 $model_line = \common\models\StockTrans::find()->select(['trans_ref_id'])->where(['BETWEEN', 'date(trans_date)', date('Y-m-d', strtotime($from_date)), date('Y-m-d', strtotime($to_date))])
-    ->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id, 'activity_type_id' => 7])->orderBy(['trans_ref_id' => SORT_ASC])->groupBy('trans_ref_id')->all();
+    ->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id, 'activity_type_id' => [7,26]])->orderBy(['trans_ref_id' => SORT_ASC])->groupBy('trans_ref_id')->all();
 
 ?>
 <!DOCTYPE html>
@@ -415,7 +417,7 @@ function getReturncarQty($route_id, $product_id, $from_date, $to_date)
     $data = 0;
     if ($route_id && $product_id) {
         $model_qty = \common\models\StockTrans::find()->where(['BETWEEN', 'date(trans_date)', date('Y-m-d', strtotime($from_date)), date('Y-m-d', strtotime($to_date))])
-            ->andFilterWhere(['trans_ref_id' => $route_id, 'product_id' => $product_id, 'activity_type_id' => 7])->SUM('qty');
+            ->andFilterWhere(['trans_ref_id' => $route_id, 'product_id' => $product_id, 'activity_type_id' => [7,26]])->SUM('qty');
         if ($model_qty != null) {
             $data = ($model_qty);
         }

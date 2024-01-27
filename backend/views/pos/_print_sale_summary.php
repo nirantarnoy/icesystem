@@ -308,10 +308,12 @@ if ($model_c_login != null) {
                         <?php
                         $x += 1;
                         $sum_qty += $find_order[$i]['qty'];
-                        $sum_total += ($find_order[$i]['qty'] * $find_order[$i]['sale_price']);
+                      //  $sum_total += ($find_order[$i]['qty'] * $find_order[$i]['sale_price']);
+                        $sum_total += ($find_order[$i]['line_total']);
 
                         $sum_qty_all += $find_order[$i]['qty'];
-                        $sum_total_all += ($find_order[$i]['qty'] * $find_order[$i]['sale_price']);
+                  //      $sum_total_all += ($find_order[$i]['qty'] * $find_order[$i]['sale_price']);
+                        $sum_total_all += ($find_order[$i]['line_total']);
                         ?>
                         <tr>
                             <td style="font-size: 16px;"><?= $find_order[$i]['order_no'] ?> </td>
@@ -321,7 +323,7 @@ if ($model_c_login != null) {
                             <td style="font-size: 16px;"><?= $line_product_name ?></td>
                             <td style="font-size: 16px;text-align: right;"><?= number_format($find_order[$i]['qty'], 2) ?></td>
                             <td style="font-size: 16px;text-align: right;"><?= number_format($find_order[$i]['sale_price'], 2) ?></td>
-                            <td style="font-size: 16px;text-align: right;"><?= number_format($find_order[$i]['sale_price'] * $find_order[$i]['qty'], 2) ?></td>
+                            <td style="font-size: 16px;text-align: right;"><?= number_format($find_order[$i]['line_total'], 2) ?></td>
                         </tr>
                         <?php if ($loop_count == $x): ?>
                             <tr>
@@ -385,7 +387,7 @@ if ($model_c_login != null) {
 function getOrder($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req,$btn_order_type)
 {
     $data = [];
-    $sql = "SELECT t2.order_no, t3.code , t3.name, t1.qty, t1.price, t2.order_date, t2.order_channel_id 
+    $sql = "SELECT t2.order_no, t3.code , t3.name, t1.qty, t1.price, t2.order_date, t2.order_channel_id, t1.line_total 
               FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id 
              WHERE  t2.order_date >=" . "'" . date('Y-m-d H:i:s', strtotime($f_date)) . "'" . " 
              AND t2.order_date <=" . "'" . date('Y-m-d H:i:s', strtotime($t_date)) . "'" . " 
@@ -437,6 +439,7 @@ function getOrder($product_id, $f_date, $t_date, $find_sale_type, $find_user_id,
                 'cus_name' => $customer_name,
                 'qty' => $model[$i]['qty'],
                 'sale_price' => $model[$i]['price'],
+                'line_total' => $model[$i]['line_total'],
                 'order_date' => $model[$i]['order_date'],
             ]);
         }

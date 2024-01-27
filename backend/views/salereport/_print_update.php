@@ -252,7 +252,7 @@ if ($find_from_date != null) {
     $model_line = \common\models\QueryOrderCustomerProduct::find()->select(['id', 'order_no'])->where(['customer_id' => $find_customer_id])
         ->andFilterWhere(['BETWEEN', 'order_date', $from_date, $to_date])
        // ->andFilterWhere(['status' => 1])
-        ->andFilterWhere(['status' => 100])
+        ->andFilterWhere(['status' => [1,100]])
             ->groupBy(['id'])->all();
     //}
 

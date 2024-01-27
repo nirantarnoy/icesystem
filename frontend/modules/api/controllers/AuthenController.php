@@ -148,6 +148,7 @@ class AuthenController extends Controller
             if ($model) {
 //                //  if ($model->validatePassword($password)) {
                 $model_info = \backend\models\Employee::find()->where(['id' => $model->employee_ref_id])->one();
+                $model_info_2 = null;
                 if ($model_info) {
                     //    $car_info = $this->getCar($model_info->id, $model->company_id, $model->branch_id);
                     $car_info = $this->getCarId($car, $model->company_id, $model->branch_id);
@@ -158,6 +159,7 @@ class AuthenController extends Controller
                             $model_member_user = \common\models\User::find()->where(['id' => $find_user_member_id])->one();
                             if ($model_member_user) {
                                 $member_id = $model_member_user->employee_ref_id;
+                                $model_info_2 = \backend\models\Employee::find()->where(['id' => $member_id])->one();
                             }
                         }
 
@@ -196,6 +198,7 @@ class AuthenController extends Controller
                                         'branch_name' => \backend\models\Branch::findName($model->branch_id),
                                         'route_type' => $car_info == null ? 1 : \backend\models\Deliveryroute::findRouteType($car_info[0]['route_id']),
                                         'route_code' => $car_info == null ? "" : \backend\models\Deliveryroute::findRoutecode($car_info[0]['route_id']),
+                                        'emp_name2' => $model_info_2 !=null ? $model_info_2->fname . ' ' . $model_info_2->lname:'',
                                     ]
                                 );
                             } else {
@@ -243,8 +246,6 @@ class AuthenController extends Controller
                 } else {
                     $res = 1;
                 }
-
-
             } else {
                 $res = 0;
             }

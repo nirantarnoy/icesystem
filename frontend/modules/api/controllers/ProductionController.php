@@ -479,9 +479,9 @@ class ProductionController extends Controller
             if ($model) {
                 $new_qty =0;
                 if($model->qty != null){
-                    $new_qty = (int)$model->qty + (int)$qty;
+                    $new_qty = (float)$model->qty + (float)$qty;
                 }else{
-                    $new_qty = (int)$qty;
+                    $new_qty = (float)$qty;
                 }
                 $model->qty = $new_qty;
                 $model->save(false);
@@ -491,7 +491,7 @@ class ProductionController extends Controller
                 $model_new->branch_id = 1;
                 $model_new->warehouse_id = $wh_id;
                 $model_new->product_id = $product_id;
-                $model_new->qty = $qty;
+                $model_new->qty = (float)$qty;
                 $model_new->save(false);
             }
         }
@@ -651,7 +651,7 @@ class ProductionController extends Controller
 //                }
                 $model = \backend\models\Stocksum::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'warehouse_id' => $warehouse_id, 'product_id' => $product_id])->one();
                 if ($model) {
-                    $model->qty = $model->qty - (int)$qty;
+                    $model->qty = (float)$model->qty - (float)$qty;
                     $model->save(false);
                 }
             }
@@ -1337,13 +1337,13 @@ class ProductionController extends Controller
         if ($wh_id != null && $product_id != null && $qty > 0) {
             $model = \backend\models\Stocksum::find()->where(['warehouse_id' => $wh_id, 'product_id' => $product_id])->one();
             if ($model) {
-                $model->qty = (int)$model->qty - (int)$qty;
+                $model->qty = (float)$model->qty - (float)$qty;
                 $model->save(false);
             } else {
                 $model_new = new \backend\models\Stocksum();
                 $model_new->warehouse_id = $wh_id;
                 $model_new->product_id = $product_id;
-                $model_new->qty = $qty;
+                $model_new->qty = (float)$qty;
                 $model_new->save(false);
             }
         }
@@ -1596,7 +1596,7 @@ class ProductionController extends Controller
                             if ($model_trans->save(false)) {
                                 $model_sum = \backend\models\Stocksum::find()->where(['warehouse_id' => $main_warehouse, 'product_id' => $model->product_id])->one();
                                 if ($model_sum) {
-                                    $model_sum->qty = (int)$model_sum->qty - (int)$qty;
+                                    $model_sum->qty = (float)$model_sum->qty - (float)$qty;
                                     if ($model_sum->save(false)) {
                                         // check issue tranform balance
                                         $chk_issue_reserv_balance = \backend\models\Stocktrans::find()->where(['product_id' => $model->product_id, 'trans_ref_id' => $model->id])->sum('qty');
@@ -2225,7 +2225,7 @@ class ProductionController extends Controller
         if ($wh_id != null && $product_id != null && $qty > 0) {
             $model = \backend\models\Stocksum::find()->where(['warehouse_id' => $wh_id, 'product_id' => $product_id])->one();
             if ($model) {
-                $model->qty = (int)$model->qty - (int)$qty;
+                $model->qty = (float)$model->qty - (float)$qty;
                 if($model->save(false)){
                     $res = 1;
                 }
@@ -2307,7 +2307,7 @@ class ProductionController extends Controller
                 if ($model_trans->save(false)) {
                     $model_sum = \backend\models\Stocksum::find()->where(['warehouse_id' => $wh_id, 'product_id' => $product_id])->one();
                     if ($model_sum) {
-                        $model_sum->qty = (int)$model_sum->qty + (int)$qty;
+                        $model_sum->qty = (float)$model_sum->qty + (float)$qty;
                         $model_sum->save(false);
                     }
 
@@ -2340,7 +2340,7 @@ class ProductionController extends Controller
 //                }
                 $model = \backend\models\Stocksum::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'warehouse_id' => $warehouse_id, 'product_id' => $product_id])->one();
                 if ($model) {
-                    $model->qty = $model->qty - (int)$qty;
+                    $model->qty = (float)$model->qty - (float)$qty;
                     if($model->save(false)){
                         $res= 1;
                     }
@@ -2475,7 +2475,7 @@ class ProductionController extends Controller
             if ($model_trans->save(false)) {
                 $model_sum = \backend\models\Stocksum::find()->where(['warehouse_id' => $wh_id, 'product_id' => $product_id])->one();
                 if ($model_sum) {
-                    $model_sum->qty = (int)$model_sum->qty + (int)$qty;
+                    $model_sum->qty = (float)$model_sum->qty + (float)$qty;
                     $model_sum->save(false);
                     $res+=1;
                 }
@@ -2570,7 +2570,7 @@ class ProductionController extends Controller
                         $status = 1;
                         $model_sum = \backend\models\Stocksum::find()->where(['warehouse_id' => 1, 'product_id' => $datalist[$i]['product_id']])->one();
                         if ($model_sum) {
-                            $model_sum->qty = (int)$model_sum->qty - (int)$datalist[$i]['qty'];
+                            $model_sum->qty = (float)$model_sum->qty - (float)$datalist[$i]['qty'];
                             $model_sum->save(false);
                         }
                     }

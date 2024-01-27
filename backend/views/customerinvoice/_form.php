@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-
+$total_amt=0;
 $company_id = 1;
 $branch_id = 1;
 if (!empty(\Yii::$app->user->identity->company_id)) {

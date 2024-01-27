@@ -305,6 +305,7 @@ if ($find_from_date != null) {
                 $num += 1;
                 $line_total_qty = 0;
                 $line_total_amt = 0;
+               // echo 'xxx';
                 ?>
                 <tr>
                     <td style="text-align: center;padding: 10px;border: 1px solid grey"><?= $num ?></td>
