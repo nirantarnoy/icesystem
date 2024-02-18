@@ -342,6 +342,7 @@ function calpayment2(){
 function getpaymentrec(e){
     var ids = e.val();
     if(ids){
+       // alert(ids);
         $.ajax({
               'type':'post',
               'dataType': 'html',

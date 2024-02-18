@@ -288,6 +288,7 @@ class PaymentreceiveController extends Controller
                 if ($model_line) {
                     $this->updatePaymenttransline($model->customer_id, $model_line->order_id, $model_line->payment_amount, 0);
                     if (\common\models\PaymentReceiveLine::deleteAll(['payment_receive_id' => $id])) {
+                        \common\models\Orders::updateAll(['payment_status'=>0],['id'=>$model_line->order_id]);
                         $this->findModel($id)->delete();
                     }
                 }else{

@@ -116,7 +116,7 @@ class User extends \common\models\User
     public static function findLogindatetime($id)
     {
         $c_date = date('Y-m-d');
-        $model = LoginLog::find()->where(['user_id' => $id, 'status' => 1])->one();
+        $model = LoginLog::find()->select('MIN(login_date) as login_date')->where(['user_id' => $id, 'status' => 1])->one();
         return $model != null ? date('Y-m-d H:i:s', strtotime($model->login_date)) : '';
     }
 

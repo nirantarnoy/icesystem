@@ -38,7 +38,7 @@ class DeliveryRoute extends \yii\db\ActiveRecord
     {
         return [
            // [['code'],'unique'],
-            [['company_id', 'branch_id', 'created_at', 'updated_at', 'created_by', 'updated_by','type_id','status'], 'integer'],
+            [['company_id', 'branch_id', 'created_at', 'updated_at', 'created_by', 'updated_by','type_id','status','is_other_branch'], 'integer'],
             [['code', 'name', 'description'], 'string', 'max' => 255],
             [['branch_id'], 'exist', 'skipOnError' => true, 'targetClass' => Branch::className(), 'targetAttribute' => ['branch_id' => 'id']],
             [['company_id'], 'exist', 'skipOnError' => true, 'targetClass' => Company::className(), 'targetAttribute' => ['company_id' => 'id']],
@@ -58,6 +58,8 @@ class DeliveryRoute extends \yii\db\ActiveRecord
             'description' => Yii::t('app', 'รายละเอียด'),
             'company_id' => Yii::t('app', 'Company ID'),
             'branch_id' => Yii::t('app', 'Branch ID'),
+            'status' => Yii::t('app', 'สถานะ'),
+            'is_other_branch' => Yii::t('app', 'สาขาอื่น'),
             'created_at' => Yii::t('app', 'Created At'),
             'updated_at' => Yii::t('app', 'Updated At'),
             'created_by' => Yii::t('app', 'Created By'),

@@ -344,7 +344,7 @@ class CustomerinvoiceController extends Controller
             $model_line = \common\models\CustomerInvoiceLine::find()->where(['customer_invoice_id' => $id])->all();
             if ($model_line) {
                 foreach ($model_line as $value){
-                    \common\models\Orders::updateAll(['payment_status'=>0],['id'=>$value->order_id]);
+                    \common\models\Orders::updateAll(['create_invoice'=>0],['id'=>$value->order_id]);
                 }
 
             }
@@ -378,19 +378,30 @@ class CustomerinvoiceController extends Controller
         $html = '';
         $total_amount = 0;
 //        $pre_date = date('Y-m-d', strtotime(date('Y-m-d') . "-3 month"));
-        $pre_date ="2022-10-01 00:00:01";
+        $pre_date ="2024-01-01 00:00:01";
         if ($cus_id) {
             // $model = \common\models\QuerySalePaySummary::find()->where(['customer_id' => $cus_id])->andFilterWhere(['>', 'remain_amount', 0])->all();
            // $model = \common\models\QuerySalePaySummary::find()->where(['customer_id' => $cus_id])->andfilterWhere(['OR', ['is', 'payment_amount', new \yii\db\Expression('null')], ['>', 'remain_amount', 0]])->andFilterWhere(['!=', 'payment_status', 1])->orderBy(['order_id' => SORT_DESC])->all();
          //   $model = \common\models\QuerySalePaySummary::find()->where(['customer_id' => $cus_id])->andfilterWhere(['OR', ['is', 'payment_amount', new \yii\db\Expression('null')], ['>', 'remain_amount', 0]])->andFilterWhere(['OR',['is', 'payment_status', new \yii\db\Expression('null')],['!=', 'payment_status', 1]])->orderBy(['order_id' => SORT_DESC])->all();
        //     $model = \common\models\QuerySalePaySummary::find()->where(['customer_id' => $cus_id])->andfilterWhere(['OR', ['is', 'payment_amount', new \yii\db\Expression('null')], ['>', 'remain_amount', 0]])->andFilterWhere(['OR',['is', 'payment_status', new \yii\db\Expression('null')],['!=', 'payment_status', 1]])->orderBy(['order_id' => SORT_DESC])->all();
            // $model = \common\models\QuerySalePaySummary::find()->where(['customer_id' => $cus_id])->andFilterWhere(['!=', 'payment_status', 1])->orderBy(['order_id' => SORT_DESC])->all();
+
+//            $sql = "select t1.id as order_id,t1.order_date,sum(t2.line_total) AS remain_amt";
+//            $sql .= " FROM orders as t1 INNER JOIN order_line as t2 ON t1.id = t2.order_id ";
+//            $sql .= " WHERE  (t1.customer_id =" . $cus_id. " OR t2.customer_id=".$cus_id.")";
+//            $sql .= " AND (t1.payment_status !=1 OR ISNULL(t1.payment_status))";
+//            $sql .= " AND t1.payment_method_id = 2";
+//            $sql .= " AND t1.status != 3";
+
+
             $sql = "select t1.id as order_id,t1.order_date,sum(t2.line_total) AS remain_amt";
             $sql .= " FROM orders as t1 INNER JOIN order_line as t2 ON t1.id = t2.order_id ";
             $sql .= " WHERE  (t1.customer_id =" . $cus_id. " OR t2.customer_id=".$cus_id.")";
-            $sql .= " AND (t1.payment_status !=1 OR ISNULL(t1.payment_status))";
             $sql .= " AND t1.payment_method_id = 2";
             $sql .= " AND t1.status != 3";
+            $sql .= " AND (t1.create_invoice != 1 OR ISNULL(t1.create_invoice))";
+
+
 //            $sql .= " AND year(t1.order_date)>=2022";
 //            $sql .= " AND month(t1.order_date)>=10";
             $sql .= " AND date(t1.order_date) >='". date('Y-m-d',strtotime($pre_date))."'";
@@ -543,14 +554,19 @@ class CustomerinvoiceController extends Controller
     public function actionCloseorderpayment(){
         $res = 0;
         $data = [];
-        $model = \common\models\OrderWaitPayment::find()->select(['order_id'])->limit(5)->all();
+       // $model = \common\models\OrderWaitPayment::find()->select(['order_id'])->limit(5)->all();
+        $model = \common\models\OrderWaitPayment::find()->select(['order_id'])->limit(5)->orderBy(['id'=>SORT_ASC])->all();
         if($model){
             foreach($model as $value){
-                $model_update_order = \common\models\Orders::find()->where(['id'=>$value->order_id,'payment_status'=>0])->one();
+              //  $model_update_order = \common\models\Orders::find()->where(['id'=>$value->order_id])->andFilterWhere(['!=','create_invoice',1])->one();
+                $model_update_order = \common\models\Orders::find()->where(['id'=>$value->order_id])->one();
                 if($model_update_order){
-                    $model_update_order->payment_status = 1;
+                    $model_update_order->create_invoice = 1;
                     if($model_update_order->save(false)){
-                        $res+=1;
+                        if(\common\models\OrderWaitPayment::deleteAll(['order_id'=>$value->order_id])){
+                            $res += 1;
+                        }
+                       // $res+=1;
                         array_push($data,['id'=>$value->order_id]);
                     }
                 }

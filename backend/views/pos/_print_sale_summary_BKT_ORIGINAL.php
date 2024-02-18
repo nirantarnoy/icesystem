@@ -206,17 +206,13 @@ if ($model_c_login != null) {
                             echo "selected";
                         } ?>>ขายเชื่อรถ
                         </option>
-                        <option value="4" <?php if ($find_sale_type == 4) {
-                            echo "selected";
-                        } ?>>ขายเชื่อรถต่างสาขา
-                        </option>
                     </select>
                 </td>
                 <td>
                     <?php
                     echo \kartik\select2\Select2::widget([
                         'name' => 'find_user_id',
-                        'data' => \yii\helpers\ArrayHelper::map(\backend\models\User::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id,'status'=>1])->all(), 'id', 'username'),
+                        'data' => \yii\helpers\ArrayHelper::map(\backend\models\User::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id])->all(), 'id', 'username'),
                         'value' => $find_user_id,
                         'options' => [
                             'placeholder' => '--พนักงานขาย--'
@@ -312,12 +308,10 @@ if ($model_c_login != null) {
                         <?php
                         $x += 1;
                         $sum_qty += $find_order[$i]['qty'];
-                      //  $sum_total += ($find_order[$i]['qty'] * $find_order[$i]['sale_price']);
-                        $sum_total += ($find_order[$i]['line_total']);
+                        $sum_total += ($find_order[$i]['qty'] * $find_order[$i]['sale_price']);
 
                         $sum_qty_all += $find_order[$i]['qty'];
-                  //      $sum_total_all += ($find_order[$i]['qty'] * $find_order[$i]['sale_price']);
-                        $sum_total_all += ($find_order[$i]['line_total']);
+                        $sum_total_all += ($find_order[$i]['qty'] * $find_order[$i]['sale_price']);
                         ?>
                         <tr>
                             <td style="font-size: 16px;"><?= $find_order[$i]['order_no'] ?> </td>
@@ -327,7 +321,7 @@ if ($model_c_login != null) {
                             <td style="font-size: 16px;"><?= $line_product_name ?></td>
                             <td style="font-size: 16px;text-align: right;"><?= number_format($find_order[$i]['qty'], 2) ?></td>
                             <td style="font-size: 16px;text-align: right;"><?= number_format($find_order[$i]['sale_price'], 2) ?></td>
-                            <td style="font-size: 16px;text-align: right;"><?= number_format($find_order[$i]['line_total'], 2) ?></td>
+                            <td style="font-size: 16px;text-align: right;"><?= number_format($find_order[$i]['sale_price'] * $find_order[$i]['qty'], 2) ?></td>
                         </tr>
                         <?php if ($loop_count == $x): ?>
                             <tr>
@@ -391,12 +385,12 @@ if ($model_c_login != null) {
 function getOrder($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req,$btn_order_type)
 {
     $data = [];
-    $sql = "SELECT t2.order_no, t3.code , t3.name, t1.qty, t1.price, t2.order_date, t2.order_channel_id, t1.line_total 
-              FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id LEFT JOIN delivery_route as t4 on t2.order_channel_id = t4.id
+    $sql = "SELECT t2.order_no, t3.code , t3.name, t1.qty, t1.price, t2.order_date, t2.order_channel_id 
+              FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id 
              WHERE  t2.order_date >=" . "'" . date('Y-m-d H:i:s', strtotime($f_date)) . "'" . " 
              AND t2.order_date <=" . "'" . date('Y-m-d H:i:s', strtotime($t_date)) . "'" . " 
              AND t1.product_id=" . $product_id . " 
-             AND t2.status <> 3
+             AND t2.status=1
              AND t2.sale_channel_id = 2
              AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
 
@@ -405,15 +399,10 @@ function getOrder($product_id, $f_date, $t_date, $find_sale_type, $find_user_id,
             $sql .= " AND t2.payment_method_id=" . $find_sale_type;
         }
         if ($find_sale_type == 2) {
-            $sql .= " AND (t2.order_channel_id = 0 OR t2.order_channel_id is null) AND t2.payment_method_id=" . $find_sale_type;
+            $sql .= " AND t2.order_channel_id is null AND t2.payment_method_id=" . $find_sale_type;
         }
         if ($find_sale_type == 3) {
             $sql .= " AND t2.order_channel_id > 0";
-            $sql .= " AND t4.is_other_branch = 0";
-        }
-        if ($find_sale_type == 4) {
-            $sql .= " AND t2.order_channel_id > 0";
-            $sql .= " AND t4.is_other_branch = 1";
         }
     }
     if ($find_user_id != null) {
@@ -448,7 +437,6 @@ function getOrder($product_id, $f_date, $t_date, $find_sale_type, $find_user_id,
                 'cus_name' => $customer_name,
                 'qty' => $model[$i]['qty'],
                 'sale_price' => $model[$i]['price'],
-                'line_total' => $model[$i]['line_total'],
                 'order_date' => $model[$i]['order_date'],
             ]);
         }

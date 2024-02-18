@@ -80,7 +80,7 @@ class DailysummaryController extends Controller
         if ($company_id && $branch_id) {
             $model = \common\models\Product::find()->where(['status' => 1])->orderBy(['id' => SORT_ASC])->all();
             if ($model) {
-                $login_time = \backend\models\User::findLogintime($user_id);
+                $login_time = \backend\models\User::findLoginDatetime($user_id);
                 foreach ($model as $value) {
                     array_push($data, [
                         'product_id' => $value->id,
@@ -146,7 +146,7 @@ class DailysummaryController extends Controller
         if ($company_id && $branch_id) {
             $model = \common\models\Product::find()->where(['status' => 1])->orderBy(['id' => SORT_ASC])->all();
             if ($model) {
-                $login_time = \backend\models\User::findLogintime($user_id);
+                $login_time = \backend\models\User::findLoginDatetime($user_id);
                 foreach ($model as $value) {
                     array_push($data, [
                         'product_id' => $value->id,
@@ -206,7 +206,7 @@ class DailysummaryController extends Controller
         if ($company_id && $branch_id) {
             $model = \common\models\Product::find()->where(['status' => 1])->orderBy(['id' => SORT_ASC])->all();
             if ($model) {
-                $login_time = \backend\models\User::findLogintime($user_id);
+                $login_time = \backend\models\User::findLoginDatetime($user_id);
                 foreach ($model as $value) {
                     array_push($data, [
                         'product_id' => $value->id,
@@ -253,7 +253,7 @@ class DailysummaryController extends Controller
         if ($company_id && $branch_id) {
             $model = \common\models\Product::find()->where(['status' => 1])->orderBy(['id' => SORT_ASC])->all();
             if ($model) {
-                $login_time = \backend\models\User::findLogintime($user_id);
+                $login_time = \backend\models\User::findLoginDatetime($user_id);
                 foreach ($model as $value) {
                     array_push($data, [
                         'product_id' => $value->id,
@@ -285,7 +285,7 @@ class DailysummaryController extends Controller
         if ($company_id && $branch_id) {
             $model = \common\models\Product::find()->where(['status' => 1])->orderBy(['id' => SORT_ASC])->all();
             if ($model) {
-                $login_time = \backend\models\User::findLogintime($user_id);
+                $login_time = \backend\models\User::findLoginDatetime($user_id);
                 foreach ($model as $value) {
                     array_push($data, [
                         'product_id' => $value->id,
@@ -349,7 +349,7 @@ class DailysummaryController extends Controller
         $status = 0;
         $data = [];
 
-        $user_login_datetime = \backend\models\User::findLogintime($user_id);
+        $user_login_datetime = \backend\models\User::findLoginDatetime($user_id);
         $t_date = \Yii::$app->request->post('t_date');
 
         if ($user_id != null && $company_id && $branch_id) {
@@ -541,7 +541,7 @@ class DailysummaryController extends Controller
             $model = \common\models\Product::find()->where(['status' => 1])->orderBy(['id' => SORT_ASC])->all();
             if ($model) {
                 foreach ($model as $value) {
-                    $login_time = \backend\models\User::findLogintime($user_id);
+                    $login_time = \backend\models\User::findLoginDatetime($user_id);
                     array_push($data, [
                         'product_id' => $value->id,
                         'product_code' => $value->code,
@@ -585,7 +585,7 @@ class DailysummaryController extends Controller
         if ($company_id && $branch_id) {
             $model = \common\models\Product::find()->where(['status' => 1])->orderBy(['id' => SORT_ASC])->all();
             if ($model) {
-                $login_time = \backend\models\User::findLogintime($user_id);
+                $login_time = \backend\models\User::findLoginDatetime($user_id);
                 foreach ($model as $value) {
                     array_push($data, [
                         'product_id' => $value->id,
@@ -631,7 +631,7 @@ class DailysummaryController extends Controller
             $model = \common\models\Product::find()->where(['status' => 1])->orderBy(['id' => SORT_ASC])->all();
             if ($model) {
                 foreach ($model as $value) {
-                    $login_time = \backend\models\User::findLogintime($user_id);
+                    $login_time = \backend\models\User::findLoginDatetime($user_id);
                     array_push($data, [
                         'product_id' => $value->id,
                         'product_code' => $value->code,
@@ -675,7 +675,7 @@ class DailysummaryController extends Controller
         if ($company_id && $branch_id) {
             $model = \common\models\Product::find()->where(['status' => 1])->orderBy(['id' => SORT_ASC])->all();
             if ($model) {
-                $login_time = \backend\models\User::findLogintime($user_id);
+                $login_time = \backend\models\User::findLoginDatetime($user_id);
                 foreach ($model as $value) {
                     array_push($data, [
                         'product_id' => $value->id,

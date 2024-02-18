@@ -4091,6 +4091,10 @@ class OrderController extends Controller
 
         // return $company_id;
 
+        if($route_id){
+            \common\models\LoginRouteLog::updateAll(['logout_date'=>date('Y-m-d H:i:s'),'status'=>2],['route_id'=>$route_id,'date(login_date)'=>date('Y-m-d')]);
+        }
+
         return $this->notifymessageorderclose($route_id, $user_id, $company_id, $branch_id);
     }
 

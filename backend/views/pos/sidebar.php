@@ -409,7 +409,7 @@
                         <?php endif; ?>
                         <?php if (\Yii::$app->user->can('pos/index')): ?>
                             <li class="nav-item">
-                                <a href="index.php?r=pos/index" class="nav-link pos">
+                                <a href="index.php?r=pos/index&id=0" class="nav-link pos">
                                     <i class="far fa-circlez nav-icon"></i>
                                     <p>ขาย POS</p>
                                 </a>

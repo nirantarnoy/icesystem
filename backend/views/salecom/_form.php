@@ -16,6 +16,13 @@ use yii\widgets\ActiveForm;
 
             <?= $form->field($model, 'name')->textInput(['maxlength' => true]) ?>
 
+            <?= $form->field($model, 'product_id')->Widget(\kartik\select2\Select2::className(),[
+                    'data'=>\yii\helpers\ArrayHelper::map(\backend\models\Product::find()->where(['status'=>1])->all(),'id','name'),
+                    'options'=>[
+                            'placeholder'=>'--เลือกสินค้า--'
+                    ]
+            ]) ?>
+
             <?= $form->field($model, 'emp_qty')->textInput(['type' => 'number']) ?>
 
             <?= $form->field($model, 'com_extra')->textInput() ?>

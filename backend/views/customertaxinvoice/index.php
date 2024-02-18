@@ -58,7 +58,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'contentOptions' => ['style' => 'text-align: center'],
             ],
             'invoice_no',
-            'customer_id',
+            [
+                    'attribute' => 'customer_id',
+                'value' => function($data){
+                   return \backend\models\Customer::findName($data->customer_id);
+                }
+            ],
             'invoice_date',
             [
                 'attribute' => 'payment_term_id',
@@ -73,7 +78,7 @@ $this->params['breadcrumbs'][] = $this->title;
             //'created_by',
             //'updated_at',
             //'updated_by',
-            //'total_amount',
+            'total_amount',
             //'vat_amount',
             //'net_amount',
             //'total_text',

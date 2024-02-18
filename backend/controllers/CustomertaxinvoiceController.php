@@ -245,7 +245,7 @@ class CustomertaxinvoiceController extends Controller
     public function actionOrdersearch(){
         $from_date = \Yii::$app->request->post('search_from_date');
         $to_date = \Yii::$app->request->post('search_to_date');
-        $customer_id = 210;// \Yii::$app->request->post('customer_id');
+        $customer_id = \Yii::$app->request->post('customer_id');
         //  $customer_id =  \Yii::$app->request->post('customer_id');
         $html = '';
 
@@ -265,7 +265,7 @@ class CustomertaxinvoiceController extends Controller
 
           //  $html.= $search_from_date. ' and '.$search_to_date;
 
-            $model = \backend\models\Orders::find()->select(['id', 'order_date'])->where(['customer_id' => $customer_id])->andFilterWhere(['BETWEEN','date(order_date)',$search_from_date,$search_to_date])->limit(20)->all();
+            $model = \backend\models\Orders::find()->select(['id', 'order_date'])->where(['customer_id' => $customer_id])->andFilterWhere(['>=','date(order_date)',date('Y-m-d',strtotime($search_from_date))])->andFilterWhere(['<=','date(order_date)',date('Y-m-d',strtotime($search_to_date))])->limit(25)->all();
             if ($model) {
                 foreach ($model as $x_value) {
 //                    $html .= $x_value->id;
@@ -298,14 +298,14 @@ class CustomertaxinvoiceController extends Controller
             }else{
                 $html.='<tr>';
                 $html.='<td colspan="9" style="text-align: center;color: red;">';
-                $html.='ไม่พบข้อมูล';
+                $html.='ไม่พบข้อมูล inner';
                 $html.='</td>';
                 $html.='</tr>';
             }
         }else{
             $html.='<tr>';
             $html.='<td colspan="9" style="text-align: center;color: red;">';
-            $html.='ไม่พบข้อมูล';
+            $html.='ไม่พบข้อมูล outer';
             $html.='</td>';
             $html.='</tr>';
         }

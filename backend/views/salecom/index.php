@@ -55,6 +55,12 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'code',
             'name',
+            [
+                'attribute' => 'product_id',
+                'value' => function ($data) {
+                    return \backend\models\Product::findName($data->product_id);
+                }
+            ],
             'emp_qty',
             'first_emp',
             'second_emp',

@@ -180,6 +180,20 @@ class AuthenController extends Controller
                             if ($this->addEmpDaily($car_info[0]['car_id'], $car_info[0]['route_id'], null, $emp_id, $isdriver, $model->company_id, $model->branch_id)) {
                                 $status = 1;
 
+                                //add login route log
+
+                                $model_login_log = new \common\models\LoginRouteLog();
+                                $model_login_log->login_date = date('Y-m-d H:i:s');
+                                $model_login_log->car_id = $car_info[0]['car_id'];
+                                $model_login_log->route_id = $car_info[0]['route_id'];
+                                $model_login_log->emp_1 = $model->employee_ref_id;
+                                $model_login_log->emp_2 = $member_id;
+                                $model_login_log->status = 1;
+                                $model_login_log->save(false);
+
+                                // end add login route log
+
+
                                 array_push($data, [
                                         'username' => $driver,
                                         'user_id' => '' . $model->id,
@@ -343,6 +357,10 @@ class AuthenController extends Controller
                         $model->branch_id = $branch_id;
                         $model->save(false);
                     }
+
+                    // save login history
+
+
 
                 }
                 // }

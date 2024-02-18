@@ -46,7 +46,7 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
         </div>
         <div class="col-lg-4">
             <?= $form->field($model, 'customer_id')->widget(\kartik\select2\Select2::className(), [
-                'data' => \yii\helpers\ArrayHelper::map(\backend\models\Customer::find()->where(['status' => 1 ,'is_invoice_req'=>1])->all(),
+                'data' => \yii\helpers\ArrayHelper::map(\backend\models\Customer::find()->where(['status' => 1 ,'is_invoice_req'=>0])->all(),
                     'id', 'name'
                 ),
                 'options' => [
@@ -172,7 +172,7 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
         </div>
         <div class="col-lg-4"></div>
         <div class="col-lg-4">
-            <?php $model->total_amount = number_format($model->total_amount, 2); ?>
+            <?php //$model->total_amount = number_format($model->total_amount, 2); ?>
             <?= $form->field($model, 'total_amount')->textInput(['readonly' => 'readonly', 'style' => 'text-align: left', 'id' => 'total-amount']) ?>
         </div>
     </div>
@@ -180,7 +180,7 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
         <div class="col-lg-4"></div>
         <div class="col-lg-4"></div>
         <div class="col-lg-4">
-            <?php $model->vat_amount = number_format($model->vat_amount, 2); ?>
+            <?php //$model->vat_amount = number_format($model->vat_amount, 2); ?>
             <?= $form->field($model, 'vat_amount')->textInput(['readonly' => 'readonly', 'style' => 'text-align: left', 'id' => 'vat-amount']) ?>
         </div>
     </div>
@@ -188,7 +188,7 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
         <div class="col-lg-4"></div>
         <div class="col-lg-4"></div>
         <div class="col-lg-4">
-            <?php $model->net_amount = number_format($model->net_amount, 2); ?>
+            <?php //$model->net_amount = number_format($model->net_amount, 2); ?>
             <?= $form->field($model, 'net_amount')->textInput(['readonly' => 'readonly', 'style' => 'text-align: left', 'id' => 'net-amount']) ?>
         </div>
     </div>
