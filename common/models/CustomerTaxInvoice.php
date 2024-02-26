@@ -26,6 +26,9 @@ use Yii;
  */
 class CustomerTaxInvoice extends \yii\db\ActiveRecord
 {
+    public $find_product_id;
+    public $find_product_group_id;
+
     /**
      * {@inheritdoc}
      */
@@ -41,7 +44,7 @@ class CustomerTaxInvoice extends \yii\db\ActiveRecord
     {
         return [
             [['customer_id', 'payment_term_id', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'], 'integer'],
-            [['invoice_date', 'payment_date'], 'safe'],
+            [['invoice_date', 'payment_date','find_product_id','find_product_group_id'], 'safe'],
             [['total_amount', 'vat_amount', 'net_amount'], 'number'],
             [['invoice_no', 'remark', 'total_text'], 'string', 'max' => 255],
         ];
@@ -66,9 +69,11 @@ class CustomerTaxInvoice extends \yii\db\ActiveRecord
             'updated_at' => 'Updated At',
             'updated_by' => 'Updated By',
             'total_amount' => 'ยอดเงิน',
+            'find_product_id'=> 'สินค้า',
             'vat_amount' => 'ภาษี',
             'net_amount' => 'ยอดเงินสุทธิ',
             'total_text' => 'ยอดเงินตัวหนังสือ',
+            'find_product_group_id'=>'ประเภทสินค้า',
         ];
     }
 }

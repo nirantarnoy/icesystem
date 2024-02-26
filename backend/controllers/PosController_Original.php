@@ -25,7 +25,7 @@ use linslin\yii2\curl;
 /**
  * CarController implements the CRUD actions for Car model.
  */
-class PosController extends Controller
+class PosControllerOriginal extends Controller
 {
     public $enableCsrfValidation = false;
 
@@ -42,8 +42,8 @@ class PosController extends Controller
                     [
                         'actions' => [
                             'logout', 'index', 'indextest', 'indextest2', 'print', 'printindex', 'dailysum', 'getcustomerprice', 'getoriginprice', 'closesale', 'cancelorder', 'manageclose',
-                            'salehistory', 'getbasicprice', 'delete', 'orderedit', 'posupdate', 'posttrans', 'saledailyend', 'saledailyend2', 'printdo', 'createissue', 'updatestock', 'listissue', 'updateissue', 'printsummary', 'printpossummary', 'printcarsummary','startcaldailymanager'
-                            , 'finduserdate', 'editsaleclose', 'createscreenshort', 'print2', 'calcloseshift', 'closesaletest','closesaletestnew','printtestnew','printtestnewdo'
+                            'salehistory', 'getbasicprice', 'delete', 'orderedit', 'posupdate', 'posttrans', 'saledailyend', 'saledailyend2', 'printdo', 'createissue', 'updatestock', 'listissue', 'updateissue', 'printsummary', 'printpossummary', 'printpossummarynew', 'printcarsummary','startcaldailymanager'
+                            , 'finduserdate', 'editsaleclose', 'createscreenshort', 'print2', 'calcloseshift', 'closesaletest', 'closesaletestnew', 'printtestnew', 'printtestnewdo'
                         ],
                         'allow' => true,
                         'roles' => ['@'],
@@ -54,7 +54,7 @@ class PosController extends Controller
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
-                    'indextest'=> ['POST','GET'],
+                    'indextest' => ['POST', 'GET'],
                 ],
             ],
         ];
@@ -79,10 +79,11 @@ class PosController extends Controller
         $this->layout = 'main_pos_new';
         return $this->render('indextest', [
             'model' => null,
-            'model_line'=> null,
-            'order_id'=>$id
+            'model_line' => null,
+            'order_id' => $id
         ]);
     }
+
     public function actionIndextest2($id)
     {
         echo $id;
@@ -438,16 +439,16 @@ class PosController extends Controller
         }
         if (!empty(\Yii::$app->user->identity->branch_id)) {
             $branch_id = \Yii::$app->user->identity->branch_id;
-           // $warehouse_primary = \backend\models\Warehouse::findPrimary($company_id, $branch_id);
-           //$default_warehouse = 6;
+            // $warehouse_primary = \backend\models\Warehouse::findPrimary($company_id, $branch_id);
+            //$default_warehouse = 6;
         }
         if (!empty(\Yii::$app->user->id)) {
             $user_id = \Yii::$app->user->id;
         }
 
-      //  $warehouse_primary = 6;
+        //  $warehouse_primary = 6;
 
-     //   $issue_no = '';
+        //   $issue_no = '';
 
         $pay_total_amount = \Yii::$app->request->post('sale_total_amount');
         $pay_amount = \Yii::$app->request->post('sale_pay_amount');
@@ -465,7 +466,7 @@ class PosController extends Controller
         // echo $print_type_doc;return;
         $pos_date = \Yii::$app->request->post('sale_pay_date');
 
-      //  echo $customer_id;return;
+        //  echo $customer_id;return;
 //        $sale_date = date('Y-m-d');
 //        $sale_time = date('H:i:s');
 //        $x_date = explode('/', $pos_date);
@@ -476,8 +477,8 @@ class PosController extends Controller
 
         $data = [];
 
-        if($product_list !=null){
-            for($x=0;$x<=count($product_list)-1;$x++){
+        if ($product_list != null) {
+            for ($x = 0; $x <= count($product_list) - 1; $x++) {
                 array_push($data, ["product_id" => (int)$product_list[$x], "qty" => (float)$line_qty[$x], "price" => (float)$line_price[$x]]);
             }
         }
@@ -522,7 +523,7 @@ class PosController extends Controller
         $after_save_order_id = 0;
         $res_data = json_decode($response, true);
         // print_r($res_data);
-        if($res_data != null){
+        if ($res_data != null) {
 //            $model_header = ["id"=>$res_data["id"],"order_no"=>$res_data["order_no"],"order_date"=>date('Y-m-d H:i:s'),"customer_id"=>$res_data["customer_id"],"time_used"=>$res_data["time_use"]];
 //            $model_detail = [];
 //            $lines = $res_data["order_line"];
@@ -578,14 +579,14 @@ class PosController extends Controller
             // end original
 
             //if($model_header["order_no"] != null || $model_header["order_no"]!=""){
-                if(0 > 0){
-                    $session = \Yii::$app->session;
+            if (0 > 0) {
+                $session = \Yii::$app->session;
                 $session->setFlash('msg-index', 'slip_index.pdf');
                 $session->setFlash('after-save', true);
                 $session->setFlash('msg-is-do', $print_type_doc);
                 $session->setFlash('msg', 'บันทึกรายการเรียบร้อย');
 
-          //      return $this->render('indextest_new', ['model' => $model_header, 'model_line' => $model_detail, 'change_amount' => $ch_amt, 'branch_id' => $branch_id]);
+                //      return $this->render('indextest_new', ['model' => $model_header, 'model_line' => $model_detail, 'change_amount' => $ch_amt, 'branch_id' => $branch_id]);
                 return $this->render('indextest_new', ['order_id' => $res_data['id']]);
                 //          return $this->redirect(['pos/indextest','id'=>$model_header['id']]);
 //                if ($print_type_doc == 2) {
@@ -610,7 +611,7 @@ class PosController extends Controller
             }
 
         }
-        return $this->redirect(['pos/printtestnew', 'order'=>$after_save_order_id,'print_type_doc'=>$print_type_doc]);
+        return $this->redirect(['pos/printtestnew', 'order' => $after_save_order_id, 'print_type_doc' => $print_type_doc]);
 
         //return $this->redirect(['pos/indextest',['model'=>null,'model_line'=>null,'change_amount'=>0,'branch_id'=>$branch_id]]);
     }
@@ -665,8 +666,8 @@ class PosController extends Controller
 
         $data = [];
 
-        if($product_list !=null){
-            for($x=0;$x<=count($product_list)-1;$x++){
+        if ($product_list != null) {
+            for ($x = 0; $x <= count($product_list) - 1; $x++) {
                 array_push($data, ["product_id" => (int)$product_list[$x], "qty" => (float)$line_qty[$x], "price" => (float)$line_price[$x]]);
             }
         }
@@ -711,7 +712,7 @@ class PosController extends Controller
         $after_save_order_id = 0;
         $res_data = json_decode($response, true);
         // print_r($res_data);
-        if($res_data != null){
+        if ($res_data != null) {
             $after_save_order_id = $res_data["id"];
 //            if(0 > 0){
 //                $session = \Yii::$app->session;
@@ -742,8 +743,8 @@ class PosController extends Controller
 //                        $this->layout = 'main_print';
         //  return $this->render('_printoindex_screen', ['model' => $model, 'model_line' => $model_line, 'change_amount' => $ch_amt, 'branch_id' => $branch_id,'print_type'=>$print_type_doc]);
         //    return $this->render('_printoindex_screen2', ['model' => $model, 'model_line' => $model_line, 'change_amount' => $ch_amt, 'branch_id' => $branch_id]);
-        $model = \backend\models\Orders::find()->where(['id'=>$after_save_order_id])->one();
-        $model_line = \backend\models\Orderline::find()->where(['order_id'=>$after_save_order_id])->all();
+        $model = \backend\models\Orders::find()->where(['id' => $after_save_order_id])->one();
+        $model_line = \backend\models\Orderline::find()->where(['order_id' => $after_save_order_id])->all();
         $this->renderPartial('_printtoindex', ['model' => $model, 'model_line' => $model_line, 'change_amount' => 0, 'branch_id' => $branch_id]);
         if ($print_type_doc == 2) {
             $session->setFlash('msg-index-do', 'slip_index_do.pdf');
@@ -764,7 +765,7 @@ class PosController extends Controller
         }
         $session = \Yii::$app->session;
         $session->setFlash('msg', 'บันทึกรายการเรียบร้อย');
-        return $this->redirect(['pos/indextest','id'=>0]);
+        return $this->redirect(['pos/indextest', 'id' => 0]);
     }
 
     public function actionClosesaletestnew()
@@ -817,8 +818,8 @@ class PosController extends Controller
 
         $data = [];
 
-        if($product_list !=null){
-            for($x=0;$x<=count($product_list)-1;$x++){
+        if ($product_list != null) {
+            for ($x = 0; $x <= count($product_list) - 1; $x++) {
                 array_push($data, ["product_id" => (int)$product_list[$x], "qty" => (float)$line_qty[$x], "price" => (float)$line_price[$x]]);
             }
         }
@@ -863,7 +864,7 @@ class PosController extends Controller
         $after_save_order_id = 0;
         $res_data = json_decode($response, true);
         // print_r($res_data);
-        if($res_data != null){
+        if ($res_data != null) {
             $after_save_order_id = $res_data["id"];
 //            if(0 > 0){
 //                $session = \Yii::$app->session;
@@ -880,12 +881,12 @@ class PosController extends Controller
 //        if($after_save_order_id == null || $after_save_order_id == 0){
 //            return $this->redirect(['pos/print',['id'=>0]]);
 //        }
-        return $this->redirect(['pos/printtestnew', 'order'=>$after_save_order_id,'print_type_doc'=>$print_type_doc]);
+        return $this->redirect(['pos/printtestnew', 'order' => $after_save_order_id, 'print_type_doc' => $print_type_doc]);
 //        return $this->redirect(['pos/print', 'id'=>$after_save_order_id]);
 
         //return $this->redirect(['pos/indextest',['model'=>null,'model_line'=>null,'change_amount'=>0,'branch_id'=>$branch_id]]);
 
-       // return $this->redirect(['pos/indextest','id'=>$after_save_order_id]);
+        // return $this->redirect(['pos/indextest','id'=>$after_save_order_id]);
     }
 
     public function actionPrint2()
@@ -899,7 +900,8 @@ class PosController extends Controller
         $this->layout = 'main_print';
         return $this->render('_printoindex_screen2', ['model' => $model, 'model_line' => $model_line, 'change_amount' => $ch_amt, 'branch_id' => $branch_id]);
     }
-    public function actionPrinttestnew($order,$print_type_doc)
+
+    public function actionPrinttestnew($order, $print_type_doc)
     {
         $id = $order;
         $ch_amt = 0;
@@ -908,8 +910,9 @@ class PosController extends Controller
         $model_line = \backend\models\Orderline::find()->where(['order_id' => $id])->all();
         //sleep(3);
         $this->layout = 'main_print';
-        return $this->render('_printoindex_screen', ['model' => $model, 'model_line' => $model_line, 'change_amount' => $ch_amt, 'branch_id' => $branch_id,'print_type'=>$print_type_doc]);
+        return $this->render('_printoindex_screen', ['model' => $model, 'model_line' => $model_line, 'change_amount' => $ch_amt, 'branch_id' => $branch_id, 'print_type' => $print_type_doc]);
     }
+
     public function actionPrinttestnewdo($order)
     {
         $id = $order;
@@ -975,7 +978,8 @@ class PosController extends Controller
             $this->renderPartial('_printtoindex2', ['model' => $model, 'model_line' => $model_line, 'change_amount' => $ch_amt, 'branch_id' => $branch_id]);
         }
     }
-    public function createDoGoApi($model_header, $model_line,$branch_id)
+
+    public function createDoGoApi($model_header, $model_line, $branch_id)
     {
         if ($model_header != null) {
             $change_amt = 0;//\backend\models\Paymenttransline::find()->where(['order_ref_id' => $order_id])->one();
@@ -1382,7 +1386,7 @@ class PosController extends Controller
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         $dataProvider->query->select(['code', 'name', 'price', 'SUM(qty) as qty',
             'SUM(line_total) as line_total', 'SUM(line_total_cash) as line_total_cash,SUM(line_total_credit) as line_total_credit',
-            'SUM(line_qty_cash) as line_qty_cash', 'SUM(line_qty_credit) as line_qty_credit','item_pos_seq']);
+            'SUM(line_qty_cash) as line_qty_cash', 'SUM(line_qty_credit) as line_qty_credit', 'item_pos_seq']);
 
         // $dataProvider->pagination->pageSize = 100;
 
@@ -1396,7 +1400,7 @@ class PosController extends Controller
         }
 
         $dataProvider->query->andFilterWhere(['AND', ['>=', 'order_date', $from_date_time], ['<=', 'order_date', $to_date_time]]);
-        $dataProvider->query->groupBy(['code', 'name', 'price','item_pos_seq']);
+        $dataProvider->query->groupBy(['code', 'name', 'price', 'item_pos_seq']);
         $dataProvider->setSort([
             'defaultOrder' => ['item_pos_seq' => SORT_ASC]
         ]);
@@ -1643,7 +1647,7 @@ class PosController extends Controller
 
         if ($res > 0) {
 
-            if ($this->saveTransactionsalepos($line_prod_id, $line_balance_in, $line_balance_out, $line_production_qty, $line_cash_qty, $line_credit_qty, $line_repack_qty, $line_refill_qty, $line_scrap_qty, $line_stock_count, $login_date, $line_transfer_qty,$line_car_issue_qty)) {
+            if ($this->saveTransactionsalepos($line_prod_id, $line_balance_in, $line_balance_out, $line_production_qty, $line_cash_qty, $line_credit_qty, $line_repack_qty, $line_refill_qty, $line_scrap_qty, $line_stock_count, $login_date, $line_transfer_qty, $line_car_issue_qty)) {
                 $session = \Yii::$app->session;
                 $session->setFlash('after-save', true);
                 $session->setFlash('msg', 'บันทึกจบรายการเรียบร้อย');
@@ -1679,7 +1683,7 @@ class PosController extends Controller
         $line_diff = \Yii::$app->request->post('line_diff');
         $login_date = \Yii::$app->request->post('login_date');
 
-        if ($this->saveTransactionsalepos($line_prod_id, $line_balance_in, $line_balance_out, $line_production_qty, $line_cash_qty, $line_credit_qty, $line_repack_qty, $line_refill_qty, $line_scrap_qty, $line_stock_count, $login_date, $line_transfer_qty,$line_car_issue_qty)) {
+        if ($this->saveTransactionsalepos($line_prod_id, $line_balance_in, $line_balance_out, $line_production_qty, $line_cash_qty, $line_credit_qty, $line_repack_qty, $line_refill_qty, $line_scrap_qty, $line_stock_count, $login_date, $line_transfer_qty, $line_car_issue_qty)) {
             $session = \Yii::$app->session;
             $session->setFlash('after-save', true);
             $session->setFlash('msg', 'บันทึกจบรายการเรียบร้อย');
@@ -1690,7 +1694,7 @@ class PosController extends Controller
         }
     }
 
-    function saveTransactionsalepos($line_prod_id, $line_balance_in, $line_balance_out, $line_production_qty, $line_cash_qty, $line_credit_qty, $line_repack_qty, $line_refill_qty, $line_scrap_qty, $line_stock_count, $login_date, $line_transfer_qty,$line_car_issue_qty)
+    function saveTransactionsalepos($line_prod_id, $line_balance_in, $line_balance_out, $line_production_qty, $line_cash_qty, $line_credit_qty, $line_repack_qty, $line_refill_qty, $line_scrap_qty, $line_stock_count, $login_date, $line_transfer_qty, $line_car_issue_qty)
     {
         $company_id = 0;
         $branch_id = 0;
@@ -1768,13 +1772,14 @@ class PosController extends Controller
         }
         return $qty;
     }
+
     function getFreeQty($product_id, $user_id, $user_login_datetime, $t_date, $company_id, $branch_id)
     {
         $qty = 0;
         if ($user_id != null) {
             $qty = \common\models\QuerySalePosData::find()->where(['created_by' => $user_id, 'product_id' => $product_id])
                 ->andFilterWhere(['between', 'order_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])
-                ->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id,'price'=>0])->sum('qty');
+                ->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id, 'price' => 0])->sum('qty');
         }
         return $qty;
     }
@@ -1912,7 +1917,7 @@ class PosController extends Controller
                 $session->setFlash('msg', 'บันทึกรายการเรียบร้อย');
 
 
-                return $this->redirect(['pos/index','id'=>0]);
+                return $this->redirect(['pos/index', 'id' => 0]);
             }
 
         }
@@ -2269,9 +2274,10 @@ class PosController extends Controller
             'company_id' => $company_id,
             'branch_id' => $branch_id,
             'is_invoice_req' => $is_invoice_req,
-            'btn_order_type'=>$btn_order_type,
+            'btn_order_type' => $btn_order_type,
         ]);
     }
+
     public function actionPrintpossummary()
     {
         $company_id = 0;
@@ -2298,7 +2304,37 @@ class PosController extends Controller
             'company_id' => $company_id,
             'branch_id' => $branch_id,
             'is_invoice_req' => $is_invoice_req,
-            'btn_order_type'=>$btn_order_type,
+            'btn_order_type' => $btn_order_type,
+        ]);
+    }
+
+    public function actionPrintpossummarynew()
+    {
+        $company_id = 0;
+        $branch_id = 0;
+
+        if (!empty(\Yii::$app->user->identity->company_id)) {
+            $company_id = \Yii::$app->user->identity->company_id;
+        }
+        if (!empty(\Yii::$app->user->identity->branch_id)) {
+            $branch_id = \Yii::$app->user->identity->branch_id;
+        }
+
+        $from_date = \Yii::$app->request->post('from_date');
+        $to_date = \Yii::$app->request->post('to_date');
+        $find_sale_type = \Yii::$app->request->post('find_sale_type');
+        $find_user_id = \Yii::$app->request->post('find_user_id');
+        $is_invoice_req = \Yii::$app->request->post('is_invoice_req');
+        $btn_order_type = \Yii::$app->request->post('btn_order_type');
+        return $this->render('_print_sale_pos_summary_new', [
+            'from_date' => $from_date,
+            'to_date' => $to_date,
+            'find_sale_type' => $find_sale_type,
+            'find_user_id' => $find_user_id,
+            'company_id' => $company_id,
+            'branch_id' => $branch_id,
+            'is_invoice_req' => $is_invoice_req,
+            'btn_order_type' => $btn_order_type,
         ]);
     }
 
@@ -2328,7 +2364,7 @@ class PosController extends Controller
             'company_id' => $company_id,
             'branch_id' => $branch_id,
             'is_invoice_req' => $is_invoice_req,
-            'btn_order_type'=>$btn_order_type,
+            'btn_order_type' => $btn_order_type,
         ]);
     }
 
@@ -2689,18 +2725,15 @@ class PosController extends Controller
         return $this->redirect(['pos/posttrans']);
     }
 
+
     ///// NEW FOR CAL MANAGER SUMMARY
 
     public function actionStartcaldailymanager()
     {
         $company_id = 1;
         $branch_id = 1;
-
-       // $create_date = date_create('2024-02-20');
-
         $from_date = date('Y-m-d');
         $to_date = date('Y-m-d');
-
         $find_sale_type = 0;
         $sum_qty_all = 0;
         $sum_total_all = 0;
@@ -2723,12 +2756,11 @@ class PosController extends Controller
         $btn_order_type = null;
 
         $model_product_daily = \backend\models\Product::find()->where(['status' => 1, 'company_id' => $company_id, 'branch_id' => $branch_id])->orderBy(['item_pos_seq' => SORT_ASC])->all();
-        \common\models\TransactionManagerDaily::deleteAll(['date(trans_date)'=>date('Y-m-d')]);
         foreach ($model_product_daily as $value) {
             $line_product_price_list = $this->getProductpricelist($value->id, $from_date, $to_date, $company_id, $branch_id);
             if ($line_product_price_list != null) {
 
-
+                \common\models\TransactionManagerDaily::deleteAll(['date(trans_date)'=>date('Y-m-d')]);
 
                 for ($x = 0; $x <= count($line_product_price_list) - 1; $x++) {
 
@@ -2786,8 +2818,6 @@ class PosController extends Controller
 
 
                 }
-            }else{
-                echo "no data";
             }
         }
     }
@@ -2798,8 +2828,8 @@ class PosController extends Controller
         $data = [];
         $sql = "SELECT t1.price
               FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id
-             WHERE  date(t2.order_date) >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
-             AND date(t2.order_date) <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
+             WHERE  t2.order_date >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
+             AND t2.order_date <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
              AND t1.product_id=" . $product_id . " 
              AND t2.status <> 3
              AND t1.qty > 0
@@ -2823,8 +2853,8 @@ class PosController extends Controller
         $data = [];
         $sql = "SELECT sum(qty) as qty, sum(line_total) as line_total
               FROM query_sale_mobile_data_new
-             WHERE  date(order_date) >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . "
-             AND date(order_date) <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . "
+             WHERE  order_date >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . "
+             AND order_date <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . "
              AND product_id=" . $product_id . "
              AND price=" . $line_price . "
              AND company_id=" . $company_id . " AND branch_id=" . $branch_id;
@@ -2862,8 +2892,8 @@ class PosController extends Controller
         $data = [];
         $sql = "SELECT sum(t1.qty) as qty, sum(t1.line_total) as line_total
               FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id 
-             WHERE  date(t2.order_date) >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
-             AND date(t2.order_date) <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
+             WHERE  t2.order_date >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
+             AND t2.order_date <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
              AND t1.product_id=" . $product_id . " 
              AND t2.status <> 3
              AND t2.sale_channel_id = 2
@@ -2901,8 +2931,8 @@ class PosController extends Controller
         $data = [];
         $sql = "SELECT sum(t1.qty) as qty, sum(t1.line_total) as line_total
               FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id 
-             WHERE  date(t2.order_date) >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
-             AND date(t2.order_date) <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
+             WHERE  t2.order_date >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
+             AND t2.order_date <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
              AND t1.product_id=" . $product_id . " 
              AND t2.status <> 3
              AND t2.sale_channel_id = 2
@@ -2940,8 +2970,8 @@ class PosController extends Controller
         $data = [];
         $sql = "SELECT sum(t1.qty) as qty, sum(t1.line_total) as line_total
               FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id INNER JOIN delivery_route as t4 on t2.order_channel_id = t4.id
-             WHERE  date(t2.order_date) >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
-             AND date(t2.order_date) <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
+             WHERE  t2.order_date >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
+             AND t2.order_date <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
              AND t1.product_id=" . $product_id . " 
              AND t2.status <> 3
              AND t2.sale_channel_id = 2
@@ -2979,8 +3009,8 @@ class PosController extends Controller
         $data = [];
         $sql = "SELECT sum(t1.qty) as qty, sum(t1.line_total) as line_total
               FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id INNER JOIN delivery_route as t4 on t2.order_channel_id = t4.id
-             WHERE  date(t2.order_date) >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
-             AND date(t2.order_date) <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
+             WHERE  t2.order_date >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
+             AND t2.order_date <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
              AND t1.product_id=" . $product_id . " 
              AND t2.status <> 3
              AND t2.sale_channel_id = 2
@@ -3012,5 +3042,6 @@ class PosController extends Controller
         }
         return $data;
     }
+
 
 }

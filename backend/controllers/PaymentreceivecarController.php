@@ -63,6 +63,7 @@ class PaymentreceivecarController extends Controller
             'perpage' => $pageSize,
         ]);
     }
+
     public function actionView($id)
     {
         return $this->render('view', [
@@ -310,8 +311,8 @@ class PaymentreceivecarController extends Controller
         $html = '';
         $total_amount = 0;
         if ($cus_id) {
-           // $model = \common\models\QuerySalePaySummary::find()->where(['customer_id' => $cus_id])->andFilterWhere(['>', 'remain_amount', 0])->all();
-            $model = \common\models\QuerySalePaySummary::find()->where(['customer_id' => $cus_id])->andfilterWhere(['OR',['is','payment_amount',new \yii\db\Expression('null')],['>', 'remain_amount', 0]])->all();
+            // $model = \common\models\QuerySalePaySummary::find()->where(['customer_id' => $cus_id])->andFilterWhere(['>', 'remain_amount', 0])->all();
+            $model = \common\models\QuerySalePaySummary::find()->where(['customer_id' => $cus_id])->andfilterWhere(['OR', ['is', 'payment_amount', new \yii\db\Expression('null')], ['>', 'remain_amount', 0]])->all();
             if ($model) {
 //                $html = $cus_id;
                 $i = 0;
@@ -320,12 +321,12 @@ class PaymentreceivecarController extends Controller
                     //   $total_amount = $total_amount + ($value->remain_amount == null ? 0 : $value->remain_amount);
                     $remain_amt = $value->line_total;
 
-                    if($value->remain_amount == null && $value->payment_amount != null) {
+                    if ($value->remain_amount == null && $value->payment_amount != null) {
                         $remain_amt = $value->line_total - $value->payment_amount;
-                    }else{
+                    } else {
                         $remain_amt = $value->remain_amount;
                     }
-                  //  $remain_amt = $value->remain_amount == null?$value->payment_amount:$value->remain_amount;
+                    //  $remain_amt = $value->remain_amount == null?$value->payment_amount:$value->remain_amount;
                     $html .= '<tr>';
                     $html .= '<td style="text-align: center">' . $i . '</td>';
                     $html .= '<td style="text-align: center">' . \backend\models\Orders::getNumber($value->order_id) . '</td>';
@@ -360,9 +361,9 @@ class PaymentreceivecarController extends Controller
         $searchModel = new \backend\models\SaleorderCustomerLoanSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         $dataProvider->query->limit(100);
-        $dataProvider->query->andFilterWhere(['>','line_total','payment_amount']);
+        $dataProvider->query->andFilterWhere(['>', 'line_total', 'payment_amount']);
         $dataProvider->setSort([
-            'defaultOrder'=>['customer_id'=>SORT_ASC,'order_date'=>SORT_ASC]
+            'defaultOrder' => ['customer_id' => SORT_ASC, 'order_date' => SORT_ASC]
         ]);
 
         return $this->render('_customerloan', [
@@ -389,24 +390,24 @@ class PaymentreceivecarController extends Controller
         $order_id = \Yii::$app->request->post('order_id');
         $html = '';
 
-      //  $model = \backend\models\Querypaymentreceive::find()->where(['order_id'=>$order_id,'company_id' => $company_id, 'branch_id' => $branch_id])->all();
-        $model = \common\models\QueryPaymentReceive::find()->where(['order_id'=>$order_id,'customer_id'=>$customer_id])->all();
-        if($model){
+        //  $model = \backend\models\Querypaymentreceive::find()->where(['order_id'=>$order_id,'company_id' => $company_id, 'branch_id' => $branch_id])->all();
+        $model = \common\models\QueryPaymentReceive::find()->where(['order_id' => $order_id, 'customer_id' => $customer_id])->all();
+        if ($model) {
             $total = 0;
             foreach ($model as $value) {
                 $total = ($total + $value->payment_amount);
                 $payment_channel = 'เงินสด';
-                if($value->payment_channel_id==1){
+                if ($value->payment_channel_id == 1) {
                     $payment_channel = 'เงินสด';
-                }else if($value->payment_channel_id==2){
+                } else if ($value->payment_channel_id == 2) {
                     $payment_channel = 'โอนธนาคาร';
                 }
                 $html .= '<tr>';
                 $html .= '<td style="text-align: center">' . $value->journal_no . '</td>';
-                $html .= '<td style="text-align: center">' . date('d/m/Y',strtotime($value->trans_date)) . '</td>';
+                $html .= '<td style="text-align: center">' . date('d/m/Y', strtotime($value->trans_date)) . '</td>';
 
                 $html .= '<td style="text-align: right">' . number_format($value->payment_amount) . '</td>';
-                $html .= '<td style="text-align: center">' . $payment_channel  . '</td>';
+                $html .= '<td style="text-align: center">' . $payment_channel . '</td>';
                 $html .= '</tr>';
             }
             $html .= '<tr>';
@@ -419,24 +420,25 @@ class PaymentreceivecarController extends Controller
         echo $html;
     }
 
-    public function actionFindcustomer(){
+    public function actionFindcustomer()
+    {
         $list = \Yii::$app->request->post('customer_list');
         $html = '';
         $data = [];
-        if($list != null){
+        if ($list != null) {
 //            for($i=0;$i<=count($list)-1;$i++){
 //                array_push($data,$list[$i]);
 //            }
             //$ids = explode(',',$list);
 
-            if(count($list)>0){
-                $model = \common\models\QueryCustomerInfo::find()->where(['rt_id'=>$list])->all();
-               // $model = \common\models\QueryCustomerInfo::find()->all();
-                if($model){
-                    foreach ($model as $value){
-                        $html.='<option id="'.$value->customer_id.'">';
-                        $html.= $value->cus_name;
-                        $html.='</option>';
+            if (count($list) > 0) {
+                $model = \common\models\QueryCustomerInfo::find()->where(['rt_id' => $list])->all();
+                // $model = \common\models\QueryCustomerInfo::find()->all();
+                if ($model) {
+                    foreach ($model as $value) {
+                        $html .= '<option id="' . $value->customer_id . '">';
+                        $html .= $value->cus_name;
+                        $html .= '</option>';
                     }
                 }
             }
@@ -449,7 +451,7 @@ class PaymentreceivecarController extends Controller
     {
         $company_id = 0;
         $branch_id = 0;
-        $is_start_find= 0;
+        $is_start_find = 0;
 
         if (!empty(\Yii::$app->user->identity->company_id)) {
             $company_id = \Yii::$app->user->identity->company_id;
@@ -460,30 +462,30 @@ class PaymentreceivecarController extends Controller
 
         $from_date = \Yii::$app->request->post('from_date');
         $to_date = \Yii::$app->request->post('to_date');
-        if($to_date == null){
-          //  $from_date = date('Y-m-d H:i');
+        if ($to_date == null) {
+            //  $from_date = date('Y-m-d H:i');
             $to_date = date('Y-m-d H:i');
         }
         //  $find_sale_type = \Yii::$app->request->post('find_sale_type');
 
         $is_start_find = \Yii::$app->request->post('is_start_find');
-        if($is_start_find == null){
+        if ($is_start_find == null) {
             $is_start_find = 0;
         }
 
         $find_customer_id = \Yii::$app->request->post('find_customer_id');
         $is_find_date = \Yii::$app->request->post('is_find_date');
         $find_customer_id_select = \Yii::$app->request->post('find_customer_id_select');
-        return $this->render('_print_customer_car_loan_new',[
-            'from_date'=>$from_date,
-            'to_date'=> $to_date,
+        return $this->render('_print_customer_car_loan_new', [
+            'from_date' => $from_date,
+            'to_date' => $to_date,
             'is_find_date' => $is_find_date,
             //    'find_sale_type'=>$find_sale_type,
-            'find_customer_id'=>$find_customer_id,
-            'find_customer_id_select'=>$find_customer_id_select,
-            'company_id'=>$company_id,
-            'branch_id'=>$branch_id,
-            'is_start_find'=>$is_start_find,
+            'find_customer_id' => $find_customer_id,
+            'find_customer_id_select' => $find_customer_id_select,
+            'company_id' => $company_id,
+            'branch_id' => $branch_id,
+            'is_start_find' => $is_start_find,
         ]);
     }
 
@@ -493,7 +495,7 @@ class PaymentreceivecarController extends Controller
         $branch_id = 0;
         $is_start_find = 0;
 
-       // echo 'hi';return;
+        // echo 'hi';return;
 
         if (!empty(\Yii::$app->user->identity->company_id)) {
             $company_id = \Yii::$app->user->identity->company_id;
@@ -504,30 +506,30 @@ class PaymentreceivecarController extends Controller
 
         $from_date = \Yii::$app->request->post('from_date');
         $to_date = \Yii::$app->request->post('to_date');
-        if($from_date == null && $to_date == null){
+        if ($from_date == null && $to_date == null) {
             $from_date = date('Y-m-d H:i');
             $to_date = date('Y-m-d H:i');
         }
         //  $find_sale_type = \Yii::$app->request->post('find_sale_type');
 
         $is_start_find = \Yii::$app->request->post('is_start_find');
-        if($is_start_find == null){
+        if ($is_start_find == null) {
             $is_start_find = 0;
         }
 
         $find_customer_id = \Yii::$app->request->post('find_customer_id');
         $is_find_date = \Yii::$app->request->post('is_find_date');
         $find_customer_id_select = \Yii::$app->request->post('find_customer_id_select');
-        return $this->render('_print_customer_car_loan_new_update',[
-            'from_date'=>$from_date,
-            'to_date'=> $to_date,
+        return $this->render('_print_customer_car_loan_new_update', [
+            'from_date' => $from_date,
+            'to_date' => $to_date,
             'is_find_date' => $is_find_date,
             //    'find_sale_type'=>$find_sale_type,
-            'find_customer_id'=>$find_customer_id,
-            'find_customer_id_select'=>$find_customer_id_select,
-            'company_id'=>$company_id,
-            'branch_id'=>$branch_id,
-            'is_start_find'=>$is_start_find,
+            'find_customer_id' => $find_customer_id,
+            'find_customer_id_select' => $find_customer_id_select,
+            'company_id' => $company_id,
+            'branch_id' => $branch_id,
+            'is_start_find' => $is_start_find,
         ]);
     }
 
@@ -546,9 +548,9 @@ class PaymentreceivecarController extends Controller
         $delivery_no = \Yii::$app->request->post('delivery_no');
         if ($order_id != null) {
             for ($i = 0; $i <= count($order_id) - 1; $i++) {
-                if($delivery_no[$i] == null)continue;
+                if ($delivery_no[$i] == null) continue;
                 $model = \backend\models\Orders::find()->where(['id' => $order_id[$i]])->one();
-                if($model){
+                if ($model) {
                     $model->customer_ref_no = $delivery_no[$i];
                     $model->save(false);
                 }
@@ -557,6 +559,38 @@ class PaymentreceivecarController extends Controller
         return $this->redirect(['paymentreceivecar/carsummaryupdate']);
     }
 
+    public function actionCheckordercarpayment()
+    {
+        $sql = "SELECT id,customer_id,total_sum
+              FROM query_sale_car_credit_amount WHERE date(order_date)>='".date('Y-m-d',strtotime('2024-02-16'))."'";
+        $sql.=" AND date(order_date)<='".date('Y-m-d',strtotime('2024-02-23'))."'";
+        $query = \Yii::$app->db->createCommand($sql);
+        $model = $query->queryAll();
+        if ($model) {
+            for ($i = 0; $i <= count($model) - 1; $i++) {
+                $sqlx = "SELECT sum(payment_amount) as payment_amount
+              FROM query_payment_receive_for_credit";
+                $sqlx .= " WHERE order_id=" . $model[$i]['id'];
+                $sqlx .= " AND customer_id=" . $model[$i]['customer_id'];
+                $queryx = \Yii::$app->db->createCommand($sqlx);
+                $modelx = $queryx->queryAll();
+                if ($modelx) {
+                    for ($ix = 0; $ix <= count($modelx) - 1; $ix++) {
+                        if ($modelx[$ix]['payment_amount'] >= $model[$i]['total_sum']) {
+                            \common\models\Orders::updateAll(['payment_status'=>1],['id'=>$model[$i]['id']]);
+                            echo "order = ".$model[$i]['id']." credit = ".$model[$i]['total_sum']. ' - '.$modelx[$ix]['payment_amount'].' is 1'.'<br />';
+                        }else{
+                            \common\models\Orders::updateAll(['payment_status'=>0],['id'=>$model[$i]['id']]);
+                            echo "order = ".$model[$i]['id']." credit = ".$model[$i]['total_sum']. ' - '.$modelx[$ix]['payment_amount'].' is 0'.'<br />';
+                        }
+                    }
+
+                }
+
+            }
+
+        }
+    }
 
 
 }

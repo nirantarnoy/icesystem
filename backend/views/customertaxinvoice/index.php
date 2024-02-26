@@ -1,7 +1,9 @@
 <?php
 
 use yii\helpers\Html;
-use yii\grid\GridView;
+
+//use yii\grid\GridView;
+use kartik\grid\GridView;
 use yii\widgets\Pjax;
 use yii\helpers\Url;
 use yii\widgets\LinkPager;
@@ -45,6 +47,7 @@ $this->params['breadcrumbs'][] = $this->title;
         'layout' => "{items}\n{summary}\n<div class='text-center'>{pager}</div>",
         'summary' => "แสดง {begin} - {end} ของทั้งหมด {totalCount} รายการ",
         'showOnEmpty' => false,
+        'showPageSummary' => true,
         //    'bordered' => true,
         //     'striped' => false,
         //    'hover' => true,
@@ -59,18 +62,50 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
             'invoice_no',
             [
-                    'attribute' => 'customer_id',
-                'value' => function($data){
-                   return \backend\models\Customer::findName($data->customer_id);
+                'attribute' => 'product_id',
+                'label' => 'ประเภทสินค้า',
+                'value' => function ($data) {
+                    $group_id = \common\models\CustomerTaxInvoiceLine::find()->where(['tax_invoice_id' => $data->id])->one();
+                    if($group_id){
+                        return \backend\models\Productgroup::findName($group_id->product_group_id);
+                    }else{
+                        return '';
+                    }
+
                 }
             ],
             'invoice_date',
             [
-                'attribute' => 'payment_term_id',
+                'attribute' => 'price',
+                'label' => 'ราคา',
                 'value' => function ($data) {
-                    return \backend\models\Paymentterm::findName($data->payment_term_id);
+                    $pricex = \common\models\CustomerTaxInvoiceLine::find()->where(['tax_invoice_id' => $data->id])->one();
+                    if($pricex){
+                        return $pricex->price;
+                    }else{
+                        return 0;
+                    }
+
                 }
             ],
+            [
+                'attribute' => 'qty',
+                'label' => 'จำนวน',
+                'value' => function ($data) {
+                    $allqty = \common\models\CustomerTaxInvoiceLine::find()->where(['tax_invoice_id' => $data->id])->sum('qty');
+                    return $allqty;
+                },
+                'format' => ['decimal', 2],
+                'hAlign' => 'right',
+                'pageSummary' => true,
+                'pageSummaryFunc' => GridView::F_SUM
+            ],
+//            [
+//                'attribute' => 'payment_term_id',
+//                'value' => function ($data) {
+//                    return \backend\models\Paymentterm::findName($data->payment_term_id);
+//                }
+//            ],
             //'payment_date',
             //'remark',
             //'status',
@@ -78,7 +113,16 @@ $this->params['breadcrumbs'][] = $this->title;
             //'created_by',
             //'updated_at',
             //'updated_by',
-            'total_amount',
+            [
+                'attribute' => 'total_amount',
+                'value' => function ($data) {
+                    return $data->total_amount;
+                },
+                'format' => ['decimal', 2],
+                'hAlign' => 'right',
+                'pageSummary' => true,
+                'pageSummaryFunc' => GridView::F_SUM
+            ],
             //'vat_amount',
             //'net_amount',
             //'total_text',
@@ -133,7 +177,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 ]
             ],
         ],
-        'pager' => ['class' => LinkPager::className()],
+       // 'pager' => ['class' => LinkPager::className()],
     ]); ?>
 
     <?php Pjax::end(); ?>

@@ -41,7 +41,7 @@ $mpdf->AddPageByArray([
 //$customer_name = $trans_data[0]['customer_id']?getCustomername($connect, $trans_data[0]['customer_id']):$trans_data[0]['customer_name'];
 //$model_product_daily = \common\models\QueryProductTransDaily::find()->where(['date(trans_date)' => date('Y-m-d')])->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id])->all();
 //$model_product_daily = \common\models\StockTrans::find()->select("product_id")->where(['BETWEEN', 'trans_date', date('Y-m-d H:i:s', strtotime($from_date)), date('Y-m-d H:i:s', strtotime($to_date))])->andFilterWhere(['activity_type_id' => 5, 'company_id' => $company_id, 'branch_id' => $branch_id])->groupBy('product_id')->orderBy(['product_id' => SORT_ASC])->all();
-$model_product_daily = \backend\models\Product::find()->where(['status' => 1, 'company_id' => $company_id, 'branch_id' => $branch_id])->orderBy(['item_pos_seq' => SORT_ASC])->all();
+$model_product_daily = \backend\models\Product::find()->where(['status'=>1,'company_id'=>$company_id,'branch_id'=>$branch_id])->orderBy(['item_pos_seq'=>SORT_ASC])->all();
 //$user_login_datetime = '';
 //$model_c_login = LoginLog::find()->select('MIN(login_date) as login_date')->where(['user_id' => $user_id, 'status' => 1])->one();
 //if ($model_c_login != null) {
@@ -251,20 +251,11 @@ $model_product_daily = \backend\models\Product::find()->where(['status' => 1, 'c
         </table>
         <table class="table-title" id="table-data" style="width: 100%">
             <tr>
-                <td rowspan="2"
-                    style="text-align: center;border-top: 1px solid gray;border-bottom: 1px solid gray;border-left: 2px solid black">
-                    <b>รหัสสินค้า</b></td>
-                <td rowspan="2" style="text-align: center;border-top: 1px solid gray;border-bottom: 1px solid gray"><b>ชื่อสินค้า</b>
-                </td>
-                <td rowspan="2"
-                    style="text-align: center;border-top: 1px solid gray;border-bottom: 1px solid gray;border-right: 2px solid black">
-                    <b>ราคา</b></td>
-                <td colspan="5"
-                    style="text-align: center;border-top: 1px solid gray;border-bottom: 1px solid grey;border-right: 2px solid black">
-                    <b>จำนวนน้ำแข็ง</b></td>
-                <td colspan="5"
-                    style="text-align: center;border-top: 1px solid gray;border-bottom: 1px solid gray;border-right: 2px solid black;">
-                    <b>จำนวนเงิน</b></td>
+                <td rowspan="2" style="text-align: center;border-top: 1px solid gray;border-bottom: 1px solid gray;border-left: 2px solid black"><b>รหัสสินค้า</b></td>
+                <td rowspan="2" style="text-align: center;border-top: 1px solid gray;border-bottom: 1px solid gray"><b>ชื่อสินค้า</b></td>
+                <td rowspan="2" style="text-align: center;border-top: 1px solid gray;border-bottom: 1px solid gray;border-right: 2px solid black"><b>ราคา</b></td>
+                <td colspan="5" style="text-align: center;border-top: 1px solid gray;border-bottom: 1px solid grey;border-right: 2px solid black"><b>จำนวนน้ำแข็ง</b></td>
+                <td colspan="5" style="text-align: center;border-top: 1px solid gray;border-bottom: 1px solid gray;border-right: 2px solid black;"><b>จำนวนเงิน</b></td>
             </tr>
             <tr>
 
@@ -300,7 +291,7 @@ $model_product_daily = \backend\models\Product::find()->where(['status' => 1, 'c
             $sum_total_all = 0;
 
             $total_qty = 0;
-            $total_qty2 = 0;
+            $total_qty2 = 0 ;
             $total_qty3 = 0;
             $total_qty4 = 0;
             $total_qty5 = 0;
@@ -318,10 +309,10 @@ $model_product_daily = \backend\models\Product::find()->where(['status' => 1, 'c
                 $line_product_code = \backend\models\Product::findCode($value->id);
                 $line_product_name = \backend\models\Product::findName($value->id);
 
-                $line_product_price_list = getProductpricelist($value->id, $from_date, $to_date, $company_id, $branch_id);
+                $line_product_price_list = getProductpricelist($value->id,$from_date,$to_date,$company_id,$branch_id);
 
                 ?>
-                <tr class="line-detail-sum" data-var="<?= $value->id ?>">
+                <tr class="line-detail-sum" data-var="<?=$value->id?>">
                     <td style="text-align: right;background-color: lightskyblue;font-weight: bold;border-left: 2px solid black"><?= $line_product_code ?></td>
                     <td style="text-align: right;background-color: lightskyblue;font-weight: bold"><?= $line_product_name ?></td>
                     <td style="text-align: right;background-color: lightskyblue;font-weight: bold;border-right: 2px solid black;"></td>
@@ -336,88 +327,96 @@ $model_product_daily = \backend\models\Product::find()->where(['status' => 1, 'c
                     <td style="text-align: right;background-color: lightskyblue;font-weight: bold"></td>
                     <td style="text-align: right;background-color: lightskyblue;font-weight: bold;border-right: 2px solid black"></td>
                 </tr>
-                <?php if ($line_product_price_list != null): ?>
-                    <?php for ($x = 0; $x <= count($line_product_price_list) - 1; $x++): ?>
-
+                <?php if($line_product_price_list != null):?>
+                <?php for($x=0;$x<=count($line_product_price_list)-1;$x++):?>
+                        <?php $find_order = getOrdercash($value->id, $from_date, $to_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type,$line_product_price_list[$x]['line_price']); ?>
+                        <?php $find_order2 = getOrderCredit($value->id, $from_date, $to_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type,$line_product_price_list[$x]['line_price']); ?>
+                        <?php //$find_order3 = getOrderCarCredit($value->id, $from_date, $to_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type,$line_product_price_list[$x]['line_price']); ?>
+                        <?php $find_order4 = getOrderCarOtherCredit($value->id, $from_date, $to_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type,$line_product_price_list[$x]['line_price']); ?>
+                        <?php $find_order5 = getOrderRoute($value->id, $from_date, $to_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type,$line_product_price_list[$x]['line_price']); ?>
                         <?php
 
 
-                        $line_qty = $line_product_price_list[$x]['cash_qty'];
-                        $line_qty2 = $line_product_price_list[$x]['credit_pos_qty'];
-                        $line_qty4 = $line_product_price_list[$x]['other_branch_qty'];
-                        $line_qty5 = $line_product_price_list[$x]['car_qty'];
 
-                        $line_total_qty = ($line_qty + $line_qty2 + $line_qty4 + $line_qty5);
+                        $line_qty = $find_order != null ? $find_order[0]['qty'] : 0;
+                        $line_qty2 = $find_order2 != null ? $find_order2[0]['qty'] : 0;
+//                        $line_qty3 = $find_order3 != null ? $find_order3[0]['qty'] : 0;
+                        $line_qty4 = $find_order4 != null ? $find_order4[0]['qty'] : 0;
+                        $line_qty5 = $find_order5 != null ? $find_order5[0]['qty'] : 0;
+
+                        $line_total_qty = ($line_qty + $line_qty2 +  $line_qty4 + $line_qty5);
                         $total_qty_all = ($total_qty_all + $line_total_qty);
 
-                        $line_amount = $line_product_price_list[$x]['cash_amount'];
-                        $line_amount2 = $line_product_price_list[$x]['credit_pos_amount'];
-                        $line_amount4 = $line_product_price_list[$x]['other_branch_amount'];
-                        $line_amount5 = $line_product_price_list[$x]['car_amount'];
+                        $line_amount = $find_order != null ? $find_order[0]['line_total']:0;
+                        $line_amount2 = $find_order2 != null ? $find_order2[0]['line_total']:0;
+                       // $line_amount3 = $find_order3 != null ? $find_order3[0]['line_total']:0;
+                        $line_amount4 = $find_order4 != null ? $find_order4[0]['line_total']:0;
+                        $line_amount5 = $find_order5 != null ? $find_order5[0]['line_total']:0;
 
-                        $line_total_amt = ($line_amount + $line_amount2 + $line_amount4 + $line_amount5);
+                        $line_total_amt = ($line_amount + $line_amount2 +  $line_amount4+ $line_amount5);
                         $total_amount_all = ($total_amount_all + $line_total_amt);
 
                         $total_qty = ($total_qty + $line_qty);
                         $total_qty2 = ($total_qty2 + $line_qty2);
-                        //  $total_qty3 = ($total_qty3 + $line_qty3);
+                      //  $total_qty3 = ($total_qty3 + $line_qty3);
                         $total_qty4 = ($total_qty4 + $line_qty4);
                         $total_qty5 = ($total_qty5 + $line_qty5);
 
                         $total_amount = ($total_amount + $line_amount);
                         $total_amount2 = ($total_amount2 + $line_amount2);
-                        //  $total_amount3 = ($total_amount3 + $line_amount3);
+                      //  $total_amount3 = ($total_amount3 + $line_amount3);
                         $total_amount4 = ($total_amount4 + $line_amount4);
                         $total_amount5 = ($total_amount5 + $line_amount5);
 
 
                         ?>
-                        <tr class="line-detail" data-var="<?= $value->id ?>">
-                            <td style="border-left: 2px solid black"></td>
+                        <tr class="line-detail" data-var="<?=$value->id?>">
+                            <td style="border-left: 2px solid black">
+<!--                                <input type="hidden" class="line-qty" value="--><?//=$line_qty?><!--">-->
+<!--                                <input type="hidden" class="line-qty2" value="--><?//=$line_qty2?><!--">-->
+<!--                                <input type="hidden" class="line-qty5" value="--><?//=$line_qty5?><!--">-->
+<!--                                <input type="hidden" class="line-qty4" value="--><?//=$line_qty4?><!--">-->
+<!--                                <input type="hidden" class="line-total-qty" value="--><?//=$line_total_qty?><!--">-->
+<!--                                <input type="hidden" class="line-amount" value="--><?//=$line_amount?><!--">-->
+<!--                                <input type="hidden" class="line-amount2" value="--><?//=$line_amount2?><!--">-->
+<!--                                <input type="hidden" class="line-amount5" value="--><?//=$line_amount5?><!--">-->
+<!--                                <input type="hidden" class="line-amount4" value="--><?//=$line_amount4?><!--">-->
+<!--                                <input type="hidden" class="line-total-amount" value="--><?//=$line_total_amt?><!--">-->
+                            </td>
                             <td></td>
-                            <td style="text-align: center;border-right: 2px solid black"><?= number_format($line_product_price_list[$x]['price'], 2) ?></td>
-                            <td style="text-align: right;"><?= number_format($line_qty, 2) ?></td>
-                            <td style="text-align: right;"><?= number_format($line_qty2, 2) ?></td>
-                            <td style="text-align: right;"><?= number_format($line_qty5, 2) ?></td>
-                            <td style="text-align: right;"><?= number_format($line_qty4, 2) ?></td>
-                            <td style="text-align: right;border-right: 2px solid black;"><?= number_format($line_total_qty, 2) ?></td>
-                            <td style="text-align: right;"><?= number_format($line_amount, 2) ?></td>
-                            <td style="text-align: right;"><?= number_format($line_amount2, 2) ?></td>
-                            <td style="text-align: right;"><?= number_format($line_amount5, 2) ?></td>
-                            <td style="text-align: right;"><?= number_format($line_amount4, 2) ?></td>
-                            <td style="text-align: right;border-right: 2px solid black"><?= number_format($line_total_amt, 2) ?></td>
+                            <td style="text-align: center;border-right: 1px solid black"><?=number_format($line_product_price_list[$x]['line_price'],2)?></td>
+                            <td style="text-align: right;"><?=number_format($line_qty, 2) ?></td>
+                            <td style="text-align: right;"><?=number_format($line_qty2, 2) ?></td>
+                            <td style="text-align: right;"><?=number_format($line_qty5, 2) ?></td>
+                            <td style="text-align: right;"><?=number_format($line_qty4, 2) ?></td>
+                            <td style="text-align: right;border-right: 2px solid black;"><?=number_format($line_total_qty, 2) ?></td>
+                            <td style="text-align: right;"><?=number_format($line_amount, 2) ?></td>
+                            <td style="text-align: right;"><?=number_format($line_amount2, 2)?></td>
+                            <td style="text-align: right;"><?=number_format($line_amount5, 2) ?></td>
+                            <td style="text-align: right;"><?=number_format($line_amount4, 2) ?></td>
+                            <td style="text-align: right;border-right: 2px solid black"><?=number_format($line_total_amt, 2) ?></td>
                         </tr>
-                    <?php endfor; ?>
-                <?php endif; ?>
+                <?php endfor;?>
+                <?php endif;?>
 
             <?php endforeach; ?>
 
             <tfoot>
-            <tr>
-                <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;border-left: 2px solid black"></td>
-                <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;"></td>
-                <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;border-right: 2px solid black"></td>
-                <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;">
-                    <b><?= number_format($total_qty, 2) ?></b></td>
-                <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;">
-                    <b><?= number_format($total_qty2, 2) ?></b></td>
-                <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;">
-                    <b><?= number_format($total_qty5, 2) ?></b></td>
-                <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;">
-                    <b><?= number_format($total_qty4, 2) ?></b></td>
-                <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;border-right: 2px solid black">
-                    <b><?= number_format($total_qty_all, 2) ?></b></td>
-                <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;">
-                    <b><?= number_format($total_amount, 2) ?></b></td>
-                <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;">
-                    <b><?= number_format($total_amount2, 2) ?></b></td>
-                <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;">
-                    <b><?= number_format($total_amount5, 2) ?></b></td>
-                <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;">
-                    <b><?= number_format($total_amount4, 2) ?></b></td>
-                <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;border-right: 2px solid black">
-                    <b><?= number_format($total_amount_all, 2) ?></b></td>
-            </tr>
+              <tr>
+                  <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;border-left: 2px solid black"></td>
+                  <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;"></td>
+                  <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;border-right: 2px solid black"></td>
+                  <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;"><b><?=number_format($total_qty,2)?></b></td>
+                  <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;"><b><?=number_format($total_qty2,2)?></b></td>
+                  <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;"><b><?=number_format($total_qty5,2)?></b></td>
+                  <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;"><b><?=number_format($total_qty4,2)?></b></td>
+                  <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;border-right: 2px solid black"><b><?=number_format($total_qty_all,2)?></b></td>
+                  <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;"><b><?=number_format($total_amount,2)?></b></td>
+                  <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;"><b><?=number_format($total_amount2,2)?></b></td>
+                  <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;"><b><?=number_format($total_amount5,2)?></b></td>
+                  <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;"><b><?=number_format($total_amount4,2)?></b></td>
+                  <td style="text-align: right;border-top: 3px solid black;border-bottom: 3px solid black;padding: 5px;border-right: 2px solid black"><b><?=number_format($total_amount_all,2)?></b></td>
+              </tr>
             </tfoot>
         </table>
     </div>
@@ -444,17 +443,18 @@ $model_product_daily = \backend\models\Product::find()->where(['status' => 1, 'c
 </div>
 </body>
 </html>
+
 <?php
-function getProductpricelist($product_id, $f_date, $t_date, $company_id, $branch_id)
-{
+function getProductpricelist($product_id, $f_date, $t_date,$company_id,$branch_id){
     $data = [];
-    $sql = "SELECT price,sum(cash_qty) as cash_qty,sum(credit_pos_qty) as credit_pos_qty,sum(car_qty) as car_qty,sum(other_branch_qty) as other_branch_qty,
-       sum(qty_total) as qty_total,sum(cash_amount) as cash_amount,sum(credit_pos_amount) as credit_pos_amount,sum(car_amount) as car_amount,sum(other_branch_amount) as other_branch_amount,
-       sum(amount_total) as amount_total
-              FROM transaction_manager_daily as t1
-             WHERE  t1.trans_date >=" . "'" . date('Y-m-d H:i:s', strtotime($f_date)) . "'" . " 
-             AND t1.trans_date <=" . "'" . date('Y-m-d H:i:s', strtotime($t_date)) . "'" . " 
-             AND t1.product_id=" . $product_id;
+    $sql = "SELECT t1.price
+              FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id
+             WHERE  t2.order_date >=" . "'" . date('Y-m-d H:i:s', strtotime($f_date)) . "'" . " 
+             AND t2.order_date <=" . "'" . date('Y-m-d H:i:s', strtotime($t_date)) . "'" . " 
+             AND t1.product_id=" . $product_id . " 
+             AND t2.status <> 3
+             AND t1.qty > 0
+             AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
     $sql .= " GROUP BY t1.price";
     $sql .= " ORDER BY t1.price asc";
     $query = \Yii::$app->db->createCommand($sql);
@@ -462,17 +462,199 @@ function getProductpricelist($product_id, $f_date, $t_date, $company_id, $branch
     if ($model) {
         for ($i = 0; $i <= count($model) - 1; $i++) {
             array_push($data, [
-                'price' => $model[$i]['price'],
-                'cash_qty' => $model[$i]['cash_qty'],
-                'credit_pos_qty' => $model[$i]['credit_pos_qty'],
-                'car_qty' => $model[$i]['car_qty'],
-                'other_branch_qty' => $model[$i]['other_branch_qty'],
-                'qty_total' => $model[$i]['qty_total'],
-                'cash_amount' => $model[$i]['cash_amount'],
-                'credit_pos_amount' => $model[$i]['credit_pos_amount'],
-                'car_amount' => $model[$i]['car_amount'],
-                'other_branch_amount' => $model[$i]['other_branch_amount'],
-                'amount_total' => $model[$i]['cash_qty'],
+                'line_price' => $model[$i]['price'],
+            ]);
+        }
+    }
+    return $data;
+}
+function getOrderRoute($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type,$line_price)
+{
+    $data = [];
+    $sql = "SELECT sum(qty) as qty, sum(line_total) as line_total
+              FROM query_sale_mobile_data_new
+             WHERE  order_date >=" . "'" . date('Y-m-d H:i:s', strtotime($f_date)) . "'" . "
+             AND order_date <=" . "'" . date('Y-m-d H:i:s', strtotime($t_date)) . "'" . "
+             AND product_id=" . $product_id . "
+             AND price=" .  $line_price."
+             AND company_id=" . $company_id . " AND branch_id=" . $branch_id;
+
+
+    if ($find_user_id != null) {
+        $sql .= " AND created_by=" . $find_user_id;
+    }
+//    if ($is_invoice_req != null) {
+//        $sql .= " AND t3.is_invoice_req =" . $is_invoice_req;
+//    }
+    $sql .= " GROUP BY product_id";
+
+    $query = \Yii::$app->db->createCommand($sql);
+    $model = $query->queryAll();
+    if ($model) {
+        for ($i = 0; $i <= count($model) - 1; $i++) {
+
+
+            array_push($data, [
+                'qty' => $model[$i]['qty'],
+                'line_total' => $model[$i]['line_total'],
+            ]);
+        }
+    }
+//                array_push($data, [
+//                'qty' => 0,
+//                'line_total' =>0,
+//            ]);
+    return $data;
+}
+function getOrdercash($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type,$line_price)
+{
+    $data = [];
+    $sql = "SELECT sum(t1.qty) as qty, sum(t1.line_total) as line_total
+              FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id 
+             WHERE  t2.order_date >=" . "'" . date('Y-m-d H:i:s', strtotime($f_date)) . "'" . " 
+             AND t2.order_date <=" . "'" . date('Y-m-d H:i:s', strtotime($t_date)) . "'" . " 
+             AND t1.product_id=" . $product_id . " 
+             AND t2.status <> 3
+             AND t2.sale_channel_id = 2
+             AND t1.price=" .  $line_price."
+             AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
+
+    $sql .= " AND t2.payment_method_id=1";
+
+
+    if ($find_user_id != null) {
+        $sql .= " AND t2.created_by=" . $find_user_id;
+    }
+    if ($is_invoice_req != null) {
+        $sql .= " AND t3.is_invoice_req =" . $is_invoice_req;
+    }
+    $sql .= " GROUP BY t1.product_id";
+
+    $query = \Yii::$app->db->createCommand($sql);
+    $model = $query->queryAll();
+    if ($model) {
+        for ($i = 0; $i <= count($model) - 1; $i++) {
+
+
+            array_push($data, [
+                'qty' => $model[$i]['qty'],
+                'line_total' => $model[$i]['line_total'],
+            ]);
+        }
+    }
+    return $data;
+}
+
+function getOrderCredit($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type,$line_price)
+{
+    $data = [];
+    $sql = "SELECT sum(t1.qty) as qty, sum(t1.line_total) as line_total
+              FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id 
+             WHERE  t2.order_date >=" . "'" . date('Y-m-d H:i:s', strtotime($f_date)) . "'" . " 
+             AND t2.order_date <=" . "'" . date('Y-m-d H:i:s', strtotime($t_date)) . "'" . " 
+             AND t1.product_id=" . $product_id . " 
+             AND t2.status <> 3
+             AND t2.sale_channel_id = 2
+              AND t1.price=" .  $line_price."
+             AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
+
+    $sql .= " AND (t2.order_channel_id = 0 OR t2.order_channel_id is null) AND t2.payment_method_id= 2";
+
+
+    if ($find_user_id != null) {
+        $sql .= " AND t2.created_by=" . $find_user_id;
+    }
+    if ($is_invoice_req != null) {
+        $sql .= " AND t3.is_invoice_req =" . $is_invoice_req;
+    }
+    $sql .= " GROUP BY t1.product_id";
+
+    $query = \Yii::$app->db->createCommand($sql);
+    $model = $query->queryAll();
+    if ($model) {
+        for ($i = 0; $i <= count($model) - 1; $i++) {
+
+
+            array_push($data, [
+                'qty' => $model[$i]['qty'],
+                'line_total' => $model[$i]['line_total'],
+            ]);
+        }
+    }
+    return $data;
+}
+
+function getOrderCarCredit($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type,$line_price)
+{
+    $data = [];
+    $sql = "SELECT sum(t1.qty) as qty, sum(t1.line_total) as line_total
+              FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id INNER JOIN delivery_route as t4 on t2.order_channel_id = t4.id
+             WHERE  t2.order_date >=" . "'" . date('Y-m-d H:i:s', strtotime($f_date)) . "'" . " 
+             AND t2.order_date <=" . "'" . date('Y-m-d H:i:s', strtotime($t_date)) . "'" . " 
+             AND t1.product_id=" . $product_id . " 
+             AND t2.status <> 3
+             AND t2.sale_channel_id = 2
+              AND t1.price=" .  $line_price."
+             AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
+
+    $sql .= " AND t2.order_channel_id > 0";
+    $sql .= " AND t4.is_other_branch = 0";
+
+    if ($find_user_id != null) {
+        $sql .= " AND t2.created_by=" . $find_user_id;
+    }
+    if ($is_invoice_req != null) {
+        $sql .= " AND t3.is_invoice_req =" . $is_invoice_req;
+    }
+    $sql .= " GROUP BY t1.product_id";
+
+    $query = \Yii::$app->db->createCommand($sql);
+    $model = $query->queryAll();
+    if ($model) {
+        for ($i = 0; $i <= count($model) - 1; $i++) {
+
+
+            array_push($data, [
+                'qty' => $model[$i]['qty'],
+                'line_total' => $model[$i]['line_total'],
+            ]);
+        }
+    }
+    return $data;
+}
+function getOrderCarOtherCredit($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type,$line_price)
+{
+    $data = [];
+    $sql = "SELECT sum(t1.qty) as qty, sum(t1.line_total) as line_total
+              FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id INNER JOIN delivery_route as t4 on t2.order_channel_id = t4.id
+             WHERE  t2.order_date >=" . "'" . date('Y-m-d H:i:s', strtotime($f_date)) . "'" . " 
+             AND t2.order_date <=" . "'" . date('Y-m-d H:i:s', strtotime($t_date)) . "'" . " 
+             AND t1.product_id=" . $product_id . " 
+             AND t2.status <> 3
+             AND t2.sale_channel_id = 2
+              AND t1.price=" .  $line_price."
+             AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
+
+    $sql .= " AND t2.order_channel_id > 0";
+    $sql .= " AND t4.is_other_branch = 1";
+
+    if ($find_user_id != null) {
+        $sql .= " AND t2.created_by=" . $find_user_id;
+    }
+    if ($is_invoice_req != null) {
+        $sql .= " AND t3.is_invoice_req =" . $is_invoice_req;
+    }
+    $sql .= " GROUP BY t1.product_id";
+
+    $query = \Yii::$app->db->createCommand($sql);
+    $model = $query->queryAll();
+    if ($model) {
+        for ($i = 0; $i <= count($model) - 1; $i++) {
+
+
+            array_push($data, [
+                'qty' => $model[$i]['qty'],
+                'line_total' => $model[$i]['line_total'],
             ]);
         }
     }
@@ -480,6 +662,7 @@ function getProductpricelist($product_id, $f_date, $t_date, $company_id, $branch
 }
 
 ?>
+
 <?php
 $this->registerJsFile(\Yii::$app->request->baseUrl . '/js/jquery.table2excel.js', ['depends' => [\yii\web\JqueryAsset::className()]]);
 $js = <<<JS
