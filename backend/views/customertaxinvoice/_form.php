@@ -40,13 +40,15 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
 <div class="customertaxinvoice-form">
     <?php $form = ActiveForm::begin(); ?>
     <input type="hidden" class="orderline-id-list" name="order_line_id_list" value="">
+    <input type="hidden" class="order-id-list" name="order_id_list" value="">
+    <input type="hidden" class="order-product-id-list" name="order_product_id_list" value="">
     <div class="row">
         <div class="col-lg-4">
             <?= $form->field($model, 'invoice_no')->textInput(['maxlength' => true]) ?>
         </div>
         <div class="col-lg-4">
-            <?= $form->field($model, 'customer_id')->widget(\kartik\select2\Select2::className(), [
-                'data' => \yii\helpers\ArrayHelper::map(\backend\models\Customer::find()->where(['status' => 1 ,'is_invoice_req'=>0])->all(),
+            <?= $form->field($model, 'find_product_id')->widget(\kartik\select2\Select2::className(), [
+                'data' => \yii\helpers\ArrayHelper::map(\backend\models\Product::find()->where(['status' => 1])->all(),
                     'id', 'name'
                 ),
                 'options' => [
@@ -126,7 +128,9 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
                             <input type="text" class="form-control line-total" name="line_total[]"
                                    style="text-align: right;" readonly value="">
                         </td>
-                        <td></td>
+                        <td>
+                            <div class="btn btn-sm btn-danger" onclick="removeline($(this))"><i class="fa fa-trash"></i></div>
+                        </td>
                     </tr>
                 <?php else: ?>
                     <?php foreach ($model_line as $value): ?>
@@ -157,7 +161,9 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
                                        style="text-align: right;" readonly
                                        value="<?= number_format($value->line_total, 2) ?>">
                             </td>
-                            <td></td>
+                            <td>
+                                <div class="btn btn-sm btn-danger" onclick="removeline($(this))"><i class="fa fa-trash"></i></div>
+                            </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php endif; ?>
@@ -243,7 +249,7 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
 
             <div class="modal-body">
                 <div class="row" style="width: 100%">
-                    <div class="col-lg-4">
+                    <div class="col-lg-3">
 
                         <?php
                         echo \kartik\date\DatePicker::widget([
@@ -261,7 +267,7 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
                         ])
                         ?>
                     </div>
-                    <div class="col-lg-4">
+                    <div class="col-lg-3">
 
                         <?php
                         echo \kartik\date\DatePicker::widget([
@@ -278,6 +284,9 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
                             ]
                         ])
                         ?>
+                    </div>
+                    <div class="col-lg-3">
+                        <input type="text" class="form-control find-price" name="find_price" value="">
                     </div>
                     <div class="col-lg-2">
                         <button type="submit" class="btn btn-primary btn-search-submit">
@@ -307,7 +316,7 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
                         <th>เลขที่บิล</th>
                         <th>วันที่</th>
                         <th>รหัสสินค้า</th>
-                        <th>ชื่อสินค้า</th>
+                        <th>ลูกค้า</th>
                         <th>ประเภท</th>
                         <th style="text-align: right">จำนวน</th>
                         <th style="text-align: right">ราคา</th>
@@ -359,7 +368,9 @@ $url_to_delete_emp_item = '';
 $js = <<<JS
 var selecteditem = [];
 var selectedorderlineid = [];
+var selectedorderid = [];
 var selecteditemgroup = [];
+var selectedorderproductid = [];
 $(function(){
    $(".btn-select-product").click(function(){
       showfindorder();
@@ -370,6 +381,7 @@ $(function(){
        var customer_id = $('.selected-customer-id').val();
        var from_date = $("#search-from-date").val();
        var to_date = $("#search-to-date").val();
+       var find_price = $(".find-price").val();
    // alert(customer_id);
   //  alert(from_date);
   //  alert(to_date);
@@ -378,7 +390,7 @@ $(function(){
       dataType: 'html',
       url:'$url_to_searchorder',
       async: false,
-      data: {'customer_id': customer_id,'search_from_date': from_date,'search_to_date': to_date},
+      data: {'customer_id': customer_id,'search_from_date': from_date,'search_to_date': to_date,'find_price':find_price},
       success: function(data){
         //  alert(data);
           $(".table-find-list tbody").html(data);
@@ -434,6 +446,7 @@ function addselecteditem(e) {
          var order_line_price = e.closest('tr').find('.line-find-price').val();
          var order_line_product_group_id = e.closest('tr').find('.line-find-product-group-id').val();
          var order_line_product_group_name = e.closest('tr').find('.line-find-product-group-name').val();
+         var order_product_id = e.closest('tr').find('.line-find-product-id').val();
         ///////
         if (id) {
             // if(checkhasempdaily(id)){
@@ -444,6 +457,7 @@ function addselecteditem(e) {
                 var obj = {};
                 obj['id'] = id;
                 obj['code'] = order_id;
+                obj['product_id'] = order_product_id;
                 obj['order_line_id'] = id;
                 obj['product_group_id'] = order_line_product_group_id;
                 obj['qty'] = order_line_qty;
@@ -451,6 +465,8 @@ function addselecteditem(e) {
                 obj['total'] = (order_line_qty * order_line_price);
                 selecteditem.push(obj);
                 selectedorderlineid.push(obj['id']);
+                selectedorderid.push(obj['code']);
+                selectedorderproductid.push(obj['product_id']);
                     var obj_after = {};
                     obj_after['product_group_id'] = order_line_product_group_id;
                     obj_after['product_group_name'] = order_line_product_group_name;
@@ -469,12 +485,13 @@ function addselecteditem(e) {
                     
                     if(selecteditemgroup.length > 0){
                         for(var x=0;x<=selecteditemgroup.length-1;x++){
+                            var line_total_amount =  parseFloat(selecteditemgroup[x]["qty"]) *  parseFloat(selecteditemgroup[x]["price"]);
                             afterselected +='<tr>';
                             afterselected +='<td><input type="hidden" class="product-group-line-id" value="'+ selecteditemgroup[x]['product_group_id'] +'">'+ selecteditemgroup[x]["product_group_name"]+'</td>';
                             afterselected +='<td style="text-align: right;">'+ selecteditemgroup[x]["qty"]+'</td>';
                             afterselected +='<td style="text-align: right;">'+ selecteditemgroup[x]["price"]+'</td>';
                             afterselected +='<td style="text-align: right;">'+ selecteditemgroup[x]["discount"]+'</td>';
-                            afterselected +='<td style="text-align: right;">'+ selecteditemgroup[x]["total"]+'</td>';
+                            afterselected +='<td style="text-align: right;">'+ line_total_amount+'</td>';
                             afterselected +='</tr>';
                         }
                         
@@ -531,6 +548,9 @@ function addselecteditem(e) {
             }
         }
         $(".orderline-id-list").val(selectedorderlineid);
+        $(".order-id-list").val(selectedorderid);
+        $(".order-product-id-list").val(selectedorderproductid);
+        
     }
     function deleteorderlineselected(id, qty){
        $.each(selecteditemgroup, function(i, el){
@@ -701,42 +721,20 @@ function addselecteditem(e) {
   }
   
   function removeline(e){
-      var ids = e.closest('tr').find('.line-car-daily-id').val();
-      var row = e.parent().parent();
-      
-      if(ids){
+     
           if(confirm('ต้องการลบรายการนี้ใช่หรือไม่ ?')){
-           $.ajax({
-              'type':'post',
-              'dataType': 'html',
-              'async': false,
-              'url': "$url_to_delete_emp_item",
-              'data': {"id": ids},
-              'success': function(data) {
-                  //  alert(data);
-                   if(data > 0){
-                       if($(".table-car-emp tbody tr").length == 1){
-                           row.closest("tr").find(".line-car-emp-code").val('');
-                           row.closest("tr").find(".line-car-emp-name").val('');
-                           row.closest("tr").find(".line-car-emp-id").val('');
-                       }else{
-                            e.parent().parent().remove();
-                       }
-                      
-                   }
-                  // $("#findModal").modal("show");
-                 }
-        });   
+               if($("#table-list tbody tr").length == 1){
+                   e.closest("tr").find(".line-product-group-id").val('');
+                   e.closest("tr").find(".line-product-group-name").val('');
+                   e.closest("tr").find(".line-qty").val('');
+                   e.closest("tr").find(".line-price").val('');
+                   e.closest("tr").find(".line-total").val('');
+                 }else{
+                   e.parent().parent().remove();
+               }
           }
-      }else{
-         if($(".table-car-emp tbody tr").length == 1){
-                           row.closest("tr").find(".line-car-emp-code").val('');
-                           row.closest("tr").find(".line-car-emp-name").val('');
-                           row.closest("tr").find(".line-car-emp-id").val('');
-                       }else{
-                            e.parent().parent().remove();
-                       }
-      }
+          
+          
       var linenum = 0;
        $("#table-list tbody tr").each(function () {
             linenum += 1;

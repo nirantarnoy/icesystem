@@ -78,6 +78,8 @@ class CustomertaxinvoiceController extends Controller
         if ($model->load(Yii::$app->request->post())) {
 
             $order_line_id_list = \Yii::$app->request->post('order_line_id_list');
+            $order_id_list = \Yii::$app->request->post('order_id_list');
+            $order_product_id_list = \Yii::$app->request->post('order_product_id_list');
             $line_product_group_id = \Yii::$app->request->post('line_product_group_id');
             $line_qty = \Yii::$app->request->post('line_qty');
             $line_price = \Yii::$app->request->post('line_price');
@@ -95,6 +97,8 @@ class CustomertaxinvoiceController extends Controller
             if($x2!=null && count($x2)>1){
                 $pay_date = $x2[2].'-'.$x2[1].'-'.$x2[0];
             }
+
+            $find_product_group_id = \backend\models\Product::findGroupId($model->find_product_id);
 
             $model->invoice_date = date('Y-m-d', strtotime($inv_date));
             $model->payment_date = date('Y-m-d', strtotime($pay_date));
@@ -129,6 +133,22 @@ class CustomertaxinvoiceController extends Controller
 //                        }
 //                    }
 //                }
+                if ($order_id_list != null) {
+                    $arr = explode(',', $order_id_list);
+                    $arr_product = explode(',', $order_product_id_list);
+                    if ($arr != null) {
+                        for ($x = 0; $x <= count($arr) - 1; $x++) {
+                            $model_x = new \common\models\OrderTaxTemp();
+                            $model_x->order_id = $arr[$x];
+                            $model_x->tax_invoice_id = $model->id;
+                            $model_x->product_group_id = $find_product_group_id;
+                            $model_x->product_id = $arr_product[$x];
+                            if ($model_x->save(false)) {
+
+                            }
+                        }
+                    }
+                }
             }
             return $this->redirect(['view', 'id' => $model->id]);
         }
@@ -179,6 +199,8 @@ class CustomertaxinvoiceController extends Controller
      */
     public function actionDelete($id)
     {
+        \common\models\OrderTaxTemp::deleteAll(['tax_invoice_id'=>$id]);
+        \common\models\CustomerTaxInvoiceLine::deleteAll(['tax_invoice_id'=>$id]);
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
@@ -205,51 +227,122 @@ class CustomertaxinvoiceController extends Controller
         $customer_id = 210;// \Yii::$app->request->post('customer_id');
        // $customer_id =  \Yii::$app->request->post('customer_id');
         $html = '';
-        if ($customer_id > 0) {
-            $model = \backend\models\Orders::find()->select(['id', 'order_date'])->where(['customer_id' => $customer_id])->limit(50)->all();
-            if ($model) {
-                foreach ($model as $x_value) {
-                    //$html .= $x_value->id."<br />";
-                    $modelline = \backend\models\Orderline::find()->where(['order_id' => $x_value->id])->andFilterWhere(['is','tax_status',new \yii\db\Expression('null')])->all();
-                    if ($modelline) {
-                        foreach ($modelline as $value) {
-                            $product_group_name = \backend\models\Product::findGroupName($value->product_id);
-                            $html .= '<tr>';
-                            $html .= '<td style="text-align: center">
-                            <div class="btn btn-outline-success btn-sm" onclick="addselecteditem($(this))" data-var="' . $value->id . '">เลือก</div>
-                            <input type="hidden" class="line-find-order-id" value="' . $value->order_id . '">
-                            <input type="hidden" class="line-find-product-id" value="' . $value->product_id . '">
-                            <input type="hidden" class="line-find-qty" value="' . $value->qty . '">
-                            <input type="hidden" class="line-find-price" value="' . $value->price . '">
-                            <input type="hidden" class="line-find-product-group-id" value="' . \backend\models\Product::findGroupId($value->product_id) . '">
-                            <input type="hidden" class="line-find-product-group-name" value="' . $product_group_name . '">
-                           </td>';
-                            $html .= '<td style="text-align: left">' . \backend\models\Orders::getNumber($value->order_id) . '</td>';
-                            $html .= '<td style="text-align: left">' . date('d-m-Y', strtotime($x_value->order_date)) . '</td>';
-                            $html .= '<td style="text-align: left">' . \backend\models\Product::findCode($value->product_id) . '</td>';
-                            $html .= '<td style="text-align: left">' . \backend\models\Product::findName($value->product_id) . '</td>';
-                            $html .= '<td style="text-align: left">' . $product_group_name . '</td>';
-                            $html .= '<td style="text-align: right">' . number_format($value->qty, 1) . '</td>';
-                            $html .= '<td style="text-align: right">' . number_format($value->price, 1) . '</td>';
-                            $html .= '<td style="text-align: right">' . number_format($value->line_total, 1) . '</td>';
-                            $html .= '</tr>';
-                        }
-                    }
-                }
-
-            }
-        }
+//        if ($customer_id > 0) {
+//            $model = \backend\models\Orders::find()->select(['id', 'order_date'])->where(['customer_id' => $customer_id])->limit(50)->all();
+//            if ($model) {
+//                foreach ($model as $x_value) {
+//                    //$html .= $x_value->id."<br />";
+//                    $modelline = \backend\models\Orderline::find()->where(['order_id' => $x_value->id])->andFilterWhere(['is','tax_status',new \yii\db\Expression('null')])->all();
+//                    if ($modelline) {
+//                        foreach ($modelline as $value) {
+//                            $product_group_name = \backend\models\Product::findGroupName($value->product_id);
+//                            $html .= '<tr>';
+//                            $html .= '<td style="text-align: center">
+//                            <div class="btn btn-outline-success btn-sm" onclick="addselecteditem($(this))" data-var="' . $value->id . '">เลือก</div>
+//                            <input type="hidden" class="line-find-order-id" value="' . $value->order_id . '">
+//                            <input type="hidden" class="line-find-product-id" value="' . $value->product_id . '">
+//                            <input type="hidden" class="line-find-qty" value="' . $value->qty . '">
+//                            <input type="hidden" class="line-find-price" value="' . $value->price . '">
+//                            <input type="hidden" class="line-find-product-group-id" value="' . \backend\models\Product::findGroupId($value->product_id) . '">
+//                            <input type="hidden" class="line-find-product-group-name" value="' . $product_group_name . '">
+//                           </td>';
+//                            $html .= '<td style="text-align: left">' . \backend\models\Orders::getNumber($value->order_id) . '</td>';
+//                            $html .= '<td style="text-align: left">' . date('d-m-Y', strtotime($x_value->order_date)) . '</td>';
+//                            $html .= '<td style="text-align: left">' . \backend\models\Product::findCode($value->product_id) . '</td>';
+//                            $html .= '<td style="text-align: left">' . \backend\models\Product::findName($value->product_id) . '</td>';
+//                            $html .= '<td style="text-align: left">' . $product_group_name . '</td>';
+//                            $html .= '<td style="text-align: right">' . number_format($value->qty, 1) . '</td>';
+//                            $html .= '<td style="text-align: right">' . number_format($value->price, 1) . '</td>';
+//                            $html .= '<td style="text-align: right">' . number_format($value->line_total, 1) . '</td>';
+//                            $html .= '</tr>';
+//                        }
+//                    }
+//                }
+//
+//            }
+//        }
         echo $html;
     }
+
+//    public function actionOrdersearch(){
+//        $from_date = \Yii::$app->request->post('search_from_date');
+//        $to_date = \Yii::$app->request->post('search_to_date');
+//        $customer_id = \Yii::$app->request->post('customer_id');
+//        //  $customer_id =  \Yii::$app->request->post('customer_id');
+//        $html = '';
+//
+//        if ($customer_id != 0 && $from_date != null && $to_date) {
+//
+//            $search_from_date = null;
+//            $search_to_date = null;
+//
+//            $x1 = explode('/',$from_date);
+//            $x2 = explode('/',$to_date);
+//            if($x1!=null && count($x1)>1){
+//                $search_from_date = $x1[2].'-'.$x1[1].'-'.$x1[0];
+//            }
+//            if($x2!=null && count($x2)>1){
+//                $search_to_date = $x2[2].'-'.$x2[1].'-'.$x2[0];
+//            }
+//
+//          //  $html.= $search_from_date. ' and '.$search_to_date;
+//
+//            $model = \backend\models\Orders::find()->select(['id', 'order_date'])->where(['customer_id' => $customer_id])->andFilterWhere(['>=','date(order_date)',date('Y-m-d',strtotime($search_from_date))])->andFilterWhere(['<=','date(order_date)',date('Y-m-d',strtotime($search_to_date))])->limit(25)->all();
+//            if ($model) {
+//                foreach ($model as $x_value) {
+////                    $html .= $x_value->id;
+//                    $modelline = \backend\models\Orderline::find()->where(['order_id' => $x_value->id])->andFilterWhere(['is','tax_status',new \yii\db\Expression('null')])->all();
+//                    if ($modelline) {
+//                        foreach ($modelline as $value) {
+//                            $product_group_name = \backend\models\Product::findGroupName($value->product_id);
+//                            $html .= '<tr>';
+//                            $html .= '<td style="text-align: center">
+//                            <div class="btn btn-outline-success btn-sm" onclick="addselecteditem($(this))" data-var="' . $value->id . '">เลือก</div>
+//                            <input type="hidden" class="line-find-order-id" value="' . $value->order_id . '">
+//                            <input type="hidden" class="line-find-product-id" value="' . $value->product_id . '">
+//                            <input type="hidden" class="line-find-qty" value="' . $value->qty . '">
+//                            <input type="hidden" class="line-find-price" value="' . $value->price . '">
+//                            <input type="hidden" class="line-find-product-group-id" value="' . \backend\models\Product::findGroupId($value->product_id) . '">
+//                            <input type="hidden" class="line-find-product-group-name" value="' . $product_group_name . '">
+//                           </td>';
+//                            $html .= '<td style="text-align: left">' . \backend\models\Orders::getNumber($value->order_id) . '</td>';
+//                            $html .= '<td style="text-align: left">' . date('d-m-Y', strtotime($x_value->order_date)) . '</td>';
+//                            $html .= '<td style="text-align: left">' . \backend\models\Product::findCode($value->product_id) . '</td>';
+//                            $html .= '<td style="text-align: left">' . \backend\models\Product::findName($value->product_id) . '</td>';
+//                            $html .= '<td style="text-align: left">' . $product_group_name . '</td>';
+//                            $html .= '<td style="text-align: right">' . number_format($value->qty, 1) . '</td>';
+//                            $html .= '<td style="text-align: right">' . number_format($value->price, 1) . '</td>';
+//                            $html .= '<td style="text-align: right">' . number_format($value->line_total, 1) . '</td>';
+//                            $html .= '</tr>';
+//                        }
+//                    }
+//                }
+//            }else{
+//                $html.='<tr>';
+//                $html.='<td colspan="9" style="text-align: center;color: red;">';
+//                $html.='ไม่พบข้อมูล inner';
+//                $html.='</td>';
+//                $html.='</tr>';
+//            }
+//        }else{
+//            $html.='<tr>';
+//            $html.='<td colspan="9" style="text-align: center;color: red;">';
+//            $html.='ไม่พบข้อมูล outer';
+//            $html.='</td>';
+//            $html.='</tr>';
+//        }
+//        echo $html;
+//    }
 
     public function actionOrdersearch(){
         $from_date = \Yii::$app->request->post('search_from_date');
         $to_date = \Yii::$app->request->post('search_to_date');
-        $customer_id = \Yii::$app->request->post('customer_id');
+        $product_id = \Yii::$app->request->post('customer_id'); // new pattern
+        $price = \Yii::$app->request->post('find_price'); // new pattern
         //  $customer_id =  \Yii::$app->request->post('customer_id');
-        $html = '';
+        $html = 'no data';
 
-        if ($customer_id != 0 && $from_date != null && $to_date) {
+        if ($product_id != 0 && $from_date != null && $to_date) {
 
             $search_from_date = null;
             $search_to_date = null;
@@ -263,37 +356,86 @@ class CustomertaxinvoiceController extends Controller
                 $search_to_date = $x2[2].'-'.$x2[1].'-'.$x2[0];
             }
 
-          //  $html.= $search_from_date. ' and '.$search_to_date;
+            //  $html.= $search_from_date. ' and '.$search_to_date;
 
-            $model = \backend\models\Orders::find()->select(['id', 'order_date'])->where(['customer_id' => $customer_id])->andFilterWhere(['>=','date(order_date)',date('Y-m-d',strtotime($search_from_date))])->andFilterWhere(['<=','date(order_date)',date('Y-m-d',strtotime($search_to_date))])->limit(25)->all();
+
+            $data = [];
+            $sql = "SELECT t1.id,t1.order_id,t1.product_id,t1.price,t1.qty,t2.order_date,t1.line_total,t2.customer_id,t1.customer_id as t1_customer_id,t2.order_channel_id,t2.sale_from_mobile
+              FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id
+             WHERE  date(t2.order_date) >=" . "'" . date('Y-m-d', strtotime($search_from_date)) . "'" . " 
+             AND date(t2.order_date) <=" . "'" . date('Y-m-d', strtotime($search_to_date)) . "'" . " 
+             AND t1.product_id=" . $product_id . " 
+             AND t2.status <> 3
+             AND t1.qty > 0";
+
+            if($price > 0){
+                $sql .= " AND t1.price =".(float)$price;
+            }
+
+
+            $sql .= " ORDER BY t1.id asc";
+            $query = \Yii::$app->db->createCommand($sql);
+            $model = $query->queryAll();
             if ($model) {
-                foreach ($model as $x_value) {
-//                    $html .= $x_value->id;
-                    $modelline = \backend\models\Orderline::find()->where(['order_id' => $x_value->id])->andFilterWhere(['is','tax_status',new \yii\db\Expression('null')])->all();
-                    if ($modelline) {
-                        foreach ($modelline as $value) {
-                            $product_group_name = \backend\models\Product::findGroupName($value->product_id);
-                            $html .= '<tr>';
-                            $html .= '<td style="text-align: center">
-                            <div class="btn btn-outline-success btn-sm" onclick="addselecteditem($(this))" data-var="' . $value->id . '">เลือก</div>
-                            <input type="hidden" class="line-find-order-id" value="' . $value->order_id . '">
-                            <input type="hidden" class="line-find-product-id" value="' . $value->product_id . '">
-                            <input type="hidden" class="line-find-qty" value="' . $value->qty . '">
-                            <input type="hidden" class="line-find-price" value="' . $value->price . '">
-                            <input type="hidden" class="line-find-product-group-id" value="' . \backend\models\Product::findGroupId($value->product_id) . '">
-                            <input type="hidden" class="line-find-product-group-name" value="' . $product_group_name . '">
-                           </td>';
-                            $html .= '<td style="text-align: left">' . \backend\models\Orders::getNumber($value->order_id) . '</td>';
-                            $html .= '<td style="text-align: left">' . date('d-m-Y', strtotime($x_value->order_date)) . '</td>';
-                            $html .= '<td style="text-align: left">' . \backend\models\Product::findCode($value->product_id) . '</td>';
-                            $html .= '<td style="text-align: left">' . \backend\models\Product::findName($value->product_id) . '</td>';
-                            $html .= '<td style="text-align: left">' . $product_group_name . '</td>';
-                            $html .= '<td style="text-align: right">' . number_format($value->qty, 1) . '</td>';
-                            $html .= '<td style="text-align: right">' . number_format($value->price, 1) . '</td>';
-                            $html .= '<td style="text-align: right">' . number_format($value->line_total, 1) . '</td>';
-                            $html .= '</tr>';
+                for ($i = 0; $i <= count($model) - 1; $i++) {
+                    $product_group_id = \backend\models\Product::findGroupId($product_id);
+                    $model_check_already = \common\models\OrderTaxTemp::find()->where(['order_id'=>$model[$i]['order_id'],'product_group_id'=>$product_group_id,'product_id'=>$model[$i]['product_id']])->one();
+                    if($model_check_already)continue;
+
+                    $product_group_name = \backend\models\Product::findGroupName($model[$i]['product_id']);
+                    $customer_name = '';
+
+                    $check_customer_id = 0;
+
+                    if($model[$i]['order_channel_id'] != null || $model[$i]['order_channel_id'] > 0){
+                        if($model[$i]['sale_from_mobile'] == 1){
+                            $customer_name =  \backend\models\Customer::findName($model[$i]['t1_customer_id']);
+                            $check_customer_id = $model[$i]['t1_customer_id'];
+                        }else{
+                            $customer_name =  \backend\models\Deliveryroute::findName($model[$i]['order_channel_id']);
+                            $check_customer_id = 'xxx';
+                        }
+
+                    }else{
+                        if($model[$i]['customer_id'] == null || $model[$i]['customer_id'] == 0 || $model[$i]['customer_id'] == '' ){
+
+                            $customer_name = \backend\models\Customer::findName($model[$i]['t1_customer_id']);
+                            $check_customer_id = $model[$i]['t1_customer_id'];
+
+                        } else if($model[$i]['customer_id'] != null || $model[$i]['customer_id'] != 0 || $model[$i]['customer_id'] != ''){
+
+                            $customer_name = \backend\models\Customer::findName($model[$i]['customer_id']);
+                            $check_customer_id = $model[$i]['customer_id'];
                         }
                     }
+
+                    if($check_customer_id !='xxx'){
+                        $model_customer_reg_inv = \backend\models\Customer::find()->where(['id'=>$check_customer_id])->one();
+                        if($model_customer_reg_inv){
+                            if($model_customer_reg_inv->is_invoice_req == 1)continue;
+                        }
+                    }
+
+
+                    $html .= '<tr>';
+                    $html .= '<td style="text-align: center">
+                            <div class="btn btn-outline-success btn-sm" onclick="addselecteditem($(this))" data-var="' . $model[$i]['id'] . '">เลือก</div>
+                            <input type="hidden" class="line-find-order-id" value="' . $model[$i]['order_id'] . '">
+                            <input type="hidden" class="line-find-product-id" value="' . $model[$i]['product_id'] . '">
+                            <input type="hidden" class="line-find-qty" value="' . $model[$i]['qty'] . '">
+                            <input type="hidden" class="line-find-price" value="' . $model[$i]['price'] . '">
+                            <input type="hidden" class="line-find-product-group-id" value="' . \backend\models\Product::findGroupId($model[$i]['product_id']) . '">
+                            <input type="hidden" class="line-find-product-group-name" value="' . $product_group_name . '">
+                           </td>';
+                    $html .= '<td style="text-align: left">' . \backend\models\Orders::getNumber($model[$i]['order_id']) . '</td>';
+                    $html .= '<td style="text-align: left">' . date('d-m-Y', strtotime($model[$i]['order_date'])) . '</td>';
+                    $html .= '<td style="text-align: left">' . \backend\models\Product::findCode($model[$i]['product_id']) . '</td>';
+                    $html .= '<td style="text-align: left">' . $customer_name . '</td>';
+                    $html .= '<td style="text-align: left">' . $product_group_name . '</td>';
+                    $html .= '<td style="text-align: right">' . number_format($model[$i]['qty'], 1) . '</td>';
+                    $html .= '<td style="text-align: right">' . number_format($model[$i]['price'], 1) . '</td>';
+                    $html .= '<td style="text-align: right">' . number_format((float)$model[$i]['qty'] * (float)$model[$i]['price'], 2) . '</td>';
+                    $html .= '</tr>';
                 }
             }else{
                 $html.='<tr>';
@@ -302,6 +444,8 @@ class CustomertaxinvoiceController extends Controller
                 $html.='</td>';
                 $html.='</tr>';
             }
+
+
         }else{
             $html.='<tr>';
             $html.='<td colspan="9" style="text-align: center;color: red;">';
@@ -416,5 +560,16 @@ class CustomertaxinvoiceController extends Controller
         $session = \Yii::$app->session;
         $session->setFlash('msg-slip-tax-full', 'slip_tax_full.pdf');
         return $this->redirect(['customertaxinvoice/update','id'=>$id]);
+    }
+
+    public function actionPrintcheck(){
+        $from_date = \Yii::$app->request->post('from_date');
+        $to_date = \Yii::$app->request->post('to_date');
+
+        return $this->render('_printcheck',[
+            'from_date' => $from_date,
+            'to_date' => $to_date,
+        ]);
+
     }
 }

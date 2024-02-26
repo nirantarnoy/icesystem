@@ -11,6 +11,7 @@ use backend\models\Customertaxinvoice;
  */
 class CustomertaxinvoiceSearch extends Customertaxinvoice
 {
+    public $from_date,$to_date;
     /**
      * {@inheritdoc}
      */
@@ -18,7 +19,7 @@ class CustomertaxinvoiceSearch extends Customertaxinvoice
     {
         return [
             [['id', 'customer_id', 'payment_term_id', 'status', 'created_at', 'created_by', 'updated_at', 'updated_by'], 'integer'],
-            [['invoice_no', 'invoice_date', 'payment_date', 'remark', 'total_text'], 'safe'],
+            [['invoice_no', 'invoice_date', 'payment_date', 'remark', 'total_text','from_date','to_date'], 'safe'],
             [['total_amount', 'vat_amount', 'net_amount'], 'number'],
         ];
     }
@@ -73,6 +74,21 @@ class CustomertaxinvoiceSearch extends Customertaxinvoice
             'vat_amount' => $this->vat_amount,
             'net_amount' => $this->net_amount,
         ]);
+
+        if($this->from_date != null && $this->to_date){
+            $xfdate = explode('-',$this->from_date);
+            $xtdate = explode('-',$this->to_date);
+            $fdate = date('Y-m-d');
+            $tdate = date('Y-m-d');
+            if(count($xfdate)>1){
+                $fdate = $xfdate[2].'/'.$xfdate[1].'/'.$xfdate[0];
+            }
+            if(count($xtdate)>1){
+                $tdate = $xtdate[2].'/'.$xtdate[1].'/'.$xtdate[0];
+            }
+
+            $query->andFilterWhere(['>=','date(invoice_date)',date('Y-m-d',strtotime($fdate))])->andFilterWhere(['<=','date(invoice_date)',date('Y-m-d',strtotime($tdate))]);
+        }
 
         $query->andFilterWhere(['like', 'invoice_no', $this->invoice_no])
             ->andFilterWhere(['like', 'remark', $this->remark])

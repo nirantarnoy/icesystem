@@ -161,7 +161,7 @@ class PaymentreceiveController extends Controller
 
                             if ($model_line->save(false)) {
                                 \common\models\Orders::updateAll(['payment_status'=>1],['id'=>$line_order[$i]]);
-                                $this->updatePaymenttransline($model->customer_id, $line_order[$i], $line_pay[$i], 1);
+                                //$this->updatePaymenttransline($model->customer_id, $line_order[$i], $line_pay[$i], 1); // deprecate
                             }
                         }
                     }
@@ -661,7 +661,7 @@ class PaymentreceiveController extends Controller
         }
         //  $find_sale_type = \Yii::$app->request->post('find_sale_type');
         $find_customer_id = \Yii::$app->request->post('find_customer_id');
-        return $this->render('_print_customer_loan', [
+        return $this->render('_print_customer_loan_new', [
             'from_date' => $from_date,
             'to_date' => $to_date,
             'is_find_date' => $is_find_date,

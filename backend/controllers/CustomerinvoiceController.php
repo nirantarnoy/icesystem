@@ -184,11 +184,13 @@ class CustomerinvoiceController extends Controller
 //                                        $model_update_order->save(false);
 //                                    }
 
-                                    $model_wait_pey = new \common\models\OrderWaitPayment();
-                                    $model_wait_pey->order_id = $xlist[$i];
-                                    $model_wait_pey->created_at = time();
-                                    $model_wait_pey->created_by = \Yii::$app->user->id;
-                                    $model_wait_pey->save(false);
+                                    if(\common\models\Orders::updateAll(['create_invoice'=>1],['id'=>$xlist[$i]])){
+                                        $model_wait_pey = new \common\models\OrderWaitPayment();
+                                        $model_wait_pey->order_id = $xlist[$i];
+                                        $model_wait_pey->created_at = time();
+                                        $model_wait_pey->created_by = \Yii::$app->user->id;
+                                        $model_wait_pey->save(false);
+                                    }
                                 }
                             }
                         } else {
@@ -555,7 +557,8 @@ class CustomerinvoiceController extends Controller
         $res = 0;
         $data = [];
        // $model = \common\models\OrderWaitPayment::find()->select(['order_id'])->limit(5)->all();
-        $model = \common\models\OrderWaitPayment::find()->select(['order_id'])->limit(5)->orderBy(['id'=>SORT_ASC])->all();
+      //  $model = \common\models\OrderWaitPayment::find()->select(['order_id'])->limit(5)->orderBy(['id'=>SORT_ASC])->all();
+        $model = \common\models\OrderWaitPayment::find()->select(['order_id'])->orderBy(['id'=>SORT_ASC])->all();
         if($model){
             foreach($model as $value){
               //  $model_update_order = \common\models\Orders::find()->where(['id'=>$value->order_id])->andFilterWhere(['!=','create_invoice',1])->one();
