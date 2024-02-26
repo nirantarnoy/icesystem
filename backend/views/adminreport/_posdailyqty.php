@@ -427,6 +427,22 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
             $balance_out_total_qty[13] = 0;
             $balance_out_total_qty[14] = 0;
 
+            $balance_in_total_qty[0] = 0;
+            $balance_in_total_qty[1] = 0;
+            $balance_in_total_qty[2] = 0;
+            $balance_in_total_qty[3] = 0;
+            $balance_in_total_qty[4] = 0;
+            $balance_in_total_qty[5] = 0;
+            $balance_in_total_qty[6] = 0;
+            $balance_in_total_qty[7] = 0;
+            $balance_in_total_qty[8] = 0;
+            $balance_in_total_qty[9] = 0;
+            $balance_in_total_qty[10] = 0;
+            $balance_in_total_qty[11] = 0;
+            $balance_in_total_qty[12] = 0;
+            $balance_in_total_qty[13] = 0;
+            $balance_in_total_qty[14] = 0;
+
             $count_total_qty[0] = 0;
             $count_total_qty[1] = 0;
             $count_total_qty[2] = 0;
@@ -468,47 +484,49 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
 
             </tr>
             <tr style="font-weight: bold;">
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;">รายการ</td>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width:10%">รายการ</td>
                 <!--            <td style="text-align: center;padding: 0px;border: 1px solid grey">จำนวน</td>-->
                 <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;font-size: 18px;"><b><?= \backend\models\Product::findCode($product_header[$y]) ?></b></td>
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;font-size: 18px;width: 10%"><b><?= \backend\models\Product::findCode($product_header[$y]) ?></b></td>
                 <?php endfor; ?>
             </tr>
             <tr>
-                <td style="padding: 8px;border: 1px solid grey;">ยอดยกมา</td>
+                <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดยกมา</td>
                 <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                     <?php
                     $qty = getBalanceInQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
                     $balance_in_qty[$y] = ($balance_in_qty[$y] + $qty);
                     $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                     ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $balance_in_qty[$y]==0?'-':number_format($balance_in_qty[$y], 0) ?></td>
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $balance_in_qty[$y]==0?'-':number_format($balance_in_qty[$y], 0) ?></td>
                 <?php endfor; ?>
             </tr>
             <tr>
-                <td style="padding: 8px;border: 1px solid grey;">ยอดผลิต</td>
+                <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดผลิต</td>
                 <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                     <?php
                     $qty = getProdrecQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
                     $prodrec_qty[$y] = ($prodrec_qty[$y] + $qty);
+                    $balance_in_qty[$y] = ($balance_in_qty[$y] + $qty);
                     $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                     ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $prodrec_qty[$y]==0?'-':number_format($prodrec_qty[$y], 0) ?></td>
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $prodrec_qty[$y]==0?'-':number_format($prodrec_qty[$y], 0) ?></td>
                 <?php endfor; ?>
             </tr>
             <tr>
-                <td style="padding: 8px;border: 1px solid grey;">รับ Reprocess</td>
+                <td style="padding: 8px;border: 1px solid grey;width: 10%">รับ Reprocess</td>
                 <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                     <?php
                     $qty = getProdReprocess(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
                     $prodrec_re_qty[$y] = ($prodrec_re_qty[$y] + $qty);
+                    $balance_in_qty[$y] = ($balance_in_qty[$y] + $qty);
                     $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                     ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $prodrec_re_qty[$y]==0?'-':number_format($prodrec_re_qty[$y], 0) ?></td>
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $prodrec_re_qty[$y]==0?'-':number_format($prodrec_re_qty[$y], 0) ?></td>
                 <?php endfor; ?>
             </tr>
             <tr>
-            <td style="padding: 8px;border: 1px solid grey;">รับ Reprocess รถ + อื่นๆ</td>
+            <td style="padding: 8px;border: 1px solid grey;width: 10%">รับ Reprocess รถ + อื่นๆ</td>
             <?php for ($y = 0;
                        $y <= count($product_header) - 1;
                        $y++): ?>
@@ -516,60 +534,73 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                     <?php
                     $qty_reprocess_car = getReturnQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
                     $issue_car_total_qty[$y] = ($issue_car_total_qty[$y] + $qty_reprocess_car);
-                    $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty_reprocess_car);
+                    $balance_in_qty[$y] = ($balance_in_qty[$y] + $qty_reprocess_car);
+                   $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty_reprocess_car);
                     ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $issue_car_total_qty[$y]==0?'-':number_format($issue_car_total_qty[$y], 0) ?></td>
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $issue_car_total_qty[$y]==0?'-':number_format($issue_car_total_qty[$y], 0) ?></td>
                 <?php endfor; ?>
                 </tr>
                 <tr>
-                    <td style="padding: 8px;border: 1px solid grey;">รับโอนต่างสาขา</td>
+                    <td style="padding: 8px;border: 1px solid grey;width: 10%">รับโอนต่างสาขา</td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                     <?php
                         $qty = getIssueTransferQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
                         $issue_transfer_total_qty[$y] = ( $issue_transfer_total_qty[$y] + $qty);
+                        $balance_in_qty[$y] = ($balance_in_qty[$y] + $qty);
                         $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                         ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;">
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
                             <b><?= $issue_transfer_total_qty[$y]==0?'-':number_format($issue_transfer_total_qty[$y], 0) ?></b>
                         </td>
                     <?php endfor; ?>
                 </tr>
                 <tr style="background-color: lightblue">
-                    <td style="padding: 8px;border: 1px solid grey;"><b>ยอดรวม</b></td>
+                    <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>ยอดรวม</b></td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;">
-                            <b><?= ($balance_in_qty[$y] + $prodrec_qty[$y] + $prodrec_re_qty[$y] + $issue_car_total_qty[$y] + $issue_transfer_total_qty[$y])==0?'-':number_format($balance_in_qty[$y] + $prodrec_qty[$y] + $prodrec_re_qty[$y] + $issue_car_total_qty[$y] + $issue_transfer_total_qty[$y], 0) ?></b>
+                        <?php $balance_in_total_qty[$y] = $balance_in_qty[$y];?>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
+                            <b><?= ($balance_in_total_qty[$y])==0?'-':number_format($balance_in_total_qty[$y], 0) ?></b>
                         </td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
-                    <td style="padding: 8px;border: 1px solid grey;">หน้าบ้าน เงินสด</td>
+                    <td style="padding: 8px;border: 1px solid grey;width: 10%">หน้าบ้าน เงินสด</td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                         <?php
                         $qty = getCashQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
                         $sale_total_qty[$y] = ($sale_total_qty[$y] + $qty);
                         $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
                         ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $qty==0?'-':number_format($qty, 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $qty==0?'-':number_format($qty, 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
                     <td style="padding: 8px;border: 1px solid grey;">หน้าบ้าน เงินเชื่อ</td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                         <?php
+                        $car_issue_qty = getIssueCarQty(date('Y-m-d', strtotime($from_date)), $product_header[$y],$line_value->user_id);
                         $qty = getCreditQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
-                        $sale_total_qty[$y] = ($sale_total_qty[$y] + $qty);
-                        $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
+                        $show_qty  = 0;
+                        if($qty > 0 && $qty >=$car_issue_qty){
+                            $show_qty = ($qty-$car_issue_qty);
+                            $sale_total_qty[$y] = ($sale_total_qty[$y] + ($qty-$car_issue_qty));
+                            $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($qty-$car_issue_qty));
+                        }else{
+                            $show_qty = ($qty);
+                           $sale_total_qty[$y] = ($sale_total_qty[$y] + ($qty));
+                            $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($car_issue_qty));
+                        }
+
                         ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $qty==0?'-':number_format($qty, 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= ($show_qty)==0?'-':number_format(($show_qty), 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
                     <td style="padding: 8px;border: 1px solid grey;">ยอดเบิกคนรถ</td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                         <?php
-                        $qty = getIssueCarQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
-                        $issue_car_total_qty[$y] = ($issue_car_total_qty[$y] + $qty);
+                        $qty = getIssueCarQty(date('Y-m-d', strtotime($from_date)), $product_header[$y],$line_value->user_id);
+                        $issue_car_total_qty[$y] = $qty;
                         $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
                         ?>
                         <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $issue_car_total_qty[$y]==0?'-':number_format($issue_car_total_qty[$y], 0) ?></td>
@@ -613,6 +644,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                 <tr style="background-color: orange">
                     <td style="padding: 8px;border: 1px solid grey;"><b>ยอดรวมออกน้ำแข็ง</b></td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
+                    <?php $balance_out_total_qty[$y] =($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y]) ?>
                         <td style="text-align: center;padding: 8px;border: 1px solid grey;">
                             <b><?=($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y])==0?'-': number_format($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y], 0) ?></b>
                         </td>
@@ -621,7 +653,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                 <tr>
                     <td style="padding: 8px;border: 1px solid grey;">เหลือยกไป</td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $balance_out_total_qty[$y]==0?'-':number_format($balance_out_total_qty[$y], 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= ($balance_in_total_qty[$y] - $balance_out_total_qty[$y])==0?'-':number_format(($balance_in_total_qty[$y] - $balance_out_total_qty[$y]), 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
@@ -638,7 +670,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
                     <td style="padding: 8px;border: 1px solid grey;"><b>เกิน-ขาด</b></td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                         <td style="text-align: center;padding: 8px;border: 1px solid grey;">
-                            <b><?= ($count_total_qty[$y] - $balance_out_total_qty[$y])==0?'-':number_format(($count_total_qty[$y] - $balance_out_total_qty[$y]), 0) ?></b>
+                            <b><?= ($count_total_qty[$y] - ($balance_in_total_qty[$y] - $balance_out_total_qty[$y]))==0?'-':number_format(($count_total_qty[$y] - ($balance_in_total_qty[$y] - $balance_out_total_qty[$y])), 0) ?></b>
                         </td>
                     <?php endfor; ?>
                 </tr>
@@ -651,10 +683,10 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
     <br />
         <table id="table-data">
         <tr style="font-weight: bold;background-color: deeppink;color: white;">
-            <td style="text-align: center;padding: 8px;border: 1px solid grey;">รายการ</td>
+            <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">รายการ</td>
             <!--            <td style="text-align: center;padding: 0px;border: 1px solid grey">จำนวน</td>-->
             <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= \backend\models\Product::findCode($product_header[$y]) ?></td>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= \backend\models\Product::findCode($product_header[$y]) ?></td>
             <?php endfor; ?>
         </tr>
 
@@ -840,170 +872,185 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id','s
             ?>
 
             <tr>
-                <td style="padding: 8px;border: 1px solid grey;">ยอดยกมา</td>
+                <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดยกมา</td>
                 <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                     <?php
                     $qty = getBalanceInQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y], 1);
                     $balance_in_qty[$y] = ($balance_in_qty[$y] + $qty);
                     $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                     ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $balance_in_qty[$y]==0?'-':number_format($balance_in_qty[$y], 0) ?></td>
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $balance_in_qty[$y]==0?'-':number_format($balance_in_qty[$y], 0) ?></td>
                 <?php endfor; ?>
             </tr>
             <tr>
-                <td style="padding: 8px;border: 1px solid grey;">ยอดผลิต</td>
+                <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดผลิต</td>
                 <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                     <?php
                     $qty = getProdrecQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
                     $prodrec_qty[$y] = ($prodrec_qty[$y] + $qty);
                     $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                     ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?=$prodrec_qty[$y] ==0?'-': number_format($prodrec_qty[$y], 0) ?></td>
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?=$prodrec_qty[$y] ==0?'-': number_format($prodrec_qty[$y], 0) ?></td>
                 <?php endfor; ?>
             </tr>
             <tr>
-                <td style="padding: 8px;border: 1px solid grey;">รับ Reprocess</td>
+                <td style="padding: 8px;border: 1px solid grey;width: 10%">รับ Reprocess</td>
                 <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                     <?php
                     $qty = getProdReprocessSum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
                     $prodrec_re_qty[$y] = ($prodrec_re_qty[$y] + $qty);
                     $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                     ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $prodrec_re_qty[$y]==0?'-':number_format($prodrec_re_qty[$y], 0) ?></td>
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $prodrec_re_qty[$y]==0?'-':number_format($prodrec_re_qty[$y], 0) ?></td>
                 <?php endfor; ?>
             </tr>
             <tr>
-            <td style="padding: 8px;border: 1px solid grey;">รับ Reprocess รถ + อื่นๆ</td>
+            <td style="padding: 8px;border: 1px solid grey;width: 10%">รับ Reprocess รถ + อื่นๆ</td>
             <?php for ($y = 0;
                        $y <= count($product_header) - 1;
                        $y++): ?>
                 <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                     <?php
-                    $qty = getIssueTransferQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
-                    $issue_transfer_total_qty[$y] = ($issue_transfer_total_qty[$y] + $qty);
-                    $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
+                    $qty_reprocess_car = getReturnQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
+                    $issue_car_total_qty[$y] = ($issue_car_total_qty[$y] + $qty_reprocess_car);
+                    $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty_reprocess_car);
                     ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $issue_transfer_total_qty[$y] ==0?'-':number_format($issue_transfer_total_qty[$y], 0) ?></td>
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $issue_car_total_qty[$y]==0?'-':number_format($issue_car_total_qty[$y], 0) ?></td>
                 <?php endfor; ?>
                 </tr>
             <tr>
-                <td style="padding: 8px;border: 1px solid grey;"><b>รับโอนต่างสาขา</b></td>
+                <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>รับโอนต่างสาขา</b></td>
                 <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                     <?php
-                    $qty = getIssueTransferQty(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
+                    $qty = getIssueTransferQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y], $line_value->shift);
                     $issue_transfer_total_qty[$y] = ( $issue_transfer_total_qty[$y] + $qty);
                     $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] + $qty);
                     ?>
-                    <td style="text-align: center;padding: 8px;border: 1px solid grey;">
+                    <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
                         <b><?= $issue_transfer_total_qty[$y]==0?'-':number_format($issue_transfer_total_qty[$y], 0) ?></b>
                     </td>
                 <?php endfor; ?>
             </tr>
                 <tr style="background-color: lightblue">
-                    <td style="padding: 8px;border: 1px solid grey;"><b>ยอดรวม</b></td>
+                    <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>ยอดรวม</b></td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;">
-                            <b><?= ($balance_in_qty[$y] + $prodrec_qty[$y] + $prodrec_re_qty[$y])==0?'-':number_format($balance_in_qty[$y] + $prodrec_qty[$y] + $prodrec_re_qty[$y], 0) ?></b>
+                    <?php $balance_in_qty[$y] = ($balance_in_qty[$y] + $prodrec_qty[$y] + $prodrec_re_qty[$y] + $issue_car_total_qty[$y] + $issue_transfer_total_qty[$y])?>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
+                            <b><?= $balance_in_qty[$y]==0?'-':number_format($balance_in_qty[$y], 0) ?></b>
                         </td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
-                    <td style="padding: 8px;border: 1px solid grey;">หน้าบ้าน เงินสด</td>
+                    <td style="padding: 8px;border: 1px solid grey;width: 10%">หน้าบ้าน เงินสด</td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                         <?php
                         $qty = getCashQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
                         $sale_total_qty[$y] = ($sale_total_qty[$y] + $qty);
                         $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
                         ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $qty==0?'-':number_format($qty, 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $qty==0?'-':number_format($qty, 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
-                    <td style="padding: 8px;border: 1px solid grey;">หน้าบ้าน เงินเชื่อ</td>
+                    <td style="padding: 8px;border: 1px solid grey;width: 10%">หน้าบ้าน เงินเชื่อ</td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                         <?php
+                        $car_issue_qty = getIssueCarQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y],$line_value->user_id);
                         $qty = getCreditQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
-                        $sale_total_qty[$y] = ($sale_total_qty[$y] + $qty);
-                        $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
+//                        $sale_total_qty[$y] = ($sale_total_qty[$y] + ($qty - $issue_car_x));
+//                        $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($qty - $issue_car_x));
+
+                        $show_qty  = 0;
+                        if($qty > 0 && $qty >=$car_issue_qty){
+                            $show_qty = ($qty-$car_issue_qty);
+                            $sale_total_qty[$y] = ($sale_total_qty[$y] + ($qty-$car_issue_qty));
+                            $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($qty-$car_issue_qty));
+                        }else{
+                            $show_qty = ($qty);
+                            $sale_total_qty[$y] = ($sale_total_qty[$y] + ($qty));
+                            $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - ($car_issue_qty));
+                        }
                         ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $qty==0?'-':number_format($qty, 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= ($show_qty)==0?'-':number_format(($show_qty), 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
-                    <td style="padding: 8px;border: 1px solid grey;">ยอดเบิกคนรถ</td>
+                    <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดเบิกคนรถ</td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                         <?php
-                        $qty = getIssueCarQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
-                        $issue_car_total_qty[$y] = ($issue_car_total_qty[$y] + $qty);
+                        $qty = getIssueCarQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y],$line_value->user_id);
+                        $issue_car_total_qty[$y] = $qty;
                         $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
                         ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $issue_car_total_qty[$y]==0?'-':number_format($issue_car_total_qty[$y], 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $issue_car_total_qty[$y]==0?'-':number_format($issue_car_total_qty[$y], 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
-                    <td style="padding: 8px;border: 1px solid grey;">ยอดเบิกต่างสาขา</td>
+                    <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดเบิกต่างสาขา</td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= 10>1?'-':number_format(0, 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= 10>1?'-':number_format(0, 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr style="background-color: yellow">
-                    <td style="padding: 8px;border: 1px solid grey;"><b>ยอดรวม</b></td>
+                    <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>ยอดรวม</b></td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;">
-                            <b><?= ($sale_total_qty[$y] + $issue_car_total_qty[$y])==0?'-':number_format(($sale_total_qty[$y] + $issue_car_total_qty[$y]), 0) ?></b></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
+                            <b><?= ($issue_car_total_qty[$y] +$sale_total_qty[$y] )==0?'-':number_format(($sale_total_qty[$y] + $issue_car_total_qty[$y]), 0) ?></b></td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
-                    <td style="padding: 8px;border: 1px solid grey;">ยอดเบิกเติม</td>
+                    <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดเบิกเติม</td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                         <?php
                         $qty = getIssueRefillQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
                         $sale_refill_qty[$y] = ($sale_refill_qty[$y] + $qty);
                         $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
                         ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $sale_refill_qty[$y]==0?'-':number_format($sale_refill_qty[$y], 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $sale_refill_qty[$y]==0?'-':number_format($sale_refill_qty[$y], 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
-                    <td style="padding: 8px;border: 1px solid grey;">ยอดเสีย</td>
+                    <td style="padding: 8px;border: 1px solid grey;width: 10%">ยอดเสีย</td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                         <?php
                         $qty = getScrapQtySum(date('Y-m-d', strtotime($from_date)), $product_header[$y]);
                         $scrap_total_qty[$y] = ($scrap_total_qty[$y] + $qty);
                         $balance_out_total_qty[$y] = ($balance_out_total_qty[$y] - $qty);
                         ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $scrap_total_qty[$y]==0?'-':number_format($scrap_total_qty[$y], 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $scrap_total_qty[$y]==0?'-':number_format($scrap_total_qty[$y], 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr style="background-color: orange">
-                    <td style="padding: 8px;border: 1px solid grey;"><b>ยอดรวมออกน้ำแข็ง</b></td>
+                    <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>ยอดรวมออกน้ำแข็ง</b></td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;">
-                            <b><?= ($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y])==0?'-':number_format($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y], 0) ?></b>
+                    <?php $balance_out_total_qty[$y] = ($sale_total_qty[$y] + $issue_car_total_qty[$y] + $sale_refill_qty[$y] + $scrap_total_qty[$y]);?>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
+                            <b><?= $balance_out_total_qty[$y]==0?'-':number_format($balance_out_total_qty[$y], 0) ?></b>
                         </td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
-                    <td style="padding: 8px;border: 1px solid grey;">เหลือยกไป</td>
+                    <td style="padding: 8px;border: 1px solid grey;width: 10%">เหลือยกไป</td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $balance_out_total_qty[$y]==0?'-':number_format($balance_out_total_qty[$y], 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= ($balance_in_qty[$y]-$balance_out_total_qty[$y])==0?'-':number_format(($balance_in_qty[$y]-$balance_out_total_qty[$y]), 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr>
-                    <td style="padding: 8px;border: 1px solid grey;">นับจริง</td>
+                    <td style="padding: 8px;border: 1px solid grey;width: 10%">นับจริง</td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                         <?php
-                        $qty = getDailycountSum($product_header[$y], date('Y-m-d', strtotime($from_date)));
+                       // $qty = getDailycountSum($product_header[$y], date('Y-m-d', strtotime($from_date)));
+                        $qty = getDailycountLasted($product_header[$y], date('Y-m-d', strtotime($from_date)));
                         $count_total_qty[$y] = ($count_total_qty[$y] + $qty);
                         ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $count_total_qty[$y]==0?'-':number_format($count_total_qty[$y], 0) ?></td>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%"><?= $count_total_qty[$y]==0?'-':number_format($count_total_qty[$y], 0) ?></td>
                     <?php endfor; ?>
                 </tr>
                 <tr style="background-color: lightgreen">
-                    <td style="padding: 8px;border: 1px solid grey;"><b>เกิน-ขาด</b></td>
+                    <td style="padding: 8px;border: 1px solid grey;width: 10%"><b>เกิน-ขาด</b></td>
                     <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
-                        <td style="text-align: center;padding: 8px;border: 1px solid grey;">
-                            <b><?= ($count_total_qty[$y] - $balance_out_total_qty[$y])==0?'-':number_format(($count_total_qty[$y] - $balance_out_total_qty[$y]), 0) ?></b>
+                        <td style="text-align: center;padding: 8px;border: 1px solid grey;width: 10%">
+                            <b><?= ($count_total_qty[$y] - ($balance_in_qty[$y]-$balance_out_total_qty[$y]))==0?'-':number_format(($count_total_qty[$y] - ($balance_in_qty[$y]-$balance_out_total_qty[$y])), 0) ?></b>
                         </td>
                     <?php endfor; ?>
                 </tr>
@@ -1113,18 +1160,24 @@ function getCreditQty($trans_date, $product_id, $shift)
             $qty = $model;
         }
     }
-    return $qty;
+   return $qty;
 }
 
-function getIssueCarQty($trans_date, $product_id, $shift)
+function getIssueCarQty($trans_date, $product_id, $user_id)
 {
     $qty = 0;
     if ($product_id && $trans_date != null) {
-        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date,'shift'=>$shift])->sum('issue_car_qty');
+        $model = \common\models\TransactionPosSaleSum::find()->select('issue_car_qty')->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date,'user_id'=>$user_id])->one();
         if ($model) {
-            $qty = $model;
+            $qty = $model->issue_car_qty;
         }
+//        $model2 = \common\models\SalePosCloseIssueCarQty::find()->select('qty')->where(['product_id' => $product_id,'user_id'=>$user_id])->andFilterWhere(['date(trans_date)'=>$trans_date])->one();
+//        if ($model2) {
+//            $qty = $model2->qty;
+//        }
     }
+
+
     return $qty;
 }
 
@@ -1133,6 +1186,20 @@ function getIssueTransferQty($trans_date, $product_id, $shift)
     $qty = 0;
     if ($product_id && $trans_date != null) {
         $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date,'shift'=>$shift])->sum('issue_transfer_qty');
+      //  $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date])->sum('issue_transfer_qty');
+        if ($model) {
+            $qty = $model;
+        }
+    }
+    return $qty;
+}
+
+function getIssueTransferQtySum($trans_date, $product_id, $shift)
+{
+    $qty = 0;
+    if ($product_id && $trans_date != null) {
+       // $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date,'shift'=>$shift])->sum('issue_transfer_qty');
+        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date])->sum('issue_transfer_qty');
         if ($model) {
             $qty = $model;
         }
@@ -1170,6 +1237,18 @@ function getDailycount($product_id,$trans_date,$shift)
         $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date,'shift'=>$shift])->sum('counting_qty');
         if ($model) {
             $qty = $model;
+        }
+    }
+    return $qty;
+}
+
+function getDailycountLasted($product_id,$trans_date)
+{
+    $qty = 0;
+    if ($product_id && $trans_date != null) {
+        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date])->orderBy(['id'=>SORT_DESC])->one();
+        if ($model) {
+            $qty = $model->counting_qty;
         }
     }
     return $qty;
@@ -1246,7 +1325,7 @@ function getCreditQtySum($trans_date, $product_id)
     return $qty;
 }
 
-function getIssueCarQtySum($trans_date, $product_id)
+function getIssueCarQtySum($trans_date, $product_id, $user_id)
 {
     $qty = 0;
     if ($product_id && $trans_date != null) {
@@ -1254,21 +1333,25 @@ function getIssueCarQtySum($trans_date, $product_id)
         if ($model) {
             $qty = $model;
         }
+//        $model2 = \common\models\SalePosCloseIssueCarQty::find()->where(['product_id' => $product_id])->andFilterWhere(['date(trans_date)'=>$trans_date])->sum('qty');
+//        if ($model2) {
+//            $qty = $model2;
+//        }
     }
     return $qty;
 }
 
-function getIssueTransferQtySum($trans_date, $product_id)
-{
-    $qty = 0;
-    if ($product_id && $trans_date != null) {
-        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date])->sum('issue_transfer_qty');
-        if ($model) {
-            $qty = $model;
-        }
-    }
-    return $qty;
-}
+//function getIssueTransferQtySum($trans_date, $product_id)
+//{
+//    $qty = 0;
+//    if ($product_id && $trans_date != null) {
+//        $model = \common\models\TransactionPosSaleSum::find()->where(['product_id' => $product_id, 'date(trans_date)' => $trans_date])->sum('issue_transfer_qty');
+//        if ($model) {
+//            $qty = $model;
+//        }
+//    }
+//    return $qty;
+//}
 
 function getIssueRefillQtySum($trans_date, $product_id)
 {
@@ -1303,6 +1386,69 @@ function getDailycountSum($product_id,$trans_date)
         }
     }
     return $qty;
+}
+
+
+function getOrder($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req,$btn_order_type)
+{
+    $data = [];
+    $sql = "SELECT t2.order_no, t3.code , t3.name, t1.qty, t1.price, t2.order_date, t2.order_channel_id 
+              FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id 
+             WHERE  t2.order_date >=" . "'" . date('Y-m-d H:i:s', strtotime($f_date)) . "'" . " 
+             AND t2.order_date <=" . "'" . date('Y-m-d H:i:s', strtotime($t_date)) . "'" . " 
+             AND t1.product_id=" . $product_id . " 
+             AND t2.status=1
+             AND t2.sale_channel_id = 2
+             AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
+
+    if ($find_sale_type != null && $find_sale_type != 0) {
+        if ($find_sale_type == 1) {
+            $sql .= " AND t2.payment_method_id=" . $find_sale_type;
+        }
+        if ($find_sale_type == 2) {
+            $sql .= " AND t2.order_channel_id is null AND t2.payment_method_id=" . $find_sale_type;
+        }
+        if ($find_sale_type == 3) {
+            $sql .= " AND t2.order_channel_id > 0";
+        }
+    }
+    if ($find_user_id != null) {
+        $sql .= " AND t2.created_by=" . $find_user_id;
+    }
+    if ($is_invoice_req != null) {
+        $sql .= " AND t3.is_invoice_req =" . $is_invoice_req;
+    }
+    // $sql .=" ORDER BY t1.price ASC";
+    if($btn_order_type == 1){
+        $sql .= " ORDER BY t2.order_no ASC";
+    }else if($btn_order_type == 2){
+        $sql .= " ORDER BY t1.price ASC";
+    }else{
+        $sql .= " ORDER BY t2.order_no ASC";
+    }
+
+    $query = \Yii::$app->db->createCommand($sql);
+    $model = $query->queryAll();
+    if ($model) {
+        for ($i = 0; $i <= count($model) - 1; $i++) {
+            $customer_code = $model[$i]['code'];
+            $customer_name = $model[$i]['name'];
+            if ($model[$i]['code'] == null) {
+                $customer_code = \backend\models\Deliveryroute::findCode($model[$i]['order_channel_id']);
+                $customer_name = \backend\models\Deliveryroute::findName($model[$i]['order_channel_id']);
+            }
+
+            array_push($data, [
+                'order_no' => $model[$i]['order_no'],
+                'cus_code' => $customer_code,
+                'cus_name' => $customer_name,
+                'qty' => $model[$i]['qty'],
+                'sale_price' => $model[$i]['price'],
+                'order_date' => $model[$i]['order_date'],
+            ]);
+        }
+    }
+    return $data;
 }
 
 

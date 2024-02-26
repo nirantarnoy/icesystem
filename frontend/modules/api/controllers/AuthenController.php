@@ -19,7 +19,8 @@ class AuthenController extends Controller
                     'login' => ['POST'],
                     'loginpos' => ['POST'],
                     'loginqrcode' => ['POST'],
-                    'orderlist' => ['POST']
+                    'orderlist' => ['POST'],
+                    'logoutpos' => ['POST']
                 ],
             ],
         ];
@@ -75,6 +76,7 @@ class AuthenController extends Controller
 
         return ['status' => $status, 'data' => $data];
     }
+
     public function actionLoginpos()
     {
         $username = '';
@@ -94,7 +96,7 @@ class AuthenController extends Controller
                 if ($model->validatePassword($password)) {
                     $model_info = \backend\models\Employee::find()->where(['id' => $model->employee_ref_id])->one();
                     if ($model_info) {
-                       // $car_info = $this->getCar($model_info->id, $model->company_id, $model->branch_id);
+                        // $car_info = $this->getCar($model_info->id, $model->company_id, $model->branch_id);
                         $member_id = 0;
 
                         array_push($data, [
@@ -111,15 +113,17 @@ class AuthenController extends Controller
                                 'branch_name' => \backend\models\Branch::findName($model->branch_id),
                             ]
                         );
-                        $status = true;
+                        if ($this->createPosLoginLog($model_info->company_id, $model_info->branch_id, $model->id) == 1) {
+                            $status = true;
+                        }
                     }
-
                 }
             }
         }
 
         return ['status' => $status, 'data' => $data];
     }
+
     public function actionLoginqrcode()
     {
         $car = '';
@@ -144,6 +148,7 @@ class AuthenController extends Controller
             if ($model) {
 //                //  if ($model->validatePassword($password)) {
                 $model_info = \backend\models\Employee::find()->where(['id' => $model->employee_ref_id])->one();
+                $model_info_2 = null;
                 if ($model_info) {
                     //    $car_info = $this->getCar($model_info->id, $model->company_id, $model->branch_id);
                     $car_info = $this->getCarId($car, $model->company_id, $model->branch_id);
@@ -154,6 +159,7 @@ class AuthenController extends Controller
                             $model_member_user = \common\models\User::find()->where(['id' => $find_user_member_id])->one();
                             if ($model_member_user) {
                                 $member_id = $model_member_user->employee_ref_id;
+                                $model_info_2 = \backend\models\Employee::find()->where(['id' => $member_id])->one();
                             }
                         }
 
@@ -174,6 +180,20 @@ class AuthenController extends Controller
                             if ($this->addEmpDaily($car_info[0]['car_id'], $car_info[0]['route_id'], null, $emp_id, $isdriver, $model->company_id, $model->branch_id)) {
                                 $status = 1;
 
+                                //add login route log
+
+                                $model_login_log = new \common\models\LoginRouteLog();
+                                $model_login_log->login_date = date('Y-m-d H:i:s');
+                                $model_login_log->car_id = $car_info[0]['car_id'];
+                                $model_login_log->route_id = $car_info[0]['route_id'];
+                                $model_login_log->emp_1 = $model->employee_ref_id;
+                                $model_login_log->emp_2 = $member_id;
+                                $model_login_log->status = 1;
+                                $model_login_log->save(false);
+
+                                // end add login route log
+
+
                                 array_push($data, [
                                         'username' => $driver,
                                         'user_id' => '' . $model->id,
@@ -192,6 +212,7 @@ class AuthenController extends Controller
                                         'branch_name' => \backend\models\Branch::findName($model->branch_id),
                                         'route_type' => $car_info == null ? 1 : \backend\models\Deliveryroute::findRouteType($car_info[0]['route_id']),
                                         'route_code' => $car_info == null ? "" : \backend\models\Deliveryroute::findRoutecode($car_info[0]['route_id']),
+                                        'emp_name2' => $model_info_2 !=null ? $model_info_2->fname . ' ' . $model_info_2->lname:'',
                                     ]
                                 );
                             } else {
@@ -220,17 +241,18 @@ class AuthenController extends Controller
                 }
                 //$res = 1;
 
-            }else{
+            } else {
                 $res = 0;
             }
 
             return $res;
         }
     }
+
     public function checkHasloginMember($user_id, $is_driver)
     {
         $res = 0;
-        if ($user_id != null || $user_id != '' || $user_id !=0) {
+        if ($user_id != null || $user_id != '' || $user_id != 0) {
             $model = \backend\models\Cardaily::find()->where(['date(trans_date)' => date('Y-m-d'), 'employee_id' => $user_id])->one();
             if ($model) {
                 if ($model->is_driver == $is_driver) {
@@ -238,9 +260,7 @@ class AuthenController extends Controller
                 } else {
                     $res = 1;
                 }
-
-
-            }else{
+            } else {
                 $res = 0;
             }
 
@@ -338,6 +358,10 @@ class AuthenController extends Controller
                         $model->save(false);
                     }
 
+                    // save login history
+
+
+
                 }
                 // }
 
@@ -395,4 +419,97 @@ class AuthenController extends Controller
 //
 //        return ['status' => true, 'data' => $data];
 //    }
+    public function createPosLoginLog($company_id, $branch_id, $user_id)
+    {
+        $res = 0;
+        $model_log = new \common\models\LoginLog();
+        $model_log->user_id = $user_id;
+        $model_log->login_date = date('Y-m-d H:i:s');
+        $model_log->status = 1;
+        $model_log->ip = '';
+        if ($model_log->save(false)) {
+            //  $check_is_login = \common\models\LoginLogCal::find()->where(['user_id'=>$model_log->user_id,'date(login_date)'=>date('Y-m-d'),'status'=>1])->one();
+            $check_is_login = \common\models\LoginLogCal::find()->where(['user_id' => $user_id, 'status' => 1])->andFilterWhere(['is', 'logout_date', new \yii\db\Expression('null')])->limit(1)->orderBy(['id' => SORT_DESC])->one();
+            if (!$check_is_login) {
+                $model_login_cal = new \common\models\LoginLogCal();
+                $model_login_cal->login_date = date('Y-m-d H:i:s');
+                $model_login_cal->user_id = $user_id;
+                $model_login_cal->status = 1;
+                $model_login_cal->ip = '';
+                $model_login_cal->company_id = $company_id;
+                $model_login_cal->branch_id = $branch_id;
+                if ($model_login_cal->save(false)) {
+                    $res = 1;
+                    // $update_remain_logout = \common\models\LoginLogCal::find()->where(['user_id'=>$model_log->user_id])->andFilterWhere(['!=','id',$model_login_cal->id]);
+                }
+            } else {
+                $date1 = date('Y-m-d H:i:s', strtotime($check_is_login->login_date));//"2021-12-04 01:00:00";
+                $date2 = date('Y-m-d H:i:s');
+                $timestamp1 = strtotime($date1);
+                $timestamp2 = strtotime($date2);
+                $hour = abs($timestamp2 - $timestamp1) / (60 * 60);
+
+                if ($hour > 12) { // login over 12 hours.
+                    $check_is_login->logout_date = date('Y-m-d H:i:s');
+                    $check_is_login->ip = '';
+                    if ($check_is_login->save(false)) {
+                        $model_login_cal = new \common\models\LoginLogCal();
+                        $model_login_cal->login_date = date('Y-m-d H:i:s', strtotime($model_log->login_date));
+                        $model_login_cal->user_id = $model_log->user_id;
+                        $model_login_cal->status = 1;
+                        $model_login_cal->ip = '';
+                        $model_login_cal->company_id = $company_id;
+                        $model_login_cal->branch_id = $branch_id;
+                        if ($model_login_cal->save(false)) {
+                        }
+                    }
+                }
+                $res = 1;
+            }
+        }
+        return $res;
+    }
+
+    public function actionLogoutpos()
+    {
+        $user_id = '';
+        $status = 0;
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+        if ($req_data != null) {
+            $user_id = $req_data['user_id'];
+        }
+        $data = [];
+        if ($user_id) {
+
+//            $c_date = date('Y-m-d');
+//            $ip = '';
+//            if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+//                //ip from share internet
+//                $ip = $_SERVER['HTTP_CLIENT_IP'];
+//            } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+//                //ip pass from proxy
+//                $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+//            } else {
+//                $ip = $_SERVER['REMOTE_ADDR'];
+//            }
+
+            if (\common\models\LoginLog::updateAll(['logout_date' => date('Y-m-d H:i:s'), 'status' => 2], ['user_id' => $user_id, 'status' => 1])) {
+               // $status = $ip;
+                $check_is_has_login = \common\models\LoginLogCal::find()->where(['user_id' => $user_id])->limit(1)->orderBy(['id' => SORT_DESC])->one();
+                if ($check_is_has_login) {
+                    $check_is_has_login->logout_date = date('Y-m-d H:i:s');
+                    $check_is_has_login->status = 2;
+                    if($check_is_has_login->save(false)){
+                        $status = 1;
+                        array_push($data,['logout_success'=>1]);
+                    }
+                }
+            }else{
+                array_push($data,['logout_success'=>1]);
+            }
+        }
+
+        return ['status' => $status, 'data' => $data];
+    }
 }

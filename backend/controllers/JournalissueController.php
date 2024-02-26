@@ -276,7 +276,7 @@ class JournalissueController extends Controller
                                 <td>
                                 <input type="hidden" class="line-avl-qty" name="line_avl_qty[]" value="' . $prod_stock . '">
                                 <input type="hidden" class="line-stock-on-car" name="line_stock_on_car[]" value="' . $is_stock_on_car . '">
-                                <input type="hidden" class="line-issue-sale-price" name="line_issue_line_price[]" value="' . $value->sale_price . '">
+                                <input type="hidden" class="line-issue-sale-price" name="line_issue_line_price[]" value="' . $value->std_cost . '">
                                 <input type="number" class="line-qty form-control" name="line_qty[]" value="0" min="0" step="0.10" onchange="checkstock($(this))">
                                 </td>
                                 <td style="text-align: center">

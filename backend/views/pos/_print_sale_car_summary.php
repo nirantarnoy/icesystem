@@ -190,7 +190,7 @@ if ($model_c_login != null) {
                         <?php
                         echo \kartik\select2\Select2::widget([
                             'name' => 'find_user_id',
-                            'data' => \yii\helpers\ArrayHelper::map(\backend\models\Deliveryroute::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id])->all(), 'id', 'name'),
+                            'data' => \yii\helpers\ArrayHelper::map(\backend\models\Deliveryroute::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id,'status'=>1])->all(), 'id', 'name'),
                             'value' => $find_user_id,
                             'options' => [
                                 'placeholder' => '--สายส่ง--'
@@ -198,6 +198,22 @@ if ($model_c_login != null) {
                             'pluginOptions' => [
                                 'allowClear' => true,
                                 'multiple' => true,
+                            ]
+                        ]);
+                        ?>
+                    </td>
+                    <td>
+                        <?php
+                        echo \kartik\select2\Select2::widget([
+                            'name' => 'is_invoice_req',
+                            'data' => \yii\helpers\ArrayHelper::map(\backend\helpers\CustomerInvoiceReqType::asArrayObject(), 'id', 'name'),
+                            'value' => $is_invoice_req,
+                            'options' => [
+                                'placeholder' => '--ใบกำกับ--'
+                            ],
+                            'pluginOptions' => [
+                                'allowClear' => true,
+                                'multiple' => false,
                             ]
                         ]);
                         ?>
@@ -263,7 +279,7 @@ if ($model_c_login != null) {
                     <td colspan="7"><b><?= $line_product_code ?></b> <span
                                 style="color: darkblue"> <?= $line_product_name ?></span></td>
                 </tr>
-                <?php $find_order = getOrder($value->product_id, $from_date, $to_date, 0, $find_user_id, $company_id, $branch_id); ?>
+                <?php $find_order = getOrder($value->product_id, $from_date, $to_date, 0, $find_user_id, $company_id, $branch_id, $is_invoice_req); ?>
                 <?php if ($find_order != null): ?>
                     <?php
                     $loop_count = count($find_order);
@@ -351,7 +367,7 @@ if ($model_c_login != null) {
     </html>
 
 <?php
-function getOrder($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id)
+function getOrder($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req)
 {
     $list_route_id = null;
 
@@ -361,7 +377,7 @@ function getOrder($product_id, $f_date, $t_date, $find_sale_type, $find_user_id,
              WHERE  t2.order_date >=" . "'" . date('Y-m-d H:i:s', strtotime($f_date)) . "'" . " 
              AND t2.order_date <=" . "'" . date('Y-m-d H:i:s', strtotime($t_date)) . "'" . " 
              AND t1.product_id=" . $product_id . " 
-             AND t2.status=100
+             AND t2.status in (1,100)
              AND t2.sale_channel_id = 1
              AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
 
@@ -387,6 +403,10 @@ function getOrder($product_id, $f_date, $t_date, $find_sale_type, $find_user_id,
         }
         $sql .= " AND t2.order_channel_id IN (" . $list_route_id . ")";
     }
+    if ($is_invoice_req != null) {
+        $sql .= " AND t3.is_invoice_req =" . $is_invoice_req;
+    }
+    $sql .=" ORDER BY t1.price ASC";
     $query = \Yii::$app->db->createCommand($sql);
     $model = $query->queryAll();
     if ($model) {

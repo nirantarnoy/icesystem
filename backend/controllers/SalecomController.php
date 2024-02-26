@@ -103,6 +103,20 @@ class SalecomController extends Controller
             }
         }
         if ($model->load(Yii::$app->request->post())) {
+            $f_date = date('Y-m-d');
+            $t_date = date('Y-m-d');
+
+            $x_date = explode('-', $model->from_date);
+            if (count($x_date) > 1) {
+                $f_date = $x_date[2] . '-' . $x_date[1] . '-' . $x_date[0];
+            }
+
+            $xx_date = explode('-', $model->to_date);
+            if (count($xx_date) > 1) {
+                $t_date = $xx_date[2] . '-' . $xx_date[1] . '-' . $xx_date[0];
+            }
+            $model->from_date = date('Y-m-d',strtotime($f_date));
+            $model->to_date = date('Y-m-d',strtotime($t_date));
             if($model->save()){
                 return $this->redirect(['view', 'id' => $model->id]);
             }
@@ -125,8 +139,28 @@ class SalecomController extends Controller
     {
         $model = $this->findModel($id);
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+        if ($model->load(Yii::$app->request->post())) {
+            $f_date = date('Y-m-d');
+            $t_date = date('Y-m-d');
+
+            $x_date = explode('-', $model->from_date);
+            if (count($x_date) > 1) {
+                $f_date = $x_date[2] . '-' . $x_date[1] . '-' . $x_date[0];
+            }
+
+            $xx_date = explode('-', $model->to_date);
+            if (count($xx_date) > 1) {
+                $t_date = $xx_date[2] . '-' . $xx_date[1] . '-' . $xx_date[0];
+            }
+
+           //echo date('Y-m-d',strtotime($f_date));return;
+            $model->from_date = date('Y-m-d',strtotime($f_date));
+            $model->to_date = date('Y-m-d',strtotime($t_date));
+
+            if($model->save(false)){
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
+
         }
 
         return $this->render('update', [

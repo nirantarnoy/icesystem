@@ -42,7 +42,7 @@ if (!empty(\Yii::$app->session->getFlash('msg-index')) && !empty(\Yii::$app->ses
 <input type="hidden" class="slip-print" value="<?= $filename ?>">
 <div class="row">
     <div class="col-lg-12">
-        <a href="index.php?r=pos/index" class="btn btn-primary"><i class="fa fa-arrow-left"></i> กลับหน้า POS </a>
+        <a href="index.php?r=pos/indextest&id=0" class="btn btn-primary"><i class="fa fa-arrow-left"></i> กลับหน้า POS </a>
     </div>
 </div>
 <div style="height: 5px;"></div>

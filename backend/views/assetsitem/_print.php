@@ -135,6 +135,7 @@ $model_customer_loan = null;
 </head>
 <body>
 <a href="<?=\yii\helpers\Url::to(['assetsitem/asset-request'],true)?>" class="btn btn-info">ใบแจ้งถังใหม่</a>
+<a href="<?=\yii\helpers\Url::to(['assetsitem/checkinprint'],true)?>" class="btn btn-info">รายการเช็คอินตำแหน่งร้าน</a>
 <form action="<?= \yii\helpers\Url::to(['assetsitem/print'], true) ?>" method="post"
       id="form-search">
     <input type="hidden" name="is_start_find" value="1">

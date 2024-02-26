@@ -47,6 +47,18 @@ $cururl = Yii::$app->controller->id;
             font-weight: normal;
             font-style: normal;
         }
+        @font-face {
+            font-family: 'THSarabunNew';
+            /*font-family: 'TH-Sarabun-New';*/
+            /*src: url('fonts/THSarabunNew.ttf') format('truetype');*/
+            src: url('fonts/THSarabunNew.ttf') format('truetype');
+            /*src: url('../../backend/web/fonts/Kanit-Regular.ttf') format('truetype');*/
+            /* src: url('../fonts/thsarabunnew-webfont.eot?#iefix') format('embedded-opentype'),
+                  url('../fonts/thsarabunnew-webfont.woff') format('woff'),
+                  url('../fonts/EkkamaiStandard-Light.ttf') format('truetype');*/
+            font-weight: normal;
+            font-style: normal;
+        }
 
         body {
             font-family: "Kanit-Regular";

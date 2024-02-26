@@ -2235,14 +2235,14 @@ class OrdersController extends Controller
 
         $res = 0;
         $route_id = 894;
-        if($route_id > 0){
+        if ($route_id > 0) {
             $reprocess_wh = $this->findReprocesswh($company_id, $branch_id);
 
-            if (\backend\models\Orders::updateAll(['status' => 1], ['order_channel_id' => $route_id, 'date(order_date)' => date('Y-m-d'), 'sale_from_mobile' => 1,'company_id'=>$company_id,'branch_id'=>$branch_id])) {
-                $model = \backend\models\Stocktrans::find()->where(['trans_ref_id' => $route_id, 'date(trans_date)' => date('Y-m-d'), 'activity_type_id' => 7,'company_id'=>$company_id,'branch_id'=>$branch_id])->all();
+            if (\backend\models\Orders::updateAll(['status' => 1], ['order_channel_id' => $route_id, 'date(order_date)' => date('Y-m-d'), 'sale_from_mobile' => 1, 'company_id' => $company_id, 'branch_id' => $branch_id])) {
+                $model = \backend\models\Stocktrans::find()->where(['trans_ref_id' => $route_id, 'date(trans_date)' => date('Y-m-d'), 'activity_type_id' => 7, 'company_id' => $company_id, 'branch_id' => $branch_id])->all();
                 if ($model) {
                     foreach ($model as $value) {
-                        $model_update = \backend\models\Stocksum::find()->where(['product_id' => $value->product_id, 'warehouse_id' => $reprocess_wh,'company_id'=>$company_id,'branch_id'=>$branch_id])->one();
+                        $model_update = \backend\models\Stocksum::find()->where(['product_id' => $value->product_id, 'warehouse_id' => $reprocess_wh, 'company_id' => $company_id, 'branch_id' => $branch_id])->one();
                         if ($model_update) {
                             $model_update->qty = ($model_update->qty - $value->qty);
                             if ($model_update->save(false)) {
@@ -2250,14 +2250,14 @@ class OrdersController extends Controller
                             }
                         }
                     }
-                    if($res > 0){
-                        \backend\models\Stocktrans::deleteAll(['trans_ref_id' => $route_id, 'date(trans_date)' => date('Y-m-d'), 'activity_type_id' => 7,'company_id'=>$company_id,'branch_id'=>$branch_id]);
+                    if ($res > 0) {
+                        \backend\models\Stocktrans::deleteAll(['trans_ref_id' => $route_id, 'date(trans_date)' => date('Y-m-d'), 'activity_type_id' => 7, 'company_id' => $company_id, 'branch_id' => $branch_id]);
                     }
                 }
             }
-            if($res > 0){
+            if ($res > 0) {
                 echo "success";
-            }else{
+            } else {
                 echo "fail";
             }
         }
@@ -2276,38 +2276,40 @@ class OrdersController extends Controller
         return $id;
     }
 
-    public function getEmporder($id){
+    public function getEmporder($id)
+    {
 
-        $model = \common\models\Orders::find()->where(['order_channel_id'=>$id,'date(order_date)'=>date('Y-m-d')])->all();
-        if($model){
-            foreach ($model as $value){
-               $emp_id = \backend\models\Employee::findIdFromUserId($value->created_by);
-               if($emp_id){
-                   $modelx = \common\models\Orders::find()->where(['id'=>$value->id])->one();
-                   if($modelx){
-                       $modelx->emp_1 = $emp_id;
-                       $modelx->save(false);
-                   }
-               }
+        $model = \common\models\Orders::find()->where(['order_channel_id' => $id, 'date(order_date)' => date('Y-m-d')])->all();
+        if ($model) {
+            foreach ($model as $value) {
+                $emp_id = \backend\models\Employee::findIdFromUserId($value->created_by);
+                if ($emp_id) {
+                    $modelx = \common\models\Orders::find()->where(['id' => $value->id])->one();
+                    if ($modelx) {
+                        $modelx->emp_1 = $emp_id;
+                        $modelx->save(false);
+                    }
+                }
             }
         }
     }
 
-    public function actionPullorderdata(){
+    public function actionPullorderdata()
+    {
         $pre_date = date('Y-m-d', strtotime(date('Y-m-d') . " -1 day"));
-        $model = \backend\models\Orders::find()->where(['date(order_date)'=>$pre_date,'sale_from_mobile'=>1])->all();
-        if($model){
-            foreach ($model as $value){
-                $model_line = \backend\models\Orderline::find()->where(['order_id'=>$value->id])->all();
-                if($model_line){
-                    foreach ($model_line as $value2){
+        $model = \backend\models\Orders::find()->where(['date(order_date)' => $pre_date, 'sale_from_mobile' => 1])->all();
+        if ($model) {
+            foreach ($model as $value) {
+                $model_line = \backend\models\Orderline::find()->where(['order_id' => $value->id])->all();
+                if ($model_line) {
+                    foreach ($model_line as $value2) {
                         $model_x = new \backend\models\Orderlinetrans();
                         $model_x->order_id = $value->id;
                         $model_x->product_id = $value2->product_id;
                         $model_x->qty = $value2->qty;
                         $model_x->price = $value2->price;
                         $model_x->line_total = $value2->line_total;
-                        $model_x->status =1;
+                        $model_x->status = 1;
                         $model_x->customer_id = $value2->customer_id;
                         $model_x->sale_payment_method_id = $value2->sale_payment_method_id;
                         $model_x->is_free = $value2->is_free;
@@ -2320,7 +2322,8 @@ class OrdersController extends Controller
         echo "ok";
     }
 
-    public function actionUpdatecustomerPay(){
+    public function actionUpdatecustomerPay()
+    {
 
         $sql = "select t1.id as order_id,t1.order_no,t1.order_date,sum(t2.line_total) AS remain_amt, t2.customer_id, t1.payment_status";
         $sql .= " FROM orders as t1 INNER JOIN order_line as t2 ON t1.id = t2.order_id ";
@@ -2336,36 +2339,70 @@ class OrdersController extends Controller
         $res = 0;
         if ($model) {
             for ($x = 0; $x <= count($model) - 1; $x++) {
-                \common\models\Orders::updateAll(['payment_status'=>0],['id'=>$model[$x]['order_id']]);
-                $res +=1;
+                \common\models\Orders::updateAll(['payment_status' => 0], ['id' => $model[$x]['order_id']]);
+                $res += 1;
             }
         }
 
-        if($res > 0){
+        if ($res > 0) {
             echo "completed";
         }
     }
 
-    public function actionDeleteoldorder(){
-        $model = \backend\models\Orders::find()->select('id')->where(['LIKE','order_no','SO-21'])->limit(2)->all();
-        if($model){
-            $x=0;
-            foreach($model as $value){
+    public function actionDeleteoldorder()
+    {
+        $model = \backend\models\Orders::find()->select('id')->where(['LIKE', 'order_no', 'SO-21'])->limit(2)->all();
+        if ($model) {
+            $x = 0;
+            foreach ($model as $value) {
 
-                if(\common\models\OrderLine::deleteAll(['order_id'=>$value->id])){
+                if (\common\models\OrderLine::deleteAll(['order_id' => $value->id])) {
                     echo "ok";
                     $this->deleteOrdermaster($value->id);
-                    $x+=1;
-                }else{
+                    $x += 1;
+                } else {
                     $this->deleteOrdermaster($value->id);
-                    $x+=1;
+                    $x += 1;
                 }
             }
         }
-        echo "completed ". $x ." records";
+        echo "completed " . $x . " records";
     }
 
-    public function deleteOrdermaster($id){
+    public function deleteOrdermaster($id)
+    {
         \backend\models\Orders::deleteAll($id);
+    }
+
+    public function actionRecalorder($route)
+    {
+        if ($route) {
+            $model = \backend\models\Orders::find()->select(['id', 'order_no'])->where(['order_channel_id' => $route, 'status' => 100, 'sale_from_mobile' => 1, 'date(order_date)' => date('Y-m-d')])->orderBy(['id' => SORT_ASC])->all();
+            if ($model != null) {
+                $i = 0;
+                $nums = 0;
+                $prefix = '';
+                foreach ($model as $value) {
+                    $order_no_new = '';
+                    $new_order_no = '';
+                    if ($i == 0) {
+                        $prefix = substr($value->order_no, 0, 15);
+                    }
+                    $nums += 1;
+                    $clen = strlen($nums);
+                    $loop = 4 - $clen;
+                    for ($i = 1; $i <= $loop; $i++) {
+                        $new_order_no .= "0";
+                    }
+
+                    echo $prefix.$new_order_no.$nums.'<br />';
+
+                    $order_no_new = $prefix.$new_order_no.$nums;
+                    \common\models\Orders::updateAll(['order_no'=>$order_no_new],['id'=>$value->id]);
+
+                    $i += 1;
+                }
+            }
+        }
     }
 }

@@ -5,6 +5,8 @@ use yii\widgets\ActiveForm;
 
 
 $prod_status = \backend\helpers\ProductStatus::asArrayObject();
+
+$harf_select = [['id'=>1,'name'=>'Yes'],['id'=>0,'name'=>'No']];
 ?>
 
 <div class="pricegroup-form">
@@ -77,6 +79,8 @@ $prod_status = \backend\helpers\ProductStatus::asArrayObject();
                                         <th style="width: 20%">รหัสสินค้า</th>
                                         <th>ชื่อสินค้า</th>
                                         <th style="width: 10%">ราคาขาย</th>
+                                        <th style="width: 10%">คิดครึ่งถัง</th>
+                                        <th style="width: 10%">ราคาครึ่งถัง</th>
                                         <th style="text-align: center">ลบ</th>
                                     </tr>
                                     </thead>
@@ -96,6 +100,15 @@ $prod_status = \backend\helpers\ProductStatus::asArrayObject();
                                                        name="line_prod_name[]" value="" disabled>
                                             </td>
                                             <td><input type="number" class="form-control line-price" name="line_price[]"
+                                                       style="text-align: right" value="0" min="0" step="0.01"></td>
+                                            <td>
+                                                <select name="line_haft_cal[]" class="form-control line-haft-cal" id="">
+                                                    <?php for($b=0;$b<=count($harf_select)-1;$b++):?>
+                                                    <option value="<?=$harf_select[$b]['id']?>"><?=$harf_select[$b]['name']?></option>
+                                                    <?php endfor;?>
+                                                </select>
+                                            </td>
+                                            <td><input type="number" class="form-control line-haft-price" name="line_haft_price[]"
                                                        style="text-align: right" value="0" min="0" step="0.01"></td>
                                             <td style="text-align: center">
                                                 <div class="btn btn-danger btn-sm" onclick="removeline($(this))"><i
@@ -130,6 +143,19 @@ $prod_status = \backend\helpers\ProductStatus::asArrayObject();
                                                                style="text-align: right"
                                                                value="<?= $value->sale_price ?>"
                                                                min="0" step="0.01"></td>
+                                                    <td>
+                                                        <select name="line_haft_cal[]" class="form-control line-haft-cal" id="">
+                                                            <?php for($b=0;$b<=count($harf_select)-1;$b++):?>
+                                                            <?php
+                                                            $selected = '';
+                                                            if($harf_select[$b]['id'] == $value->haft_cal)$selected = 'selected';
+                                                            ?>
+                                                                <option value="<?=$harf_select[$b]['id']?>" <?=$selected?>><?=$harf_select[$b]['name']?></option>
+                                                            <?php endfor;?>
+                                                        </select>
+                                                    </td>
+                                                    <td><input type="number" class="form-control line-haft-price" name="line_haft_price[]"
+                                                               style="text-align: right" value="<?= $value->sale_haft_price ?>" min="0" step="0.01"></td>
                                                     <td style="text-align: center">
                                                         <div class="btn btn-danger btn-sm"
                                                              onclick="removeline($(this))"><i
@@ -153,6 +179,15 @@ $prod_status = \backend\helpers\ProductStatus::asArrayObject();
                                                 </td>
                                                 <td><input type="number" class="form-control line-price"
                                                            name="line_price[]"
+                                                           style="text-align: right" value="0" min="0" step="0.01"></td>
+                                                <td>
+                                                    <select name="line_haft_cal[]" class="form-control line-haft-cal" id="">
+                                                        <?php for($b=0;$b<=count($harf_select)-1;$b++):?>
+                                                            <option value="<?=$harf_select[$b]['id']?>"><?=$harf_select[$b]['name']?></option>
+                                                        <?php endfor;?>
+                                                    </select>
+                                                </td>
+                                                <td><input type="number" class="form-control line-haft-price" name="line_haft_price[]"
                                                            style="text-align: right" value="0" min="0" step="0.01"></td>
                                                 <td style="text-align: center">
                                                     <div class="btn btn-danger btn-sm" onclick="removeline($(this))"><i

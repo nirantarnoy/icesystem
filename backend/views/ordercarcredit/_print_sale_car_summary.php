@@ -121,7 +121,8 @@ $mpdf->AddPageByArray([
     </head>
     <div id="div1">
 
-        <form action="<?= \yii\helpers\Url::to(['ordercarcredit/printcarsummary'], true) ?>" method="post" id="form-search">
+        <form action="<?= \yii\helpers\Url::to(['ordercarcredit/printcarsummary'], true) ?>" method="post"
+              id="form-search">
             <table class="table-header" style="width: 100%;font-size: 18px;" border="0">
                 <tr>
 
@@ -130,7 +131,7 @@ $mpdf->AddPageByArray([
                         echo DateRangePicker::widget([
                             'name' => 'from_date',
                             // 'value'=>'2015-10-19 12:00 AM',
-                           // 'value' => $from_date != null ? date('Y-m-d H:i', strtotime($from_date)) : date('Y-m-d H:i'),
+                            // 'value' => $from_date != null ? date('Y-m-d H:i', strtotime($from_date)) : date('Y-m-d H:i'),
                             'value' => $from_date != null ? date('Y-m-d', strtotime($from_date)) : date('Y-m-d'),
                             //    'useWithAddon'=>true,
                             'convertFormat' => true,
@@ -155,7 +156,7 @@ $mpdf->AddPageByArray([
                         <?php
                         echo DateRangePicker::widget([
                             'name' => 'to_date',
-                           // 'value' => $to_date != null ? date('Y-m-d H:i', strtotime($to_date)) : date('Y-m-d H:i'),
+                            // 'value' => $to_date != null ? date('Y-m-d H:i', strtotime($to_date)) : date('Y-m-d H:i'),
                             'value' => $to_date != null ? date('Y-m-d', strtotime($to_date)) : date('Y-m-d'),
                             //    'useWithAddon'=>true,
                             'convertFormat' => true,
@@ -180,7 +181,7 @@ $mpdf->AddPageByArray([
                         <?php
                         echo \kartik\select2\Select2::widget([
                             'name' => 'find_user_id',
-                            'data' => \yii\helpers\ArrayHelper::map(\backend\models\Deliveryroute::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id,'status'=>1])->all(), 'id', 'name'),
+                            'data' => \yii\helpers\ArrayHelper::map(\backend\models\Deliveryroute::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'status' => 1])->all(), 'id', 'name'),
                             'value' => $find_user_id,
                             'options' => [
                                 'placeholder' => '--สายส่ง--'
@@ -194,10 +195,10 @@ $mpdf->AddPageByArray([
                     </td>
                     <td>
                         <select class="form-control" name="sale_type" id="">
-                            <option value="0" <?=$sale_type==0?'selected':''?>>--สด-เชื่อ--</option>
-                            <option value="2" <?=$sale_type==2?'selected':''?>>เชื่อ</option>
-                            <option value="1" <?=$sale_type==1?'selected':''?>>สด</option>
-                            <option value="3" <?=$sale_type==3?'selected':''?>>ฟรี</option>
+                            <option value="0" <?= $sale_type == 0 ? 'selected' : '' ?>>--สด-เชื่อ--</option>
+                            <option value="2" <?= $sale_type == 2 ? 'selected' : '' ?>>เชื่อ</option>
+                            <option value="1" <?= $sale_type == 1 ? 'selected' : '' ?>>สด</option>
+                            <option value="3" <?= $sale_type == 3 ? 'selected' : '' ?>>ฟรี</option>
                         </select>
                     </td>
                     <td>
@@ -212,17 +213,16 @@ $mpdf->AddPageByArray([
             <tr>
                 <td style="text-align: center; font-size: 20px; font-weight: bold">
                     <?php
-                     $head_title = 'สด-เชื่อ';
-                     if($sale_type==1){
-                         $head_title = 'สด';
-                     }else if($sale_type ==2){
-                         $head_title = 'เชื่อ';
-                     }
-                     else if($sale_type ==3){
-                         $head_title = 'ฟรี';
-                     }
+                    $head_title = 'สด-เชื่อ';
+                    if ($sale_type == 1) {
+                        $head_title = 'สด';
+                    } else if ($sale_type == 2) {
+                        $head_title = 'เชื่อ';
+                    } else if ($sale_type == 3) {
+                        $head_title = 'ฟรี';
+                    }
                     ?>
-                    รายงานยอดขาย<?=$head_title?>(แยกสายส่ง)
+                    รายงานยอดขาย<?= $head_title ?>(แยกสายส่ง)
                 </td>
             </tr>
         </table>
@@ -259,78 +259,79 @@ $mpdf->AddPageByArray([
                 <td style="text-align: right;border-top: 1px dotted gray;border-bottom: 1px dotted gray">
                     <b>ส่วนลด</b>
                 </td>
-                <td style="text-align: right;border-top: 1px dotted gray;border-bottom: 1px dotted gray"><b>ราคารวม</b></td>
+                <td style="text-align: right;border-top: 1px dotted gray;border-bottom: 1px dotted gray"><b>ราคารวม</b>
+                </td>
             </tr>
             <?php
             $sum_qty_all = 0;
             $sum_total_all = 0;
 
             ?>
-            <?php if($find_user_id!=null):?>
-            <?php
-             //   echo count($find_user_id);return;
-            ?>
-            <?php for ($k= 0;$k<= count($find_user_id)-1;$k++): ?>
+            <?php if ($find_user_id != null): ?>
                 <?php
-                $line_route_code = \backend\models\Deliveryroute::findName($find_user_id[$k]);
+                //   echo count($find_user_id);return;
                 ?>
-                <tr>
-                    <td colspan="7"><b><?= $line_route_code ?></b> </td>
-                </tr>
-                <?php $find_order = getOrder($from_date, $to_date, $sale_type, $find_user_id[$k], $company_id, $branch_id); ?>
-                <?php if ($find_order != null): ?>
+                <?php for ($k = 0; $k <= count($find_user_id) - 1; $k++): ?>
                     <?php
-                    $loop_count = count($find_order);
-                    $x = 0;
-                    $sum_qty = 0;
-                    $sum_total = 0;
-
+                    $line_route_code = \backend\models\Deliveryroute::findName($find_user_id[$k]);
                     ?>
-                    <?php for ($i = 0; $i <= count($find_order) - 1; $i++): ?>
+                    <tr>
+                        <td colspan="7"><b><?= $line_route_code ?></b></td>
+                    </tr>
+                    <?php $find_order = getOrder($from_date, $to_date, $sale_type, $find_user_id[$k], $company_id, $branch_id); ?>
+                    <?php if ($find_order != null): ?>
                         <?php
-                        $x += 1;
-                        $sum_qty += $find_order[$i]['qty'];
-                        $sum_total += (($find_order[$i]['qty'] * $find_order[$i]['sale_price'])-$find_order[$i]['discount_amt']);
+                        $loop_count = count($find_order);
+                        $x = 0;
+                        $sum_qty = 0;
+                        $sum_total = 0;
 
-                        $sum_qty_all += $find_order[$i]['qty'];
-                        $sum_total_all += (($find_order[$i]['qty'] * $find_order[$i]['sale_price']) - $find_order[$i]['discount_amt']);
                         ?>
-                        <tr>
-                            <td style="font-size: 16px;"><?= $find_order[$i]['route_name'] ?> </td>
-                            <td style="font-size: 16px;"><?= date('Y-m-d H:i:s', strtotime($find_order[$i]['order_date'])) ?></td>
-                            <td style="font-size: 16px;"><?= $find_order[$i]['order_no'] ?> </td>
-                            <td style="font-size: 16px;"><?= $find_order[$i]['cus_code'] ?> </td>
-                            <td style="font-size: 16px;"><?= $find_order[$i]['cus_branch_no'] ?> </td>
-                            <td style="font-size: 16px;"><?= $find_order[$i]['cus_name'] ?></td>
-                            <td style="font-size: 16px;"><?= \backend\models\Product::findCode($find_order[$i]['product_id'])  ?></td>
-                            <td style="font-size: 16px;"><?= \backend\models\Product::findName($find_order[$i]['product_id'])  ?></td>
-                            <td style="font-size: 16px;text-align: right;"><?= number_format($find_order[$i]['qty'], 2) ?></td>
-                            <td style="font-size: 16px;text-align: right;"><?= number_format($find_order[$i]['sale_price'], 2) ?></td>
-                            <td style="font-size: 16px;text-align: right;"><?= number_format($find_order[$i]['discount_amt'], 2) ?></td>
-                            <td style="font-size: 16px;text-align: right;"><?= number_format(($find_order[$i]['sale_price'] * $find_order[$i]['qty'])-$find_order[$i]['discount_amt'], 2) ?></td>
-                        </tr>
-                        <?php if ($loop_count == $x): ?>
+                        <?php for ($i = 0; $i <= count($find_order) - 1; $i++): ?>
+                            <?php
+                            $x += 1;
+                            $sum_qty += $find_order[$i]['qty'];
+                            $sum_total += (($find_order[$i]['qty'] * $find_order[$i]['sale_price']) - $find_order[$i]['discount_amt']);
+
+                            $sum_qty_all += $find_order[$i]['qty'];
+                            $sum_total_all += (($find_order[$i]['qty'] * $find_order[$i]['sale_price']) - $find_order[$i]['discount_amt']);
+                            ?>
                             <tr>
-                                <td style="font-size: 16px;border-top: 1px solid black"></td>
-                                <td style="font-size: 16px;border-top: 1px solid black"></td>
-                                <td style="font-size: 16px;border-top: 1px solid black"></td>
-                                <td style="font-size: 16px;border-top: 1px solid black"></td>
-                                <td style="font-size: 16px;border-top: 1px solid black"></td>
-                                <td style="font-size: 16px;border-top: 1px solid black"></td>
-                                <td style="font-size: 16px;border-top: 1px solid black"></td>
-                                <td style="font-size: 16px;border-top: 1px solid black"></td>
-                                <td style="font-size: 16px;text-align: right;border-top: 1px solid black;border-bottom: 1px solid black">
-                                    <b><?= number_format($sum_qty, 2) ?></b></td>
-                                <td style="font-size: 16px;text-align: right;border-top: 1px solid black;border-bottom: 1px solid black"></td>
-                                <td style="font-size: 16px;text-align: right;border-top: 1px solid black;border-bottom: 1px solid black"></td>
-                                <td style="font-size: 16px;text-align: right;border-top: 1px solid black;border-bottom: 1px solid black">
-                                    <b><?= number_format($sum_total, 2) ?></b></td>
+                                <td style="font-size: 16px;"><?= $find_order[$i]['route_name'] ?> </td>
+                                <td style="font-size: 16px;"><?= date('Y-m-d H:i:s', strtotime($find_order[$i]['order_date'])) ?></td>
+                                <td style="font-size: 16px;"><?= $find_order[$i]['order_no'] ?> </td>
+                                <td style="font-size: 16px;"><?= $find_order[$i]['cus_code'] ?> </td>
+                                <td style="font-size: 16px;"><?= $find_order[$i]['cus_branch_no'] ?> </td>
+                                <td style="font-size: 16px;"><?= $find_order[$i]['cus_name'] ?></td>
+                                <td style="font-size: 16px;"><?= \backend\models\Product::findCode($find_order[$i]['product_id']) ?></td>
+                                <td style="font-size: 16px;"><?= \backend\models\Product::findName($find_order[$i]['product_id']) ?></td>
+                                <td style="font-size: 16px;text-align: right;"><?= number_format($find_order[$i]['qty'], 2) ?></td>
+                                <td style="font-size: 16px;text-align: right;"><?= number_format($find_order[$i]['sale_price'], 2) ?></td>
+                                <td style="font-size: 16px;text-align: right;"><?= number_format($find_order[$i]['discount_amt'], 2) ?></td>
+                                <td style="font-size: 16px;text-align: right;"><?= number_format(($find_order[$i]['sale_price'] * $find_order[$i]['qty']) - $find_order[$i]['discount_amt'], 2) ?></td>
                             </tr>
-                        <?php endif; ?>
-                    <?php endfor ?>
-                <?php endif; ?>
-            <?php endfor; ?>
-           <?php endif;?>
+                            <?php if ($loop_count == $x): ?>
+                                <tr>
+                                    <td style="font-size: 16px;border-top: 1px solid black"></td>
+                                    <td style="font-size: 16px;border-top: 1px solid black"></td>
+                                    <td style="font-size: 16px;border-top: 1px solid black"></td>
+                                    <td style="font-size: 16px;border-top: 1px solid black"></td>
+                                    <td style="font-size: 16px;border-top: 1px solid black"></td>
+                                    <td style="font-size: 16px;border-top: 1px solid black"></td>
+                                    <td style="font-size: 16px;border-top: 1px solid black"></td>
+                                    <td style="font-size: 16px;border-top: 1px solid black"></td>
+                                    <td style="font-size: 16px;text-align: right;border-top: 1px solid black;border-bottom: 1px solid black">
+                                        <b><?= number_format($sum_qty, 2) ?></b></td>
+                                    <td style="font-size: 16px;text-align: right;border-top: 1px solid black;border-bottom: 1px solid black"></td>
+                                    <td style="font-size: 16px;text-align: right;border-top: 1px solid black;border-bottom: 1px solid black"></td>
+                                    <td style="font-size: 16px;text-align: right;border-top: 1px solid black;border-bottom: 1px solid black">
+                                        <b><?= number_format($sum_total, 2) ?></b></td>
+                                </tr>
+                            <?php endif; ?>
+                        <?php endfor ?>
+                    <?php endif; ?>
+                <?php endfor; ?>
+            <?php endif; ?>
             <tfoot>
             <tr>
                 <td style="font-size: 16px;border-top: 1px solid black"></td>
@@ -355,7 +356,7 @@ $mpdf->AddPageByArray([
     <table width="100%" class="table-title">
         <tr>
             <td>
-                <a class="btn btn-info" href="<?=\yii\helpers\Url::to(['ordercarcredit/carsummaryupdate'],true)?>">อัพเดทใบส่งของ</a>
+                <a class="btn btn-info" href="<?= \yii\helpers\Url::to(['ordercarcredit/carsummaryupdate'], true) ?>">อัพเดทใบส่งของ</a>
             </td>
             <td style="text-align: right">
                 <button id="btn-export-excel" class="btn btn-secondary">Export Excel</button>
@@ -386,15 +387,17 @@ function getOrder($f_date, $t_date, $find_sale_type, $find_user_id, $company_id,
 
     $data = [];
     $model = null;
-    if($find_sale_type == 0){
-        $model = \common\models\QueryApiOrderDailySummaryNew::find()->where(['BETWEEN','date(order_date)',date('Y-m-d', strtotime($f_date)),date('Y-m-d', strtotime($t_date))])
-            ->andFilterWhere(['order_channel_id'=>$find_user_id])
-            ->andFilterWhere(['!=','order_line_status',500])->all();
-    }else{
+    if ($find_sale_type == 0) {
+        $model = \common\models\QueryApiOrderDailySummaryNew::find()->where(['BETWEEN', 'date(order_date)', date('Y-m-d', strtotime($f_date)), date('Y-m-d', strtotime($t_date))])
+            ->andFilterWhere(['order_channel_id' => $find_user_id])
+            ->andFilterWhere(['!=', 'order_line_status', 500])
+            ->orderBy(['order_date'=>SORT_DESC,'price' => SORT_ASC])->all();
+    } else {
         $model = \common\models\QueryApiOrderDailySummaryNew::find()->where(['sale_payment_method_id' => $find_sale_type])
-            ->andFilterWhere(['BETWEEN','date(order_date)',date('Y-m-d', strtotime($f_date)),date('Y-m-d', strtotime($t_date))])
-            ->andFilterWhere(['order_channel_id'=>$find_user_id])
-            ->andFilterWhere(['!=','order_line_status',500])->all();
+            ->andFilterWhere(['BETWEEN', 'date(order_date)', date('Y-m-d', strtotime($f_date)), date('Y-m-d', strtotime($t_date))])
+            ->andFilterWhere(['order_channel_id' => $find_user_id])
+            ->andFilterWhere(['!=', 'order_line_status', 500])
+            ->orderBy(['order_date'=>SORT_DESC,'price' => SORT_ASC])->all();
     }
 //    if($find_sale_type == 0){
 //        $model = \common\models\QueryApiOrderDailySummaryNew::find()->where(['BETWEEN','order_date',date('Y-m-d H:i:s', strtotime($f_date)),date('Y-m-d H:i:s', strtotime($t_date))])
@@ -409,14 +412,14 @@ function getOrder($f_date, $t_date, $find_sale_type, $find_user_id, $company_id,
 //            ->andFilterWhere(['!=','order_line_status',500])->all();
 //    }
     if ($model) {
-        foreach($model as $value)  {
+        foreach ($model as $value) {
 
             array_push($data, [
                 'product_id' => $value->product_id,
                 'order_no' => $value->order_no,
                 'route_name' => \backend\models\Deliveryroute::findName($value->order_channel_id),
                 'cus_code' => $value->code,
-                'cus_branch_no' => getCustbranchno($value->code,$company_id,$branch_id),
+                'cus_branch_no' => getCustbranchno($value->code, $company_id, $branch_id),
                 'cus_name' => $value->name,
                 'qty' => $value->line_qty,
                 'sale_price' => $value->price,
@@ -427,16 +430,19 @@ function getOrder($f_date, $t_date, $find_sale_type, $find_user_id, $company_id,
     }
     return $data;
 }
-function getCustbranchno($cus_id,$company_id,$branch_id){
+
+function getCustbranchno($cus_id, $company_id, $branch_id)
+{
     $no = '';
-    if($cus_id){
-        $model = \backend\models\Customer::find()->select('sort_name')->where(['code'=>$cus_id,'company_id'=>$company_id,'branch_id'=>$branch_id])->one();
-        if($model){
+    if ($cus_id) {
+        $model = \backend\models\Customer::find()->select('sort_name')->where(['code' => $cus_id, 'company_id' => $company_id, 'branch_id' => $branch_id])->one();
+        if ($model) {
             $no = $model->sort_name;
         }
     }
     return $no;
 }
+
 //function getOrder($f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id)
 //{
 //    $list_route_id = null;

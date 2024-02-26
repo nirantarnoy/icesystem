@@ -105,7 +105,7 @@ if (!empty(\Yii::$app->user->identity->branch_id)) {
 
     </div>
     <div class="row">
-        <div class="col-lg-6">
+        <div class="col-lg-4">
             <?php //echo $form->field($model, 'shop_photo')->fileInput(['maxlength' => true]) ?>
             <br>
             <?php if ($model->shop_photo != ''): ?>
@@ -141,10 +141,12 @@ if (!empty(\Yii::$app->user->identity->branch_id)) {
         </div>
 
         <div class="col-lg-4">
-            <label for=""><?= $model->getAttributeLabel('status') ?></label>
-            <?php echo $form->field($model, 'status')->widget(\toxor88\switchery\Switchery::className(), ['options' => ['label' => '', 'class' => 'form-control']])->label(false) ?>
+            <label for=""><?= $model->getAttributeLabel('is_invoice_req') ?></label>
+            <?php echo $form->field($model, 'is_invoice_req')->widget(\toxor88\switchery\Switchery::className(), ['options' => ['label' => '', 'class' => 'form-control']])->label(false) ?>
         </div>
         <div class="col-lg-4">
+            <label for=""><?= $model->getAttributeLabel('status') ?></label>
+            <?php echo $form->field($model, 'status')->widget(\toxor88\switchery\Switchery::className(), ['options' => ['label' => '', 'class' => 'form-control']])->label(false) ?>
 
         </div>
     </div>

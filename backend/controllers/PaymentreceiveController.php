@@ -288,6 +288,7 @@ class PaymentreceiveController extends Controller
                 if ($model_line) {
                     $this->updatePaymenttransline($model->customer_id, $model_line->order_id, $model_line->payment_amount, 0);
                     if (\common\models\PaymentReceiveLine::deleteAll(['payment_receive_id' => $id])) {
+                        \common\models\Orders::updateAll(['payment_status'=>0],['id'=>$model_line->order_id]);
                         $this->findModel($id)->delete();
                     }
                 }else{
@@ -421,15 +422,34 @@ class PaymentreceiveController extends Controller
                     $html .= '<td style="text-align: center">' . $i . '</td>';
                     $html .= '<td style="text-align: center">' . \backend\models\Orders::getNumber($model[$x]['order_id']) . '</td>';
                     $html .= '<td style="text-align: center">' . date('d/m/Y', strtotime($model[$x]['order_date'])) . '</td>';
-                    $html .= '<td>
-                            <select name="line_pay_type[]" id=""  class="form-control" onchange="checkpaytype($(this))">
-                                <option value="1">เงินสด</option>
-                                <option value="2">โอนธนาคาร</option>
-                            </select>
+
+//                    $html .= '<td>
+//                            <select name="line_pay_type[]" id=""  class="form-control" onchange="checkpaytype($(this))">
+//                                <option value="1">เงินสด</option>
+//                                <option value="2">โอนธนาคาร</option>
+//                            </select>
+//                            <input type="file" class="line-doc" name="line_doc[]" style="display: none">
+//                            <input type="hidden" class="line-order-id" name="line_order_id[]" value="' . $model[$x]['order_id'] . '">
+//                            <input type="hidden" class="line-number" name="line_number[]" value="' . ($i - 1) . '">
+//                    </td>';
+
+                    $html .= '<td style="text-align: center;">
+                            <div class="btn-group">
+                                    <div class="btn btn-success line-pay-cash" data-var="1"
+                                         onclick="checkpaytype2($(this))">เงินสด
+                                    </div>
+                                    <div class="btn btn-default line-pay-bank" data-var="2"
+                                         onclick="checkpaytype3($(this))">โอนธนาคาร
+                                    </div>
+
+                                </div>
+                                <input type="hidden" class="line-payment-type" name="line_pay_type[]" value="1">
                             <input type="file" class="line-doc" name="line_doc[]" style="display: none">
                             <input type="hidden" class="line-order-id" name="line_order_id[]" value="' . $model[$x]['order_id'] . '">
                             <input type="hidden" class="line-number" name="line_number[]" value="' . ($i - 1) . '">
                     </td>';
+
+
 //                    $html .= '<td style="text-align: center"><input type="file" class="form-control"></td>';
                     $html .= '<td>
                             <input type="text" class="form-control line-remain" style="text-align: right" name="line_remain[]" value="' . number_format($remain_amt, 2) . '" readonly>
@@ -485,15 +505,33 @@ class PaymentreceiveController extends Controller
                     $html .= '<td style="text-align: center">' . $i . '</td>';
                     $html .= '<td style="text-align: center">' . \backend\models\Orders::getNumber($model[$x]['order_id']) . '</td>';
                     $html .= '<td style="text-align: center">' . date('d/m/Y', strtotime($model[$x]['order_date'])) . '</td>';
-                    $html .= '<td>
-                            <select name="line_pay_type[]" id=""  class="form-control" onchange="checkpaytype($(this))">
-                                <option value="1">เงินสด</option>
-                                <option value="2">โอนธนาคาร</option>
-                            </select>
+//                    $html .= '<td>
+//                            <select name="line_pay_type[]" id=""  class="form-control" onchange="checkpaytype($(this))">
+//                                <option value="1">เงินสด</option>
+//                                <option value="2">โอนธนาคาร</option>
+//                            </select>
+//                            <input type="file" class="line-doc" name="line_doc[]" style="display: none">
+//                            <input type="hidden" class="line-order-id" name="line_order_id[]" value="' . $model[$x]['order_id'] . '">
+//                            <input type="hidden" class="line-number" name="line_number[]" value="' . ($i - 1) . '">
+//                    </td>';
+                    $html .= '<td style="text-align: center;">
+                            <div class="btn-group">
+                                    <div class="btn btn-success line-pay-cash" data-var="1"
+                                         onclick="checkpaytype2($(this))">เงินสด
+                                    </div>
+                                    <div class="btn btn-default line-pay-bank" data-var="2"
+                                         onclick="checkpaytype3($(this))">โอนธนาคาร
+                                    </div>
+
+                                </div>
+                                <input type="hidden" class="line-payment-type" name="line_pay_type[]" value="0">
                             <input type="file" class="line-doc" name="line_doc[]" style="display: none">
                             <input type="hidden" class="line-order-id" name="line_order_id[]" value="' . $model[$x]['order_id'] . '">
                             <input type="hidden" class="line-number" name="line_number[]" value="' . ($i - 1) . '">
                     </td>';
+
+
+
 //                    $html .= '<td style="text-align: center"><input type="file" class="form-control"></td>';
                     $html .= '<td>
                             <input type="text" class="form-control line-remain" style="text-align: right" name="line_remain[]" value="' . number_format($remain_amt, 2) . '" readonly>

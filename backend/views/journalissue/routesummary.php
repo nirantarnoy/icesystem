@@ -51,22 +51,31 @@ $this->params['breadcrumbs'][] = $this->title;
                         'mergeColumns' => [[0, 2]], // columns to merge in summary
                         'content' => [             // content to show in each summary cell
                             1 => 'ยอดรวม (' . \backend\models\Deliveryroute::findName($model->delivery_route_id) . ')',
-                            3 => GridView::F_SUM,
+                            4 => GridView::F_SUM,
 
                         ],
                         'contentFormats' => [      // content reformatting for each summary cell
-                            3 => ['format' => 'number', 'decimals' => 2],
+                            4 => ['format' => 'number', 'decimals' => 2],
 
                         ],
                         'contentOptions' => [      // content html attributes for each summary cell
                             1 => ['style' => 'font-variant:small-caps'],
-                            3 => ['style' => 'text-align:right'],
+                            4 => ['style' => 'text-align:right'],
 
                         ],
                         // html attributes for group summary row
                         'options' => ['class' => 'info table-info', 'style' => 'font-weight:bold;']
                     ];
                 }
+            ],
+            [
+                'attribute' => 'trans_date',
+                'width' => '250px',
+                'value' => function ($model, $key, $index, $widget) {
+                    return date('d-m-Y', strtotime($model->trans_date));
+                },
+                'group' => true,  // enable grouping
+                'subGroupOf' => 0, // supplier column index is the parent group,
             ],
             [
                 'attribute' => 'product_id',

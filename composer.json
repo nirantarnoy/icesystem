@@ -36,7 +36,8 @@
     "kartik-v/yii2-widget-timepicker": "dev-master",
     "miloschuman/yii2-highcharts-widget": "^8.0",
     "chillerlan/php-qrcode": "^1.0",
-    "linslin/yii2-curl": "*"
+    "linslin/yii2-curl": "*",
+    "yii2assets/yii2-printthis": "^1.0"
   },
   "require-dev": {
     "yiisoft/yii2-debug": "~2.1.0",

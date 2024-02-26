@@ -135,10 +135,10 @@ class MainconfigController extends Controller
 //                        continue;
 //                    }
 
-                    $route_id = $this->checkRoute($rowData[3]);
+                    $route_id = $this->checkRoute($rowData[4]);
                     $group_id = $this->checkCustomergroup($rowData[5]);
                     $type_id = $this->checkCustomertype($rowData[6]);
-                    $payment_method = $this->checkPaymethod($rowData[14]);
+                    $payment_method = $this->checkPaymethod($rowData[13]);
                     $payment_term = $this->checkPayterm($rowData[15]);
 
                     $modelx = new \backend\models\Customer();
@@ -159,6 +159,7 @@ class MainconfigController extends Controller
                     $modelx->sort_name = $rowData[1];
                     $modelx->payment_method_id = $payment_method;
                     $modelx->payment_term_id = $payment_term;
+                    $modelx->is_invoice_req = 0;
                     $modelx->status = 1;
                     $modelx->company_id = 1;
                     $modelx->branch_id = 1;
@@ -274,7 +275,7 @@ class MainconfigController extends Controller
     {
         $id = 0;
         if ($name != '') {
-            $model = \backend\models\Deliveryroute::find()->where(['code' => $name, 'company_id' => 1, 'branch_id' => 1])->one();
+            $model = \backend\models\Deliveryroute::find()->where(['name' => $name, 'company_id' => 1, 'branch_id' => 1])->one();
             if ($model) {
                 $id = $model->id;
             } else {

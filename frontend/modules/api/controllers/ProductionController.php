@@ -42,6 +42,17 @@ class ProductionController extends Controller
                     'productionlist' => ['POST'],
                     'updateprodstatus' => ['POST'],
                     'addprodrecprod' => ['POST'],
+                    'addprodrecmobile' => ['POST'],
+                    'listmobileall' => ['POST'],
+                    'deleprodrecline'=> ['POST'],
+                    'addproducttransform'=>['POST'],
+                    'scraplist'=>['POST'],
+                    'addscrapmobile' => ['POST'],
+                    'scrapcancel' => ['POST'],
+                    'producttransferlist'=> ['POST'],
+                    'addproducttransfermobile' => ['POST'],
+                    'deleproducttransferline' => ['POST'],
+                    'deleteproducttransform' => ['POST'],
 
                 ],
             ],
@@ -83,17 +94,17 @@ class ProductionController extends Controller
 
         if ($product_id && $warehouse_id && $qty) {
 
-            $main_warehouse = \backend\models\Warehouse::findPrimary($company_id, $branch_id);
-
+            //$main_warehouse = \backend\models\Warehouse::findPrimary($company_id, $branch_id);
+            $warehouse_id = 6; // หนองขาหยั่ง
             $model_journal = new \backend\models\Stockjournal();
             if ($production_type == 1) {
                 sleep(3);
                 $model_journal->journal_no = $model_journal->getLastNo($company_id, $branch_id);
             } else if ($production_type == 5) {
-                sleep(3);
+                sleep(2);
                 $model_journal->journal_no = $model_journal->getLastNoReceiveTransfer($company_id, $branch_id);
             } else {
-                sleep(3);
+                sleep(2);
                 //       $model_journal->journal_no = $model_journal->getLastNoNew($company_id, $branch_id, $act_id, $production_type);
                 $model_journal->journal_no = $model_journal->getLastNoCarreprocess($company_id, $branch_id);
             }
@@ -112,7 +123,7 @@ class ProductionController extends Controller
                 $model->trans_date = date('Y-m-d H:i:s');
                 $model->product_id = $product_id;
                 $model->qty = $qty;
-                $model->warehouse_id = $main_warehouse;//$warehouse_id;
+                $model->warehouse_id = $warehouse_id;//$warehouse_id;
                 $model->stock_type = 1;
                 $model->activity_type_id = $act_id; // 15 prod rec
                 $model->production_type = $production_type;
@@ -121,8 +132,96 @@ class ProductionController extends Controller
                 $model->created_by = $user_id;
                 if ($model->save(false)) {
                     $status = 1;
-                    $this->updateSummary($product_id, $main_warehouse, $qty);
+                    $this->updateSummary($product_id, $warehouse_id, $qty);
                 }
+            }
+//            $model = \backend\models\Stockjournal::find()->where(['id' => $model_journal->id])->one();
+//            $model_line = \backend\models\Stocktrans::find()->where(['journal_id' => $model_journal->id])->all();
+
+            array_push($data, ['journal_no' => $journal_no]);
+            //  $this->renderPartial('_printtoindex', ['model' => $model, 'model_line' => $model_line, 'change_amount' => 0]);
+        }
+
+        return ['status' => $status, 'data' => $data];
+    }
+
+    public function actionAddproducttransfermobile()
+    {
+        $company_id = 0;
+        $branch_id = 0;
+        $datalist = null;
+        $warehouse_id = 0;
+        $user_id = 0;
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+        $company_id = $req_data['company_id'];
+        $branch_id = $req_data['branch_id'];
+        $datalist = $req_data['data'];
+        $warehouse_id = $req_data['warehouse_id'];
+        $user_id = $req_data['user_id'];
+        $production_type = $req_data['production_type'];
+
+        $data = [];
+        $status = false;
+        $journal_no = '';
+
+        $act_id = 15;
+        if ($production_type == 1) {
+            $act_id = 15; //รับผลิต
+        } else if ($production_type == 2) {
+            $act_id = 26; // reprocess รถ
+        } else if ($production_type == 3) {
+            $act_id = 27; // reprocess
+        } else if ($production_type == 5) {
+            $act_id = 15; // รับผลิต + รับโอนจากต่างสาขา
+        }
+
+        if ($warehouse_id != null && $datalist != null) {
+
+            //$main_warehouse = \backend\models\Warehouse::findPrimary($company_id, $branch_id);
+            $warehouse_id = 1; // หนองดินแดง
+            $model_journal = new \backend\models\Stockjournal();
+            if ($production_type == 1) {
+                sleep(1);
+                $model_journal->journal_no = $model_journal->getLastNo($company_id, $branch_id);
+            } else if ($production_type == 5) {
+                sleep(1);
+                $model_journal->journal_no = $model_journal->getLastNoReceiveTransfer($company_id, $branch_id);
+            } else {
+                sleep(1);
+                //       $model_journal->journal_no = $model_journal->getLastNoNew($company_id, $branch_id, $act_id, $production_type);
+                $model_journal->journal_no = $model_journal->getLastNoCarreprocess($company_id, $branch_id);
+            }
+
+
+            $model_journal->trans_date = date('Y-m-d H:i:s');
+
+            $journal_no = $model_journal->journal_no;
+            $model_journal->company_id = $company_id;
+            $model_journal->branch_id = $branch_id;
+            $model_journal->production_type = $act_id; // $production_type;
+            if ($model_journal->save(false)) {
+                for($i=0;$i<=count($datalist)-1;$i++){
+                    $model = new \backend\models\Stocktrans();
+                    $model->journal_no = $model_journal->journal_no;
+                    $model->journal_id = $model_journal->id;
+                    $model->trans_date = date('Y-m-d H:i:s');
+                    $model->product_id = $datalist[$i]['product_id'];
+                    $model->qty = $datalist[$i]['qty'];
+                    $model->warehouse_id = $warehouse_id;//$warehouse_id;
+                    $model->stock_type = 1;
+                    $model->activity_type_id = $act_id; // 15 prod rec
+                    $model->production_type = $production_type;
+                    $model->company_id = $company_id;
+                    $model->branch_id = $branch_id;
+                    $model->created_by = $user_id;
+                    if ($model->save(false)) {
+                        $status = 1;
+                        $this->updateSummary($datalist[$i]['product_id'], $warehouse_id, $datalist[$i]['qty']);
+                    }
+                }
+
             }
 //            $model = \backend\models\Stockjournal::find()->where(['id' => $model_journal->id])->one();
 //            $model_line = \backend\models\Stocktrans::find()->where(['journal_id' => $model_journal->id])->all();
@@ -378,13 +477,21 @@ class ProductionController extends Controller
         if ($wh_id != null && $product_id != null && $qty > 0) {
             $model = \backend\models\Stocksum::find()->where(['warehouse_id' => $wh_id, 'product_id' => $product_id])->one();
             if ($model) {
-                $model->qty = (int)$model->qty + (int)$qty;
+                $new_qty =0;
+                if($model->qty != null){
+                    $new_qty = (float)$model->qty + (float)$qty;
+                }else{
+                    $new_qty = (float)$qty;
+                }
+                $model->qty = $new_qty;
                 $model->save(false);
             } else {
                 $model_new = new \backend\models\Stocksum();
+                $model_new->company_id = 1;
+                $model_new->branch_id = 1;
                 $model_new->warehouse_id = $wh_id;
                 $model_new->product_id = $product_id;
-                $model_new->qty = $qty;
+                $model_new->qty = (float)$qty;
                 $model_new->save(false);
             }
         }
@@ -544,7 +651,7 @@ class ProductionController extends Controller
 //                }
                 $model = \backend\models\Stocksum::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'warehouse_id' => $warehouse_id, 'product_id' => $product_id])->one();
                 if ($model) {
-                    $model->qty = $model->qty - (int)$qty;
+                    $model->qty = (float)$model->qty - (float)$qty;
                     $model->save(false);
                 }
             }
@@ -954,7 +1061,7 @@ class ProductionController extends Controller
             }
             $model = null;
             if ($journal_id != null) {
-                    $model = \common\models\QueryProdrecTrans::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'date(trans_date)' => $find_date])->andFilterWhere(['=', 'product_code', $journal_id])->orderBy(['trans_date' => SORT_DESC])->all();
+                $model = \common\models\QueryProdrecTrans::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'date(trans_date)' => $find_date])->andFilterWhere(['=', 'product_code', $journal_id])->orderBy(['trans_date' => SORT_DESC])->all();
 
             }
 //            if ($journal_id != null) {
@@ -1205,7 +1312,6 @@ class ProductionController extends Controller
                             \common\models\ProductionStatus::updateAll(['color_status' => 'G', 'start_date' => $replace_date, 'end_date' => NULL], ['loc_id' => $model_product_loc_id->production_loc_id]); // return production status to green color
                         }
                     }
-
                 }
             }
             array_push($data, ['journal_no' => $journal_no]);
@@ -1231,13 +1337,13 @@ class ProductionController extends Controller
         if ($wh_id != null && $product_id != null && $qty > 0) {
             $model = \backend\models\Stocksum::find()->where(['warehouse_id' => $wh_id, 'product_id' => $product_id])->one();
             if ($model) {
-                $model->qty = (int)$model->qty - (int)$qty;
+                $model->qty = (float)$model->qty - (float)$qty;
                 $model->save(false);
             } else {
                 $model_new = new \backend\models\Stocksum();
                 $model_new->warehouse_id = $wh_id;
                 $model_new->product_id = $product_id;
-                $model_new->qty = $qty;
+                $model_new->qty = (float)$qty;
                 $model_new->save(false);
             }
         }
@@ -1490,7 +1596,7 @@ class ProductionController extends Controller
                             if ($model_trans->save(false)) {
                                 $model_sum = \backend\models\Stocksum::find()->where(['warehouse_id' => $main_warehouse, 'product_id' => $model->product_id])->one();
                                 if ($model_sum) {
-                                    $model_sum->qty = (int)$model_sum->qty - (int)$qty;
+                                    $model_sum->qty = (float)$model_sum->qty - (float)$qty;
                                     if ($model_sum->save(false)) {
                                         // check issue tranform balance
                                         $chk_issue_reserv_balance = \backend\models\Stocktrans::find()->where(['product_id' => $model->product_id, 'trans_ref_id' => $model->id])->sum('qty');
@@ -1827,5 +1933,682 @@ class ProductionController extends Controller
         }
 
 
+    }
+
+    public function actionAddprodrecmobile()
+    {
+        $company_id = 1;
+        $branch_id = 1;
+        $product_id = 0;
+        $warehouse_id = 1;
+        $user_id = 0;
+        $qty = 0;
+        $datalist = null;
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+//        $company_id = $req_data['company_id'];
+//        $branch_id = $req_data['branch_id'];
+        //   $product_id = $req_data['product_id'];
+        //    $warehouse_id = $req_data['warehouse_id'];
+        //   $qty = $req_data['qty'];
+        $user_id = $req_data['user_id'];
+        $production_type = 1; // $req_data['production_type'];
+        $datalist = $req_data['data'];
+
+        $data = [];
+        $status = false;
+        $journal_no = '';
+
+        $act_id = 15;
+        if ($production_type == 1) {
+            $act_id = 15; //รับผลิต
+        } else if ($production_type == 2) {
+            $act_id = 26; // reprocess รถ
+        } else if ($production_type == 3) {
+            $act_id = 27; // reprocess
+        } else if ($production_type == 5) {
+            $act_id = 15; // รับผลิต + รับโอนจากต่างสาขา
+        }
+
+        if (count($datalist) > 0) {
+            for ($i = 0; $i <= count($datalist) - 1; $i++) {
+                if ($datalist[$i]['qty'] <= 0) continue;
+                $product_id = $datalist[$i]['product_id'];
+                $qty = $datalist[$i]['qty'];
+
+
+                if ($product_id && $warehouse_id && $qty) {
+
+                    //$main_warehouse = \backend\models\Warehouse::findPrimary($company_id, $branch_id);
+                    $warehouse_id = 1; // หนองขาหยั่ง
+                    $model_journal = new \backend\models\Stockjournal();
+                    if ($production_type == 1) {
+                        sleep(1);
+                        $model_journal->journal_no = $model_journal->getLastNo($company_id, $branch_id);
+                    } else if ($production_type == 5) {
+                        sleep(1);
+                        $model_journal->journal_no = $model_journal->getLastNoReceiveTransfer($company_id, $branch_id);
+                    } else {
+                        sleep(1);
+                        //       $model_journal->journal_no = $model_journal->getLastNoNew($company_id, $branch_id, $act_id, $production_type);
+                        $model_journal->journal_no = $model_journal->getLastNoCarreprocess($company_id, $branch_id);
+                    }
+
+
+                    $model_journal->trans_date = date('Y-m-d H:i:s');
+
+
+                    $model_journal->company_id = $company_id;
+                    $model_journal->branch_id = $branch_id;
+                    $model_journal->production_type = $act_id; // $production_type;
+                    if ($model_journal->save(false)) {
+                        $journal_no = $model_journal->journal_no;
+                        $model = new \backend\models\Stocktrans();
+                        $model->journal_no = $model_journal->journal_no;
+                        $model->journal_id = $model_journal->id;
+                        $model->trans_date = date('Y-m-d H:i:s');
+                        $model->product_id = $product_id;
+                        $model->qty = $qty;
+                        $model->warehouse_id = $warehouse_id;//$warehouse_id;
+                        $model->stock_type = 1;
+                        $model->activity_type_id = $act_id; // 15 prod rec
+                        $model->production_type = $production_type;
+                        $model->company_id = $company_id;
+                        $model->branch_id = $branch_id;
+                        $model->created_by = $user_id;
+                        $model->status = 0;
+                        if ($model->save(false)) {
+                            $status = 1;
+                            $this->updateSummary($product_id, $warehouse_id, $qty);
+                        }
+                    }
+//            $model = \backend\models\Stockjournal::find()->where(['id' => $model_journal->id])->one();
+//            $model_line = \backend\models\Stocktrans::find()->where(['journal_id' => $model_journal->id])->all();
+
+                    array_push($data, ['journal_no' => $journal_no]);
+                    //  $this->renderPartial('_printtoindex', ['model' => $model, 'model_line' => $model_line, 'change_amount' => 0]);
+                }
+            }
+        }
+
+
+        return ['status' => $status, 'data' => $data];
+    }
+
+    public function actionListmobileall()
+    {
+        $company_id = 1;
+        $branch_id = 1;
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+        $company_id = $req_data['company_id'];
+        $branch_id = $req_data['branch_id'];
+
+        $data = [];
+        $status = false;
+
+        $model = \common\models\StockTrans::find()->where(['activity_type_id'=>15,'status'=>0,'company_id' => $company_id, 'branch_id' => $branch_id,'date(trans_date)'=>date('Y-m-d')])->orderBy(['id'=>SORT_DESC])->all();
+        // $model = \common\models\QueryCustomerPrice::find()->all();
+        if ($model) {
+            $status = true;
+            foreach ($model as $value) {
+                // $product_info = \backend\models\Product::findInfo($value->product_id);
+                array_push($data, [
+                    'id' => $value->id,
+                    'journal_no' => $value->journal_no,
+                    'trans_date' => $value->trans_date,
+                    'product_name'=> \backend\models\Product::findName($value->product_id),
+                    'qty' =>$value->qty,
+                    'created_name' => \backend\models\User::findName($value->created_by),
+                ]);
+            }
+        }
+
+        return ['status' => $status, 'data' => $data];
+    }
+    public function actionProducttransferlist()
+    {
+        $company_id = 1;
+        $branch_id = 1;
+        $user_id = 0;
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+        $user_id = $req_data['user_id'];
+        $company_id = $req_data['company_id'];
+        $branch_id = $req_data['branch_id'];
+
+        $data = [];
+        $status = false;
+
+        $model = \common\models\StockTrans::find()->where(['activity_type_id'=>15,'production_type'=>5,'company_id' => $company_id, 'branch_id' => $branch_id,'date(trans_date)'=>date('Y-m-d')])->andFilterWhere(['OR',['!=','status',500],['is','status', new \yii\db\Expression('null')]])->orderBy(['id'=>SORT_DESC])->all();
+        // $model = \common\models\QueryCustomerPrice::find()->all();
+        if ($model) {
+            $status = true;
+            foreach ($model as $value) {
+                // $product_info = \backend\models\Product::findInfo($value->product_id);
+                array_push($data, [
+                    'id' => $value->id,
+                    'journal_no' => $value->journal_no,
+                    'trans_date' => $value->trans_date,
+                    'product_id'=> $value->product_id,
+                    'product_name'=> \backend\models\Product::findName($value->product_id),
+                    'qty' =>$value->qty,
+                    'created_name' => \backend\models\User::findName($value->created_by),
+                    'warehouse_name' => \backend\models\Warehouse::findName($value->warehouse_id),
+                ]);
+            }
+        }
+
+        return ['status' => $status, 'data' => $data];
+    }
+    public function actionDeleprodrecline()
+    {
+        $id = 0;
+        $user_id = 0;
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+        $id = $req_data['id'];
+        $user_id = $req_data['user_id'];
+
+        $data = [];
+        $status = false;
+
+        if($id && $user_id){
+            $model = \common\models\StockTrans::find()->where(['id'=>$id])->one();
+            if ($model) {
+                $status = true;
+                $main_warehouse = 1; //\backend\models\Warehouse::findPrimary($company_id, $branch_id);
+
+                // cancel production receive
+                $model_journal = new \backend\models\Stockjournal();
+                $model_journal->journal_no = $model_journal->getReturnProdLastNo($model->company_id, $model->branch_id);
+                //  $model_journal->journal_no = $model_journal->getLastNoNew($company_id, $branch_id, $act_id, $production_type);
+                $model_journal->trans_date = date('Y-m-d H:i:s');
+
+                $journal_no = $model_journal->journal_no;
+                $model_journal->company_id = $model->company_id;
+                $model_journal->branch_id = $model->branch_id;
+                $model_journal->production_type = 28; // cancel production
+                if ($model_journal->save(false)) {
+                    $modelx = new \backend\models\Stocktrans();
+                    $modelx->journal_no = $model_journal->journal_no;
+                    $modelx->journal_id = $model_journal->id;
+                    $modelx->trans_date = date('Y-m-d H:i:s');
+                    $modelx->product_id = $model->product_id;
+                    $modelx->qty = $model->qty;
+                    $modelx->warehouse_id = $main_warehouse;//$warehouse_id;
+                    $modelx->stock_type = 2; // 2 out
+                    $modelx->activity_type_id = 28; // 28 prod rec cancel
+                    $modelx->production_type = 28;
+                    $modelx->company_id = $model->company_id;
+                    $modelx->branch_id = $model->branch_id;
+                    $modelx->created_by = $user_id;
+                    if ($modelx->save(false)) {
+                        $status = 1;
+                        if($this->reducestock($model->product_id,$main_warehouse,$model->qty) == 1){
+                            $model->status = 500;
+                            $model->save(false);
+                        }
+                    }
+                }
+                array_push($data, ['journal_no' => $journal_no]);
+            }
+        }
+
+        return ['status' => $status, 'data' => $data];
+    }
+
+    public function actionDeleproducttransferline()
+    {
+        $id = 0;
+        $user_id = 0;
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+        $id = $req_data['id'];
+        $user_id = $req_data['user_id'];
+
+        $data = [];
+        $status = false;
+
+        if($id && $user_id){
+            $model = \common\models\StockTrans::find()->where(['id'=>$id])->one();
+            if ($model) {
+                $status = true;
+                $main_warehouse = 1; //\backend\models\Warehouse::findPrimary($company_id, $branch_id);
+
+                // cancel production receive
+                $model_journal = new \backend\models\Stockjournal();
+                $model_journal->journal_no = $model_journal->getReturnProdLastNo($model->company_id, $model->branch_id);
+                //  $model_journal->journal_no = $model_journal->getLastNoNew($company_id, $branch_id, $act_id, $production_type);
+                $model_journal->trans_date = date('Y-m-d H:i:s');
+
+                $journal_no = $model_journal->journal_no;
+                $model_journal->company_id = $model->company_id;
+                $model_journal->branch_id = $model->branch_id;
+                $model_journal->production_type = 28; // cancel production
+                if ($model_journal->save(false)) {
+                    $modelx = new \backend\models\Stocktrans();
+                    $modelx->journal_no = $model_journal->journal_no;
+                    $modelx->journal_id = $model_journal->id;
+                    $modelx->trans_date = date('Y-m-d H:i:s');
+                    $modelx->product_id = $model->product_id;
+                    $modelx->qty = $model->qty;
+                    $modelx->warehouse_id = $main_warehouse;//$warehouse_id;
+                    $modelx->stock_type = 2; // 2 out
+                    $modelx->activity_type_id = 28; // 28 prod rec cancel
+                    $modelx->production_type = 28;
+                    $modelx->company_id = $model->company_id;
+                    $modelx->branch_id = $model->branch_id;
+                    $modelx->created_by = $user_id;
+                    if ($modelx->save(false)) {
+                        $status = 1;
+                        if($this->reducestock($model->product_id,$main_warehouse,$model->qty) == 1){
+                            $model->status = 500;
+                            $model->save(false);
+                        }
+                    }
+                }
+                array_push($data, ['journal_no' => $journal_no]);
+            }
+        }
+
+        return ['status' => $status, 'data' => $data];
+    }
+    public function reducestock($product_id, $wh_id, $qty)
+    {
+        $res = 0;
+        if ($wh_id != null && $product_id != null && $qty > 0) {
+            $model = \backend\models\Stocksum::find()->where(['warehouse_id' => $wh_id, 'product_id' => $product_id])->one();
+            if ($model) {
+                $model->qty = (float)$model->qty - (float)$qty;
+                if($model->save(false)){
+                    $res = 1;
+                }
+            }
+        }
+        return $res;
+    }
+
+    public function actionAddproducttransform(){
+        $from_product_id = 0;
+        $issue_qty = 0;
+        $data_list = null;
+        $user_id = 0;
+        $company_id = 0;
+        $branch_id = 0;
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+        $from_product_id = $req_data['product_id'];
+        $issue_qty = $req_data['issue_qty'];
+        $user_id = $req_data['user_id'];
+        $data_list = $req_data['data'];
+        $company_id = $req_data['company_id'];
+        $branch_id = $req_data['branch_id'];
+
+        $data = [];
+        $status = false;
+
+        if ($from_product_id != null && $data_list != null) {
+
+                $model_reserv = new \backend\models\Transformreserv();
+                $model_reserv->journal_no = $model_reserv::getLastNo(date('Y-m-d'),$company_id,$branch_id);
+                $model_reserv->trans_date = date('Y-m-d H:i:s');
+                $model_reserv->product_id = $from_product_id;
+                $model_reserv->qty = $issue_qty;
+                $model_reserv->status = 0;
+                $model_reserv->user_id = $user_id;
+                $model_reserv->company_id = $company_id;
+                $model_reserv->branch_id = $branch_id;
+                if ($model_reserv->save(false)) {
+
+                    for ($i = 0; $i <= count($data_list) - 1; $i++) {
+                        if ($data_list[$i]['qty'] == '' || $data_list[$i]['qty'] == 0) continue;
+                        $this->updateStockIn($data_list[$i]['product_id'], $data_list[$i]['qty'], 1, $model_reserv->id, $company_id, $branch_id,$user_id);
+                    }
+                    if($this->updatestockout($from_product_id,$issue_qty,$company_id,$branch_id,$user_id) == 1){
+                        $status = 1;
+                    }
+                }
+            }
+
+
+        return ['status' => $status, 'data' => $data];
+    }
+    public function updateStockIn($product_id, $qty, $wh_id, $journal_id, $company_id, $branch_id,$user_id)
+    {
+        if ($product_id != null && $qty > 0) {
+
+            $model_journal = new \backend\models\Stockjournal();
+            $model_journal->journal_no = $model_journal->getLastNoReprocess($company_id, $branch_id);
+            $model_journal->trans_date = date('Y-m-d H:i:s');
+            $model_journal->company_id = $company_id;
+            $model_journal->branch_id = $branch_id;
+            $model_journal->production_type = 27;
+            if ($model_journal->save(false)) {
+                $model_trans = new \backend\models\Stocktrans();
+                $model_trans->journal_no = $model_journal->journal_no;
+                $model_trans->trans_date = date('Y-m-d H:i:s');
+                $model_trans->product_id = $product_id;
+                $model_trans->qty = $qty;
+                $model_trans->warehouse_id = $wh_id;
+                $model_trans->stock_type = 1; // 1 in 2 out
+                $model_trans->activity_type_id = 27; // 27 receive reprocess
+                $model_trans->company_id = $company_id;
+                $model_trans->branch_id = $branch_id;
+                $model_trans->created_by = $user_id;
+                $model_trans->trans_ref_id = $journal_id;
+                $model_trans->status = 0;
+                if ($model_trans->save(false)) {
+                    $model_sum = \backend\models\Stocksum::find()->where(['warehouse_id' => $wh_id, 'product_id' => $product_id])->one();
+                    if ($model_sum) {
+                        $model_sum->qty = (float)$model_sum->qty + (float)$qty;
+                        $model_sum->save(false);
+                    }
+
+                }
+            }
+        }
+    }
+    public function updatestockout($product_id, $qty, $company_id, $branch_id, $user_id)
+    {
+        $res = 0;
+        if ($product_id != null && $qty != null) {
+            $warehouse_id = 1; //$this->findReprocesswarehouse($company_id, $branch_id);
+            $model_trans = new \backend\models\Stocktrans();
+            $model_trans->journal_no = $model_trans::getIssueReprocessCar($company_id, $branch_id);
+            $model_trans->trans_date = date('Y-m-d H:i:s');
+            $model_trans->product_id = $product_id;
+            $model_trans->qty = $qty;
+            $model_trans->warehouse_id = $warehouse_id;
+            $model_trans->stock_type = 2; // 1 in 2 out
+            $model_trans->activity_type_id = 18; // 6 issue car
+            $model_trans->company_id = $company_id;
+            $model_trans->created_by = $user_id;
+            $model_trans->branch_id = $branch_id;
+            if ($model_trans->save(false)) {
+
+//                $model = \common\models\StockSum::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'product_id' => $product_id, 'warehouse_id' => $warehouse_id])->one();
+//                if ($model) {
+//                    $model->qty = 0;
+//                    $model->save(false);
+//                }
+                $model = \backend\models\Stocksum::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'warehouse_id' => $warehouse_id, 'product_id' => $product_id])->one();
+                if ($model) {
+                    $model->qty = (float)$model->qty - (float)$qty;
+                    if($model->save(false)){
+                        $res= 1;
+                    }
+                }
+            }
+
+        }
+        return $res;
+    }
+
+    public function actionGettransformall(){
+        $company_id = 1;
+        $branch_id = 1;
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+        $company_id = $req_data['company_id'];
+        $branch_id = $req_data['branch_id'];
+
+        $data = [];
+        $status = false;
+
+        $model = \common\models\TransformReserv::find()->where(['date(trans_date)'=>date('Y-m-d'),'company_id' => $company_id, 'branch_id' => $branch_id,'status'=>0])->all();
+        // $model = \common\models\QueryCustomerPrice::find()->all();
+        if ($model) {
+            $status = true;
+            foreach ($model as $value) {
+                // $product_info = \backend\models\Product::findInfo($value->product_id);
+                array_push($data, [
+                    'id' => $value->id,
+                    'journal_no' => $value->journal_no,
+                    'trans_date' => $value->trans_date,
+                    'product_name'=> \backend\models\Product::findName($value->product_id),
+                    'qty' =>$value->qty,
+                    'created_name' => \backend\models\User::findName($value->user_id),
+                ]);
+            }
+        }
+
+
+        return ['status' => $status, 'data' => $data];
+    }
+
+    public function actionDeleteproducttransform()
+    {
+        $id = 0;
+        $user_id = 0;
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+        $id = $req_data['id'];
+        $user_id = $req_data['user_id'];
+
+        $data = [];
+        $status = false;
+
+        if($id && $user_id){
+            $model_transform = \common\models\TransformReserv::find()->where(['id'=>$id])->one();
+            if($model_transform){
+                $model = \common\models\StockTrans::find()->where(['trans_ref_id'=>$id,'activity_type_id'=>27,'created_by'=>$user_id])->one();
+                if ($model) {
+                    $status = true;
+                    $main_warehouse = 1; //\backend\models\Warehouse::findPrimary($company_id, $branch_id);
+
+                    // cancel production receive
+                    $model_journal = new \backend\models\Stockjournal();
+                    $model_journal->journal_no = $model_journal->getReturnProdLastNo($model->company_id, $model->branch_id);
+                    //  $model_journal->journal_no = $model_journal->getLastNoNew($company_id, $branch_id, $act_id, $production_type);
+                    $model_journal->trans_date = date('Y-m-d H:i:s');
+
+                    $journal_no = $model_journal->journal_no;
+                    $model_journal->company_id = $model->company_id;
+                    $model_journal->branch_id = $model->branch_id;
+                    $model_journal->production_type = 28; // cancel production
+                    if ($model_journal->save(false)) {
+                        $modelx = new \backend\models\Stocktrans();
+                        $modelx->journal_no = $model_journal->journal_no;
+                        $modelx->journal_id = $model_journal->id;
+                        $modelx->trans_date = date('Y-m-d H:i:s');
+                        $modelx->product_id = $model->product_id;
+                        $modelx->qty = $model->qty;
+                        $modelx->warehouse_id = $main_warehouse;//$warehouse_id;
+                        $modelx->stock_type = 2; // 2 out
+                        $modelx->activity_type_id = 28; // 28 prod rec cancel
+                        $modelx->production_type = 28;
+                        $modelx->company_id = $model->company_id;
+                        $modelx->branch_id = $model->branch_id;
+                        $modelx->created_by = $user_id;
+                        if ($modelx->save(false)) {
+
+                            $status = 1;
+                            if($this->reducestock($model->product_id,$main_warehouse,$model->qty) == 1){
+                                if($this->addqtyfromreturntransform($model->company_id,$model->branch_id,$model_transform->product_id,$model_transform->qty,$main_warehouse,0,$user_id)){
+                                    $model->status = 500;
+                                    $model->save(false);
+                                    $model_transform->status = 1;
+                                    $model_transform->save(false);
+                                }
+                            }
+                        }
+                    }
+                    array_push($data, ['journal_no' => $journal_no]);
+                }
+            }
+        }
+
+        return ['status' => $status, 'data' => $data];
+    }
+
+    public function addqtyfromreturntransform($company_id,$branch_id,$product_id,$qty,$wh_id,$journal_id,$user_id){
+        $res = 0;
+        $model_journal = new \backend\models\Stockjournal();
+        $model_journal->journal_no = $model_journal->getLastNoReprocess($company_id, $branch_id);
+        $model_journal->trans_date = date('Y-m-d H:i:s');
+        $model_journal->company_id = $company_id;
+        $model_journal->branch_id = $branch_id;
+        $model_journal->production_type = 27;
+        if ($model_journal->save(false)) {
+            $model_trans = new \backend\models\Stocktrans();
+            $model_trans->journal_no = $model_journal->journal_no;
+            $model_trans->trans_date = date('Y-m-d H:i:s');
+            $model_trans->product_id = $product_id;
+            $model_trans->qty = $qty;
+            $model_trans->warehouse_id = $wh_id;
+            $model_trans->stock_type = 1; // 1 in 2 out
+            $model_trans->activity_type_id = 27; // 27 receive reprocess
+            $model_trans->company_id = $company_id;
+            $model_trans->branch_id = $branch_id;
+            $model_trans->created_by = $user_id;
+            $model_trans->trans_ref_id = $journal_id;
+            $model_trans->status = 0;
+            if ($model_trans->save(false)) {
+                $model_sum = \backend\models\Stocksum::find()->where(['warehouse_id' => $wh_id, 'product_id' => $product_id])->one();
+                if ($model_sum) {
+                    $model_sum->qty = (float)$model_sum->qty + (float)$qty;
+                    $model_sum->save(false);
+                    $res+=1;
+                }
+
+            }
+        }
+        return $res;
+    }
+
+    public function actionScraplist()
+    {
+        $company_id = 0;
+        $branch_id = 0;
+        $trans_date = null;
+        $journal_id = null;
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+        $company_id = $req_data['company_id'];
+        $branch_id = $req_data['branch_id'];
+
+        $data = [];
+        $status = false;
+
+        if ($company_id && $branch_id) {
+            $model = \common\models\QueryScrap::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'date(trans_date)' => date('Y-m-d')])->andFilterWhere(['>','qty',0])->orderBy(['id' => SORT_DESC])->all();
+            if ($model) {
+                $status = true;
+                foreach ($model as $value) {
+                    array_push($data, [
+                        'id' => $value->id,
+                        'line_id'=> $value->line_id,
+                        'journal_no'=>$value->journal_no,
+                        'product_id' => $value->product_id,
+                        'product_code' => $value->code,
+                        'product_name' => $value->name,
+                        'qty' => $value->qty,
+                    ]);
+                }
+            }
+        }
+
+        return ['status' => $status, 'data' => $data];
+    }
+
+    public function actionAddscrapmobile()
+    {
+        $company_id = 0;
+        $branch_id = 0;
+        $product_id = 0;
+        $production_rec_id = 0;
+        $user_id = 0;
+        $order_id = 0;
+        $order_no = null;
+        $qty = 0;
+        $datalist = null;
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+        $company_id = $req_data['company_id'];
+        $branch_id = $req_data['branch_id'];
+        $datalist = $req_data['data'];
+        $user_id = $req_data['user_id'];
+
+        $data = [];
+        $status = false;
+        $journal_no = '';
+
+        if ($order_no != null) {
+            $order_id = \backend\models\Orders::findId($order_no);
+        }
+
+        if ($datalist != null && $user_id && $company_id && $branch_id) {
+            $model_journal = new \backend\models\Scrap();
+            $journal_no =  $model_journal->getLastNo($company_id, $branch_id);
+            $model_journal->journal_no = $journal_no;
+            $model_journal->trans_date = date('Y-m-d H:i:s');
+            $model_journal->prodrec_id = $production_rec_id;
+            $model_journal->company_id = $company_id;
+            $model_journal->branch_id = $branch_id;
+            $model_journal->created_by = $user_id;
+            $model_journal->scrap_type_id = 1;
+            $model_journal->order_id = $order_id;
+            $model_journal->status = 1;
+            if ($model_journal->save(false)) {
+                for($i=0;$i<=count($datalist)-1;$i++){
+                    $model = new \common\models\ScrapLine();
+                    $model->scrap_id = $model_journal->id;
+                    $model->product_id = $datalist[$i]['product_id'];
+                    $model->qty = $datalist[$i]['qty'];
+                    $model->note = '';
+                    $model->status = 1;
+                    if ($model->save(false)) {
+                        $status = 1;
+                        $model_sum = \backend\models\Stocksum::find()->where(['warehouse_id' => 1, 'product_id' => $datalist[$i]['product_id']])->one();
+                        if ($model_sum) {
+                            $model_sum->qty = (float)$model_sum->qty - (float)$datalist[$i]['qty'];
+                            $model_sum->save(false);
+                        }
+                    }
+                }
+            }
+
+            array_push($data, ['journal_no' => $journal_no]);
+            //  $this->renderPartial('_printtoindex', ['model' => $model, 'model_line' => $model_line, 'change_amount' => 0]);
+        }
+
+        return ['status' => $status, 'data' => $data];
+    }
+
+    public function actionScrapcancel(){
+        $company_id = 0;
+        $branch_id = 0;
+        $id = 0;
+        $user_id = 0;
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+        $company_id = $req_data['company_id'];
+        $branch_id = $req_data['branch_id'];
+        $id = $req_data['id'];
+        $user_id = $req_data['user_id'];
+
+        $data = [];
+        $status = false;
+        if($user_id && $id){
+            $model = \common\models\ScrapLine::find()->where(['id'=>$id])->one();
+            $model->qty = 0;
+            if($model->save(false)){
+                  $status = true;
+                  array_push($data,['message'=>'success']);
+            }
+        }
+
+
+        return ['status' => $status, 'data' => $data];
     }
 }

@@ -51,7 +51,7 @@ if ($is_admin == 1) {
             ?>
 
             <?= $form->field($model, 'customer_id')->widget(\kartik\select2\Select2::className(), [
-                'data' => \yii\helpers\ArrayHelper::map(\backend\models\Customer::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'is_show_pos' => 1])->all(), 'id', function ($data) {
+                'data' => \yii\helpers\ArrayHelper::map(\backend\models\Customer::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'is_show_pos' => 1,'status'=>1])->all(), 'id', function ($data) {
                     return $data->code . ' ' . $data->name;
                 }),
                 'options' => [
@@ -69,7 +69,7 @@ if ($is_admin == 1) {
 
             echo \kartik\select2\Select2::widget([
                 'name' => 'customer_car_id',
-                'data' => \yii\helpers\ArrayHelper::map(\backend\models\Customer::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'is_show_pos' => 0])->all(), 'id', function ($data) {
+                'data' => \yii\helpers\ArrayHelper::map(\backend\models\Customer::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'is_show_pos' => 0,'status'=>1])->all(), 'id', function ($data) {
                     return $data->code . ' ' . $data->name;
                 }),
                 'options' => [
@@ -119,11 +119,21 @@ if ($is_admin == 1) {
                             <td style="text-align: center"><?= \backend\models\Orders::getNumber($value->order_id) ?></td>
                             <td style="text-align: center"><?= date('d/m/Y', strtotime($order_date)) ?></td>
                             <td>
-                                <select name="line_pay_type[]" id="" class="form-control"
-                                        onchange="checkpaytype($(this))">
-                                    <option value="1">เงินสด</option>
-                                    <option value="2">โอนธนาคาร</option>
-                                </select>
+<!--                                <select name="line_pay_type[]" id="" class="form-control"-->
+<!--                                        onchange="checkpaytype($(this))">-->
+<!--                                    <option value="1">เงินสด</option>-->
+<!--                                    <option value="2">โอนธนาคาร</option>-->
+<!--                                </select>-->
+                                <div class="btn-group">
+                                    <div class="btn btn-success line-pay-cash" data-var="1"
+                                         onclick="checkpaytype2($(this))">เงินสด
+                                    </div>
+                                    <div class="btn btn-default line-pay-bank" data-var="2"
+                                         onclick="checkpaytype3($(this))">โอนธนาคาร
+                                    </div>
+
+                                </div>
+                                <input type="hidden" class="line-payment-type" name="line_pay_type[]" value="0">
                                 <input type="file" class="line-doc" name="line_doc[]" style="display: none">
                                 <input type="hidden" class="line-order-id" name="line_order_id[]"
                                        value="<?= $value->order_id ?>">
@@ -156,6 +166,20 @@ if ($is_admin == 1) {
             </table>
         </div>
     </div>
+    <?php if ($model->isNewRecord): ?>
+        <div class="row show-button-payment" style="display: none;">
+            <div class="col-lg-9">
+                <div class="btn btn-primary" onclick="selectallcash();">ชำระด้วยเงินสดทั้งหมด</div>
+                <div class="btn btn-warning" onclick="selectallbank();">ชำระด้วยเงินโอนทั้งหมด</div>
+
+            </div>
+            <div class="col-lg-3" style="text-align: right">
+
+            </div>
+        </div>
+    <?php endif; ?>
+
+    <br />
 
     <div class="form-group show-save" style="display: none">
         <?= Html::submitButton('Save', ['class' => 'btn btn-success']) ?>
@@ -192,6 +216,42 @@ function linepaychange(e){
    calpayment();
 }
 
+function selectallcash(){
+    $(".table-list tbody tr").each(function(){
+        $(this).closest('tr').find('.line-payment-type').val(1);
+        $(this).closest('tr').find('.line-pay-bank').removeClass('btn-success');
+        $(this).closest('tr').find('.line-pay-bank').addClass('btn-default');
+        $(this).closest('tr').find('.line-pay-cash').removeClass('btn-default');
+        $(this).closest('tr').find('.line-pay-cash').addClass('btn-success');
+    });
+}
+function selectallbank(){
+    $(".table-list tbody tr").each(function(){
+        $(this).closest('tr').find('.line-payment-type').val(2);
+        $(this).closest('tr').find('.line-pay-cash').removeClass('btn-success');
+        $(this).closest('tr').find('.line-pay-cash').addClass('btn-default');
+        $(this).closest('tr').find('.line-pay-bank').removeClass('btn-default');
+        $(this).closest('tr').find('.line-pay-bank').addClass('btn-success');
+    });
+}
+
+function checkpaytype2(e){
+    var val = e.attr('data-var');
+        e.closest('tr').find('.line-payment-type').val(val);
+        e.closest('tr').find('.line-pay-bank').removeClass('btn-success');
+        e.closest('tr').find('.line-pay-bank').addClass('btn-default');
+        e.removeClass('btn-default');
+        e.addClass('btn-success');
+}
+function checkpaytype3(e){
+    var val = e.attr('data-var');
+        e.closest('tr').find('.line-payment-type').val(val);
+        e.closest('tr').find('.line-pay-cash').removeClass('btn-success');
+        e.closest('tr').find('.line-pay-cash').addClass('btn-default');
+        e.removeClass('btn-default');
+        e.addClass('btn-success');
+}
+
 function calpayment(){
     var pay_total = 0;
     var remain_amount = 0;
@@ -223,8 +283,10 @@ function getpaymentrec(e){
                   //  alert(data);
                    if(data != ''){
                        $(".show-save").show();
+                       $(".show-button-payment").show();
                    }else{
                        $(".show-save").hide();
+                       $(".show-button-payment").hide();
                    }
                    $(".table-list tbody").html(data);
                  }
@@ -245,8 +307,10 @@ function getpaymentrecfromcar(e){
                   //  alert(data);
                    if(data != ''){
                        $(".show-save").show();
+                       $(".show-button-payment").show();
                    }else{
                        $(".show-save").hide();
+                       $(".show-button-payment").hide();
                    }
                    $(".table-list tbody").html(data);
                  }

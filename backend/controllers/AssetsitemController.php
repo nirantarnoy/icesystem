@@ -619,4 +619,15 @@ class AssetsitemController extends Controller
 
         return $this->redirect(['assetsitem/asset-request']);
     }
+
+    public function actionCheckinprint(){
+        $from_date = \Yii::$app->request->post('from_date');
+        $to_date = \Yii::$app->request->post('to_date');
+        $find_customer_id = \Yii::$app->request->post('find_customer_id');
+        return $this->render('_printcheckin', [
+            'from_date' => $from_date,
+            'to_date' => $to_date,
+            'find_customer_id' => $find_customer_id,
+        ]);
+    }
 }

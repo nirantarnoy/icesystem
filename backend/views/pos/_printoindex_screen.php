@@ -354,12 +354,12 @@ use yii\web\Response;
         </div>
     <?php endif; ?>
 </div>
-<form id="form-print2" action="<?= \yii\helpers\Url::to(['pos/print2'], true) ?>" method="post">
+<form id="form-print2" action="<?= \yii\helpers\Url::to(['pos/printtestnewdo', 'order' => $model->id], true) ?>" method="post">
     <input type="hidden" name="order_id" value="<?= $model->id ?>">
     <input type="hidden" class="ch-amt" name="ch_amt" value="<?= $change_amount ?>">
 </form>
 <input type="hidden" class="print-type" value="<?= $print_type ?>">
-<form id="form-back-pos" action="<?= \yii\helpers\Url::to(['pos/index'], true) ?>" method="post"></form>
+<form id="form-back-pos" action="<?= \yii\helpers\Url::to(['pos/indextest','id'=>0], true) ?>" method="post"></form>
 </body>
 </html>
 

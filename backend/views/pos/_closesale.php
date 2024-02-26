@@ -60,7 +60,7 @@ $model_product_daily = \common\models\Product::find()->select(['id'])->where(['s
             <input type="hidden" name="user_login_datetime" value="<?=$user_login_datetime?>">
             <input type="hidden" name="t_date" value="<?=date('Y-m-d H:i:s')?>">
             <input type="hidden" name="user_id" value="<?=$user_id?>">
-            <input type="submit" value="กดคำณวน" class="btn btn-primary">
+            <input type="submit" value="กดคำนวณ" class="btn btn-primary">
         </form>
     </div>
 </div>
@@ -141,6 +141,7 @@ $model_product_daily = \common\models\Product::find()->select(['id'])->where(['s
                     <?php
                     $total_order_cash_qty = 0;
                     $total_order_credit_qty = 0;
+                    $total_order_car_issue_qty = 0;
                     $total_order_cash_amount = 0;
                     $total_order_credit_amount = 0;
                     $total_production_qty = 0;
@@ -167,9 +168,11 @@ $model_product_daily = \common\models\Product::find()->select(['id'])->where(['s
                         $production_rec_qty = getProdDaily($value->id, $user_login_datetime, $t_date, $company_id, $branch_id, $user_id);
                         $order_cash_qty =  getOrderCashQty($value->id, $user_id, $user_login_datetime, $t_date);
                         $order_credit_qty = getOrderCreditQty($value->id, $user_id, $user_login_datetime, $t_date);
+                        $order_car_issue_qty = getOrderCarIssueQty($value->id, $user_id, $user_login_datetime, $t_date);
 //
                         $total_order_cash_qty = $total_order_cash_qty + $order_cash_qty;
                         $total_order_credit_qty = $total_order_credit_qty + $order_credit_qty;
+                       // $total_order_car_issue_qty = $total_order_car_issue_qty + $order_car_issue_qty;
                         $total_production_qty = $total_production_qty + $production_rec_qty;
 
                         $order_cash_amount = getOrderCashAmount($value->id, $user_id, $user_login_datetime, $t_date);
@@ -193,7 +196,7 @@ $model_product_daily = \common\models\Product::find()->select(['id'])->where(['s
                         $scrap_qty = getScrapDaily($value->id, $user_login_datetime, $t_date, $user_id);
                         $total_scrap_qty = $total_scrap_qty + $scrap_qty;
 
-                        $line_balance_out = ($balance_in + $production_rec_qty + $repack_qty + $transfer_qty + $reprocess_car_qty) - ($order_cash_qty + $order_credit_qty) - $refill_qty - $issue_reprocess_qty - $scrap_qty;
+                        $line_balance_out = ($balance_in + $production_rec_qty + $repack_qty + $transfer_qty + $reprocess_car_qty) - ($order_cash_qty + $order_credit_qty + $order_car_issue_qty) - $refill_qty - $issue_reprocess_qty - $scrap_qty;
                         $total_balance_out = $total_balance_out + $line_balance_out;
                         $total_issue_refill = $total_issue_refill + $refill_qty;
                         $total_issue_reprocess = $total_issue_reprocess + $issue_reprocess_qty;
@@ -270,11 +273,12 @@ $model_product_daily = \common\models\Product::find()->select(['id'])->where(['s
                             <td style="text-align: right;vertical-align: middle">
                                 <input type="hidden"
                                        name="line_credit_qty[]"
-                                       value="<?= $order_credit_qty ?>">
-                                <?= $order_credit_qty==0?'-':number_format($order_credit_qty, 2) ?>
+                                       value="<?= ($order_credit_qty + $order_car_issue_qty) ?>">
+                                <?= ($order_credit_qty + $order_car_issue_qty)==0?'-':number_format(($order_credit_qty + $order_car_issue_qty), 2) ?>
+                                <input type="hidden" name="line_car_issue_qty[]" value="<?= $order_car_issue_qty ?>">
                             </td>
                             <td style="text-align: right;background-color: #99c5de;vertical-align: middle">
-                                <?= ($order_cash_qty + $order_credit_qty)==0?'-':number_format($order_cash_qty + $order_credit_qty, 2) ?>
+                                <?= ($order_cash_qty + $order_credit_qty + $order_car_issue_qty)==0?'-':number_format($order_cash_qty + $order_credit_qty + $order_car_issue_qty, 2) ?>
                                 <input type="hidden" name="line_cash_amount[]" value="<?= $order_cash_amount ?>">
                                 <input type="hidden" name="line_credit_amount[]" value="<?= $order_credit_amount ?>">
                             </td>
@@ -396,11 +400,11 @@ $model_product_daily = \common\models\Product::find()->select(['id'])->where(['s
         <br/>
         <div class="row">
             <div class="col-lg-3">
-                <?php $caspay = getPaymentcashAll($user_login_datetime, $t_date, $company_id, $branch_id);?>
+                <?php $caspay = getPaymentcashAll($user_login_datetime, $t_date, $company_id, $branch_id,$user_id);?>
                 <h4><span><i class="fa fa-money text-success"></i></span> <span>รวมรับชำระเงินสด :  <?=number_format($caspay,2)?></span></h4>
             </div>
             <div class="col-lg-3">
-                <h4><span><i class="fa fa-money text-success"></i></span> <span>รวมรับชำระเงินโอน :  <?=number_format(getPaymentbankAll($user_login_datetime, $t_date, $company_id, $branch_id),2)?></span></h4>
+                <h4><span><i class="fa fa-money text-success"></i></span> <span>รวมรับชำระเงินโอน :  <?=number_format(getPaymentbankAll($user_login_datetime, $t_date, $company_id, $branch_id,$user_id),2)?></span></h4>
             </div>
         </div>
         <br />
@@ -610,21 +614,21 @@ function getProdReprocessCarDaily($product_id, $user_login_datetime, $t_date, $u
     $qty = 0;
     $second_user_id = [];
     if ($product_id != null) {
-        $model_login = \common\models\LoginLogCal::find()->where(['user_id' => $user_id])->orderBy(['id' => SORT_DESC])->one();
-        if ($model_login) {
-            //  $second_user_id = $model_login->second_user_id;
-            $model_user_ref = \common\models\LoginUserRef::find()->select('user_id')->where(['login_log_cal_id' => $model_login->id])->all();
-            if ($model_user_ref) {
-                foreach ($model_user_ref as $value) {
-                    array_push($second_user_id, $value->user_id);
-                }
-            }
-        }
-        if (count($second_user_id) > 0) {
-            $qty = \backend\models\Stocktrans::find()->where(['in', 'activity_type_id', [26]])->andFilterWhere(['product_id' => $product_id,'created_by' => $second_user_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])->sum('qty');
-        }else{
+//        $model_login = \common\models\LoginLogCal::find()->where(['user_id' => $user_id])->orderBy(['id' => SORT_DESC])->one();
+//        if ($model_login) {
+//            //  $second_user_id = $model_login->second_user_id;
+//            $model_user_ref = \common\models\LoginUserRef::find()->select('user_id')->where(['login_log_cal_id' => $model_login->id])->all();
+//            if ($model_user_ref) {
+//                foreach ($model_user_ref as $value) {
+//                    array_push($second_user_id, $value->user_id);
+//                }
+//            }
+//        }
+//        if (count($second_user_id) > 0) {
+//            $qty = \backend\models\Stocktrans::find()->where(['in', 'activity_type_id', [26]])->andFilterWhere(['product_id' => $product_id,'created_by' => $second_user_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])->sum('qty');
+//        }else{
             $qty = \backend\models\Stocktrans::find()->where(['in', 'activity_type_id', [26]])->andFilterWhere(['product_id' => $product_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])->sum('qty');
-        }
+      //  }
         //  $qty = \backend\models\Stocktrans::find()->where(['in', 'activity_type_id', [26, 27]])->andFilterWhere(['product_id' => $product_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])->sum('qty');
 
     }
@@ -790,7 +794,20 @@ function getOrderCreditQty($product_id, $user_id, $user_login_datetime, $t_date)
 //                $qty = $model[$i]['line_qty_credit'];
 //            }
 //        }
-        $model = \common\models\SalePosCloseCreditQty::find()->select('qty')->where(['user_id' => $user_id, 'product_id' => $product_id])->one();
+       // $model = \common\models\SalePosCloseCreditQty::find()->select('qty')->where(['user_id' => $user_id, 'product_id' => $product_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])->one();
+
+        $model = \common\models\SalePosCloseCreditQty::find()->select('qty')->where(['product_id' => $product_id,'user_id'=>$user_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])->one();
+        if($model){
+            $qty = $model->qty;
+        }
+    }
+    return $qty;
+}
+function getOrderCarIssueQty($product_id, $user_id, $user_login_datetime, $t_date)
+{
+    $qty = 0;
+    if ($user_id != null) {
+        $model = \common\models\SalePosCloseIssueCarQty::find()->select('qty')->where(['user_id' => $user_id, 'product_id' => $product_id])->andFilterWhere(['date(trans_date)'=>date('Y-m-d')])->one();
         if($model){
             $qty = $model->qty;
         }
@@ -957,16 +974,17 @@ function getPaymentAll($f_date, $t_date, $company_id, $branch_id)
     }
     return $amount;
 }
-function getPaymentcashAll($f_date, $t_date, $company_id, $branch_id)
+function getPaymentcashAll($f_date, $t_date, $company_id, $branch_id,$user_id)
 {
     $amount = 0;
     $sql = "SELECT SUM(t1.payment_amount) as amount from query_payment_receive as t1
-              WHERE (t1.trans_date>= " . "'" . date('Y-m-d H:i', strtotime($f_date)) . "'" . " 
-              AND t1.trans_date <= " . "'" . date('Y-m-d H:i', strtotime($t_date)) . "'" . " )
+              WHERE (date(t1.trans_date) >= " . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
+              AND date(t1.trans_date) <= " . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " )
               AND t1.status <> 100 
               AND t1.payment_method_id=2
               AND t1.payment_channel_id = 1
               AND isnull(t1.route_id)
+              AND t1.crated_by = ".$user_id."
               AND t1.company_id=" . $company_id . " AND t1.branch_id=" . $branch_id;
 
 
@@ -981,16 +999,17 @@ function getPaymentcashAll($f_date, $t_date, $company_id, $branch_id)
     }
     return $amount;
 }
-function getPaymentbankAll($f_date, $t_date, $company_id, $branch_id)
+function getPaymentbankAll($f_date, $t_date, $company_id, $branch_id,$user_id)
 {
     $amount = 0;
     $sql = "SELECT SUM(t1.payment_amount) as amount from query_payment_receive as t1
-              WHERE (t1.trans_date>= " . "'" . date('Y-m-d H:i', strtotime($f_date)) . "'" . " 
-              AND t1.trans_date <= " . "'" . date('Y-m-d H:i', strtotime($t_date)) . "'" . " )
+              WHERE (date(t1.trans_date) >= " . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
+              AND date(t1.trans_date) <= " . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " )
               AND t1.status <> 100 
               AND t1.payment_method_id=2
               AND t1.payment_channel_id = 2
-              AND isnull(t1.route_id)
+              AND t1.route_id = 0
+              AND t1.crated_by = ".$user_id."
               AND t1.company_id=" . $company_id . " AND t1.branch_id=" . $branch_id;
 
 

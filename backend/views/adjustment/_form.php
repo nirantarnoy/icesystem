@@ -66,7 +66,7 @@ $wh_data = \backend\models\Warehouse::find()->where(['company_id' => $company_id
                     </td>
                     <td>
                         <input type="hidden" name="line_product_id[]" class="line-product-id" value="">
-                        <input type="number" class="form-control line-qty" name="line_qty[]" value="0" min="0">
+                        <input type="number" class="form-control line-qty" name="line_qty[]" value="0" min="0.5" step=".01">
                     </td>
                     <td>
                         <select name="line_stock_type[]" id="" class="form-control line-stock-type">

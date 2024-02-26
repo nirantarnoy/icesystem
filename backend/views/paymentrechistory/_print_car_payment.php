@@ -236,6 +236,9 @@ $mpdf->AddPageByArray([
             $sum_qty_all = 0;
             $sum_total_all = 0;
 
+            $payment_cash = 0;
+            $payment_transfer = 0;
+
             ?>
             <?php if ($find_user_id != null): ?>
                 <?php
@@ -291,6 +294,11 @@ $mpdf->AddPageByArray([
                                             <?php for ($k = 0; $k <= count($payline) - 1; $k++): ?>
                                             <?php
                                                $order_credit = \backend\models\Orders::getlinesumcredit($payline[$k]['order_id']);
+                                                if($payline[$k]['status'] == 'เงินสด'){
+                                                    $payment_cash = ($payment_cash + $payline[$k]['pay']);
+                                                }else  if($payline[$k]['status'] == 'เงินโอน'){
+                                                    $payment_transfer = ($payment_transfer + $payline[$k]['pay']);
+                                                }
                                             ?>
                                                 <tr>
                                                     <td><?=\backend\models\Orders::getOrderdate($payline[$k]['order_id'])?></td>
@@ -346,6 +354,21 @@ $mpdf->AddPageByArray([
         </td>
     </table>
     <br/>
+    <br/>
+    <div class="row">
+        <div class="col-lg-4">
+            <table style="border: 1px solid grey;">
+                <tr>
+                    <td style="width: 20%">เงินสด</td>
+                    <td><?=number_format($payment_cash,2)?></td>
+                </tr>
+                <tr>
+                    <td>เงินโอน</td>
+                    <td><?=number_format($payment_transfer, 2)?></td>
+                </tr>
+            </table>
+        </div>
+    </div>
     <!--<script src="../web/plugins/jquery/jquery.min.js"></script>-->
     <!--<script>-->
     <!--    $(function(){-->

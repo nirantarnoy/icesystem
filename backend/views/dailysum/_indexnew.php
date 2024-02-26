@@ -609,7 +609,7 @@ function getIssuecar($route_id, $product_id, $order_date, $user_id)
     $sql = "SELECT SUM(t2.origin_qty) as qty";
     $sql .= " FROM journal_issue as t1 INNER JOIN journal_issue_line as t2 ON t2.issue_id = t1.id";
     $sql .= " WHERE t2.product_id =" . $product_id;
-//    $sql .= " AND t1.status in (2,150)";
+    $sql .= " AND not isnull(t1.delivery_route_id)";
     $sql .= " AND t1.status in (2)";
     $sql .= " AND date(t1.trans_date) =" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " ";
     if ($route_id != null) {
@@ -634,6 +634,7 @@ function getSalecar($route_id, $product_id, $order_date, $user_id)
     $sql = "SELECT id,product_id, SUM(qty) as qty";
     $sql .= " FROM query_sale_mobile_data_new";
     $sql .= " WHERE  product_id =" . $product_id;
+    //$sql .= " AND  order_line_status <> 500";
     $sql .= " AND date(order_date) =" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " ";
     if ($route_id != null) {
         $sql .= " AND route_id=" . $route_id;
@@ -691,7 +692,7 @@ function getReturnCar($route_id, $product_id, $order_date, $user_id)
     $sql = "SELECT SUM(t1.qty) as qty";
     $sql .= " FROM stock_trans as t1 ";
     $sql .= " WHERE  t1.product_id =" . $product_id;
-    $sql .= " AND t1.activity_type_id=7";
+    $sql .= " AND t1.activity_type_id in (7,26)";
     $sql .= " AND date(t1.trans_date) =" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " ";
     if ($route_id != null) {
         $sql .= " AND t1.trans_ref_id=" . $route_id;

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2d91957cea5197f01118b3bcdee89873",
+    "content-hash": "ded3634f667ba487d315be099003f0ac",
     "packages": [
         {
             "name": "almasaeed2010/adminlte",
@@ -136,6 +136,24 @@
             },
             "require": {
                 "bower-asset/jquery": ">=1.6"
+            },
+            "type": "bower-asset",
+            "license": [
+                "MIT"
+            ]
+        },
+        {
+            "name": "bower-asset/printthis",
+            "version": "v1.15.0",
+            "source": {
+                "type": "git",
+                "url": "git@github.com:jasonday/printThis.git",
+                "reference": "c941b376b3615c9fc8e8a8361c266a14c40f5477"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jasonday/printThis/zipball/c941b376b3615c9fc8e8a8361c266a14c40f5477",
+                "reference": "c941b376b3615c9fc8e8a8361c266a14c40f5477"
             },
             "type": "bower-asset",
             "license": [
@@ -385,6 +403,7 @@
         },
         {
             "name": "doctrine/deprecations",
+<<<<<<< HEAD
             "version": "v1.1.0",
             "source": {
                 "type": "git",
@@ -395,19 +414,36 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/doctrine/deprecations/zipball/8cffffb2218e01f3b370bf763e00e81697725259",
                 "reference": "8cffffb2218e01f3b370bf763e00e81697725259",
+=======
+            "version": "1.1.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/doctrine/deprecations.git",
+                "reference": "eac01fbdf4e4a3635169b056608730ec0930e188"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/doctrine/deprecations/zipball/eac01fbdf4e4a3635169b056608730ec0930e188",
+                "reference": "eac01fbdf4e4a3635169b056608730ec0930e188",
+>>>>>>> c930cda9b2d2e3202a2c1b2b7262922c69c07d49
                 "shasum": ""
             },
             "require": {
-                "php": "^7.1|^8.0"
+                "php": "^7.1 || ^8.0"
             },
             "require-dev": {
                 "doctrine/coding-standard": "^9",
-                "phpunit/phpunit": "^7.5|^8.5|^9.5",
-                "psr/log": "^1|^2|^3"
+                "phpstan/phpstan": "1.4.10 || 1.10.15",
+                "phpstan/phpstan-phpunit": "^1.0",
+                "phpunit/phpunit": "^7.5 || ^8.5 || ^9.5",
+                "psalm/plugin-phpunit": "0.18.4",
+                "psr/log": "^1 || ^2 || ^3",
+                "vimeo/psalm": "4.30.0 || 5.12.0"
             },
             "suggest": {
                 "psr/log": "Allows logging deprecations via PSR-3 logger implementation"
             },
+            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -422,9 +458,15 @@
             "homepage": "https://www.doctrine-project.org/",
             "support": {
                 "issues": "https://github.com/doctrine/deprecations/issues",
+<<<<<<< HEAD
                 "source": "https://github.com/doctrine/deprecations/tree/v1.1.0"
             },
             "time": "2023-05-29T18:55:17+00:00"
+=======
+                "source": "https://github.com/doctrine/deprecations/tree/1.1.x"
+            },
+            "time": "2023-06-07T19:57:14+00:00"
+>>>>>>> c930cda9b2d2e3202a2c1b2b7262922c69c07d49
         },
         {
             "name": "doctrine/lexer",
@@ -2606,6 +2648,57 @@
                 "source": "https://github.com/toxor88/yii2-widget-switchery/tree/master"
             },
             "time": "2016-10-27T17:44:44+00:00"
+        },
+        {
+            "name": "yii2assets/yii2-printthis",
+            "version": "v1.0.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Yii2Assets/yii2-print-this.git",
+                "reference": "9705d38746b7c6f808d973a8d46e6e71c826648f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Yii2Assets/yii2-print-this/zipball/9705d38746b7c6f808d973a8d46e6e71c826648f",
+                "reference": "9705d38746b7c6f808d973a8d46e6e71c826648f",
+                "shasum": ""
+            },
+            "require": {
+                "bower-asset/printthis": "*",
+                "yiisoft/yii2": "*"
+            },
+            "type": "yii2-extension",
+            "autoload": {
+                "psr-4": {
+                    "yii2assets\\printthis\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Manop Kongoon",
+                    "email": "kongoon@gmail.com",
+                    "homepage": "https://www.programmerthailand.com/"
+                }
+            ],
+            "description": "Print html by selector for Yii Framework 2.0",
+            "homepage": "https://github.com/Yii2Assets/yii2-print-this",
+            "keywords": [
+                "PrintThis",
+                "extension",
+                "html",
+                "print",
+                "yii",
+                "yii2"
+            ],
+            "support": {
+                "issues": "https://github.com/Yii2Assets/yii2-print-this/issues",
+                "source": "https://github.com/Yii2Assets/yii2-print-this/tree/master"
+            },
+            "time": "2018-03-28T14:22:25+00:00"
         },
         {
             "name": "yiisoft/yii2",

@@ -2,7 +2,7 @@
 
 use yii\helpers\Html;
 use yii\widgets\ActiveForm;
-
+$total_amt=0;
 $company_id = 1;
 $branch_id = 1;
 if (!empty(\Yii::$app->user->identity->company_id)) {
@@ -40,7 +40,7 @@ $t_date = date('d/m/Y');
                 ?>
 
                 <?= $form->field($model, 'customer_id')->widget(\kartik\select2\Select2::className(), [
-                    'data' => \yii\helpers\ArrayHelper::map(\backend\models\Customer::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id])->all(), 'id', function ($data) {
+                    'data' => \yii\helpers\ArrayHelper::map(\backend\models\Customer::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id,'status'=>1])->all(), 'id', function ($data) {
                         return $data->code . ' ' . $data->name;
                     }),
                     'options' => [
@@ -342,6 +342,7 @@ function calpayment2(){
 function getpaymentrec(e){
     var ids = e.val();
     if(ids){
+       // alert(ids);
         $.ajax({
               'type':'post',
               'dataType': 'html',

@@ -3,7 +3,7 @@ date_default_timezone_set('Asia/Bangkok');
 
 use chillerlan\QRCode\QRCode;
 use yii\web\Response;
-
+use yii2assets\printthis\PrintThis;
 //require_once __DIR__ . '/vendor/autoload.php';
 //require_once 'vendor/autoload.php';
 // เพิ่ม Font ให้กับ mPDF
@@ -26,16 +26,21 @@ use yii\web\Response;
             /*font-family: garuda;*/
             font-size: 18px;
             width: 350px;
+            height: auto;
         }
 
         table.table-header {
+            margin-top: 0px;
             border: 0px;
             border-spacing: 1px;
+            height: auto;
         }
 
         table.table-qrcode {
+            margin-top: 0px;
             border: 0px;
             border-spacing: 1px;
+            height: auto;
         }
 
         table.table-qrcode td, th {
@@ -58,8 +63,10 @@ use yii\web\Response;
         }
 
         table.table-title {
+            margin-top: 0px;
             border: 0px;
             border-spacing: 0px;
+            height: auto;
         }
 
         table.table-title td, th {
@@ -70,8 +77,10 @@ use yii\web\Response;
         }
 
         table {
+            margin-top: 0px;
             border-collapse: collapse;
             width: 100%;
+            height: auto;
         }
 
         td, th {
@@ -95,17 +104,29 @@ use yii\web\Response;
             padding: 2px;
         }
 
+        /*@media print {*/
+        /*    @page {*/
+        /*        size: auto;*/
+        /*    }*/
+        /*}*/
         @media print {
-            @page {
-                size: auto;
+            html, body {
+                height: 99%;
+                page-break-after: avoid !important;
+                page-break-before: avoid !important;
             }
+
+            /*div#print-area-2 {*/
+            /*    height: 250px;*/
+            /*    position:absolute;*/
+            /*}*/
         }
 
         /*@media print {*/
         /*    html, body {*/
         /*        width: 80mm;*/
-        /*        height:100%;*/
-        /*        position:absolute;*/
+        /*        !*height:100mm;*!*/
+        /*        !*position:absolute;*!*/
         /*    }*/
         /*}*/
 
@@ -114,8 +135,8 @@ use yii\web\Response;
     <!--    <script type="text/javascript" src="js/ThaiBath-master/thaibath.js"></script>-->
 </head>
 <body>
-<div id="print-area-2" style="height: 450px;width: 350px;">
-    <table class="table-qrcode" style="width: 100%">
+<div id="print-area-2" style="width: 350px;height: 500px;page-break-after: avoid;background-color: grey;">
+    <table class="table-qrcode">
         <tr>
             <td style="width: 20%">
                 <div style="height: 150px;width: 150px;">
@@ -215,11 +236,7 @@ use yii\web\Response;
         </tr>
         </tfoot>
     </table>
-    <table class="table-header">
-        <tr>
-            <td></td>
-        </tr>
-    </table>
+    <br/>
     <table class="table-header">
         <tr>
             <td style="font-size: 18px;">แคชเชียร์ ........ <span
@@ -230,10 +247,34 @@ use yii\web\Response;
         <tr>
         </tr>
     </table>
-    <br/>
-    <br/>
 </div>
-<form id="form-back-pos" action="<?= \yii\helpers\Url::to(['pos/index'], true) ?>" method="post"></form>
+
+</div>
+<form id="form-back-pos" action="<?= \yii\helpers\Url::to(['pos/indextest', 'id' => 0], true) ?>" method="post"></form>
+<?php
+//echo PrintThis::widget([
+//    'htmlOptions' => [
+//        'id' => 'print-area-2',
+//        'btnClass' => 'btn btn-info',
+//        'btnId' => 'btnPrintThis',
+//        'btnText' => 'พิมพ์หน้านี้',
+//        'btnIcon' => 'fa fa-print'
+//    ],
+//    'options' => [
+//        'debug' => false,
+//        'importCSS' => true,
+//        'importStyle' => false,
+//        // 'loadCSS' => "path/to/my.css",
+//        'pageTitle' => "",
+//        'removeInline' => false,
+//        'printDelay' => 333,
+//        'header' => null,
+//        'formValues' => true,
+//        'onafterprint'=> 'alert()',
+//    ]
+//]);
+?>
+
 </body>
 </html>
 

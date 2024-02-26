@@ -70,6 +70,18 @@ class Product extends \common\models\Product
         $model = Product::find()->select('code')->where(['id'=>$id])->one();
         return $model != null?$model->code:'';
     }
+    public static function findGroupId($id){
+        $model = Product::find()->select('product_group_id')->where(['id'=>$id])->one();
+        return $model != null?$model->product_group_id:0;
+    }
+    public static function findGroupName($id){
+        $modelname = null;
+        $model = Product::find()->select('product_group_id')->where(['id'=>$id])->one();
+        if($model){
+            $modelname = \backend\models\Productgroup::find()->select('name')->where(['id'=>$model->product_group_id])->one();
+        }
+        return $modelname != null?$modelname->name:'';
+    }
     public static function findName($id){
         $model = Product::find()->select('name')->where(['id'=>$id])->one();
         return $model !=null?$model->name:'';

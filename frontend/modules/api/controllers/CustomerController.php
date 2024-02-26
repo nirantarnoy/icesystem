@@ -24,6 +24,8 @@ class CustomerController extends Controller
                     'assetchecklist' => ['POST'],
                     'checklist' => ['POST'],
                     'addnewasset' => ['POST'],
+                    'checkin' => ['POST'],
+                    'routeall' => ['POST'],
                 ],
             ],
         ];
@@ -59,6 +61,66 @@ class CustomerController extends Controller
         return ['status' => $status, 'data' => $data];
     }
 
+    public function actionCheckin()
+    {
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+        $company_id = $req_data['company_id'];
+        $branch_id = $req_data['branch_id'];
+        $route_id = $req_data['route_id'];
+        $customer_id = $req_data['customer_id'];
+        $user_id = $req_data['user_id'];
+        $base64_string = $req_data['image'];
+        $location = $req_data['location'];
+
+        $data = [];
+        $status = false;
+
+        if ($company_id != null && $branch_id != null && $customer_id != null && $user_id != null) {
+            $newfilesave = '';
+            if ($base64_string != null) {
+                $has_photo = 1;
+
+                for ($xp = 0; $xp <= count($base64_string) - 1; $xp++) {
+                    $newfile = time() + $xp . ".jpg";
+                    $outputfile = '../web/uploads/assetcheck/' . $newfile;          //save as image.jpg in uploads/ folder
+
+                    $filehandler = fopen($outputfile, 'wb');
+                    //file open with "w" mode treat as text file
+                    //file open with "wb" mode treat as binary file
+
+                    fwrite($filehandler, base64_decode(trim($base64_string[$xp])));
+                    // we could add validation here with ensuring count($data)>1
+
+                    // clean up the file resource
+                    fclose($filehandler);
+                    // file_put_contents($newfile,base64_decode($base64_string));
+                    // $newfile = base64_decode($base64_string);
+                    if ($xp == 0) {
+                        $newfilesave = $newfile;
+                    } else {
+                        $newfilesave = $newfilesave . ',' . $newfile;
+                    }
+
+                }
+
+            }
+            $model = new \backend\models\Customercheckin();
+            $model->customer_id = $customer_id;
+            $model->checkin_date = date('Y-m-d H:i:s');
+            $model->company_id = $company_id;
+            $model->branch_id = $branch_id;
+            $model->latlong = $location;
+            $model->route_id = $route_id;
+            $model->photo = $newfilesave;
+            if($model->save(false)){
+                $status = 1;
+            }
+        }
+
+        return ['status' => $status, 'data' => $data];
+    }
+
     public function actionBootlist()
     {
         $company_id = 1;
@@ -86,6 +148,7 @@ class CustomerController extends Controller
 
         return ['status' => $status, 'data' => $data];
     }
+
     public function actionPoslist()
     {
         $company_id = 1;
@@ -319,10 +382,11 @@ class CustomerController extends Controller
         return ['status' => $status, 'data' => $data];
     }
 
-    public function updateCustomerlocation($location, $customer_id){
-        if($customer_id){
-            $model = \backend\models\Customer::find()->where(['id'=>$customer_id])->one();
-            if($model){
+    public function updateCustomerlocation($location, $customer_id)
+    {
+        if ($customer_id) {
+            $model = \backend\models\Customer::find()->where(['id' => $customer_id])->one();
+            if ($model) {
                 $model->location_info = $location;
                 $model->save(false);
             }
@@ -343,8 +407,8 @@ class CustomerController extends Controller
 
         $data = [];
         $status = false;
-        if($company_id && $branch_id && $customer_id && $asset_no != ''){
-           // $asset_id = 0;
+        if ($company_id && $branch_id && $customer_id && $asset_no != '') {
+            // $asset_id = 0;
             $asset_id = \backend\models\Assetsitem::findIdFromCode($asset_no);
             $model = new \common\models\CustomerAssetRequest();
             $model->customer_id = $customer_id;
@@ -355,7 +419,7 @@ class CustomerController extends Controller
             $model->created_by = $user_id;
             $model->branch_id = $branch_id;
             $model->location = $location;
-            if($model->save(false)){
+            if ($model->save(false)) {
                 if ($base64_string != null) {
                     for ($xp = 0; $xp <= count($base64_string) - 1; $xp++) {
                         if ($xp == 0) { // only first
@@ -382,13 +446,41 @@ class CustomerController extends Controller
                         }
 
                     }
-                }else{
-                    array_push($data,['message'=>'no image']);
+                } else {
+                    array_push($data, ['message' => 'no image']);
                 }
                 $status = true;
             }
 
 
+        }
+
+        return ['status' => $status, 'data' => $data];
+    }
+
+    public function actionRouteall()
+    {
+        $company_id = 1;
+        $branch_id = 1;
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+        $route_id = $req_data['route_id'];
+
+        $data = [];
+        $status = false;
+        if ($route_id) {
+         //   $model = \common\models\DeliveryRoute::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'status' => 1,])->andFilterWhere(['>','id',1])->all();
+            $model = \common\models\DeliveryRoute::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'status' => 1])->all();
+            if ($model) {
+                $status = true;
+                foreach ($model as $value) {
+                    array_push($data, [
+                        'id' => $value->id,
+                        'code' => $value->code,
+                        'name' => $value->name,
+                    ]);
+                }
+            }
         }
 
         return ['status' => $status, 'data' => $data];

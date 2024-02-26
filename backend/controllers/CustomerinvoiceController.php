@@ -92,7 +92,7 @@ class CustomerinvoiceController extends Controller
         $pageSize = \Yii::$app->request->post("perpage");
         $searchModel = new CustomerinvoiceSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        $dataProvider->query->andFilterWhere(['customer_invoice.status' => 0]);
+        $dataProvider->query->andFilterWhere(['customer_invoice.status' => 0,'invoice_type'=>1]);
         $dataProvider->setSort(['defaultOrder' => ['id' => SORT_DESC]]);
         $dataProvider->pagination->pageSize = $pageSize;
 
@@ -144,6 +144,7 @@ class CustomerinvoiceController extends Controller
             $list_order = \Yii::$app->request->post('list_order');
             $list_note = \Yii::$app->request->post('note');
 
+            //print_r($list_order);return;
          //   print_r(\Yii::$app->request->post());return;
 
             $model->journal_no = \backend\models\Customerinvoice::getLastNo($company_id, $branch_id);
@@ -151,49 +152,101 @@ class CustomerinvoiceController extends Controller
             $model->status = 0;
             $model->company_id = $company_id;
             $model->branch_id = $branch_id;
-            if ($model->save()) {
+            $model->invoice_type = 1;
+            if ($model->save(false)) {
                 $xlist = explode(',', $list_order);
                 if ($xlist != null) {
                     for ($i = 0; $i <= count($xlist) - 1; $i++) {
                         $remain_amt = 0;
                         $check_is_cus_car = \backend\models\Customer::find()->select('is_show_pos')->where(['id' => $model->customer_id])->one();
                         if ($check_is_cus_car->is_show_pos == 0 || $check_is_cus_car->is_show_pos == null) { // route
+                           // echo "this";return;
                             //  $customer_remain_amount = \common\models\QuerySalePaySummary::find()->where(['customer_id' => $model->customer_id, 'order_id' => $xlist[$i]])->one();
                             //    $customer_remain_amount = \common\models\OrderLine::find()->where(['customer_id' => $model->customer_id, 'order_id' => $xlist[$i]])->sum('qty');
-                            $customer_remain_amount = \common\models\OrderLine::find()->where(['order_id' => $xlist[$i], 'customer_id' => $model->customer_id])->sum('line_total');
+                          //  $customer_remain_amount = \common\models\OrderLine::find()->where(['order_id' => $xlist[$i], 'customer_id' => $model->customer_id])->sum('line_total');
+                            $customer_remain_amount = \common\models\Orders::find()->select(['order_total_amt'])->where(['id' => $xlist[$i]])->one();
                             if ($customer_remain_amount) {
                                 // $customer_remain_amount;
                                 $model_line = new \common\models\CustomerInvoiceLine();
                                 $model_line->customer_invoice_id = $model->id;
                                 $model_line->order_id = $xlist[$i];
-                                $model_line->amount = $customer_remain_amount;
-                                $model_line->remain_amount = $customer_remain_amount;
+                                $model_line->amount = $customer_remain_amount->order_total_amt;
+                                $model_line->remain_amount = $customer_remain_amount->order_total_amt;
                                 $model_line->status = 1;
                             //    $model_line->note = $list_note[$i]==null?'':$list_note[$i];
                                 if ($model_line->save(false)) {
-                                    \common\models\Orders::updateAll(['payment_status'=>1],['id'=>$xlist[$i]]);
+                                  //  \common\models\Orders::updateAll(['payment_status'=>1],['id'=>$xlist[$i]]);
+                                    // update payment_status in order table
+
+//                                    $model_update_order = \common\models\Orders::find()->where(['id'=>$xlist[$i]])->one();
+//                                    if($model_update_order != null){
+//                                        $model_update_order->payment_status = 1;
+//                                        $model_update_order->save(false);
+//                                    }
+
+                                    $model_wait_pey = new \common\models\OrderWaitPayment();
+                                    $model_wait_pey->order_id = $xlist[$i];
+                                    $model_wait_pey->created_at = time();
+                                    $model_wait_pey->created_by = \Yii::$app->user->id;
+                                    $model_wait_pey->save(false);
                                 }
                             }
                         } else {
-                            $customer_remain_amount = \common\models\Orders::find()->where(['customer_id' => $model->customer_id, 'id' => $xlist[$i]])->one();
+//                            $customer_remain_amount = \common\models\Orders::find()->where(['customer_id' => $model->customer_id, 'id' => $xlist[$i]])->one();
                             $is_payment = 0;
-                            if ($customer_remain_amount) {
-                                $remain_amt = $customer_remain_amount->order_total_amt;
-                                $model_line = new \common\models\CustomerInvoiceLine();
-                                $model_line->customer_invoice_id = $model->id;
-                                $model_line->order_id = $xlist[$i];
-                                $model_line->amount = $remain_amt;
-                                $model_line->remain_amount = $remain_amt;
-                                $model_line->status = 1;
-                               // $model_line->note = $list_note[$i]==null?'':$list_note[$i];
-                                if ($model_line->save(false)) {
-                                    $is_payment += 1;
+//                            if ($customer_remain_amount) {
+//                                $remain_amt = $customer_remain_amount->order_total_amt;
+//                                $model_line = new \common\models\CustomerInvoiceLine();
+//                                $model_line->customer_invoice_id = $model->id;
+//                                $model_line->order_id = $xlist[$i];
+//                                $model_line->amount = $remain_amt;
+//                                $model_line->remain_amount = $remain_amt;
+//                                $model_line->status = 1;
+//                               // $model_line->note = $list_note[$i]==null?'':$list_note[$i];
+//                                if ($model_line->save(false)) {
+//                                    $is_payment += 1;
+//
+//                                    $model_wait_pey = new \common\models\OrderWaitPayment();
+//                                    $model_wait_pey->order_id = $xlist[$i];
+//                                    $model_wait_pey->created_at = time();
+//                                    $model_wait_pey->created_by = \Yii::$app->user->id;
+//                                    $model_wait_pey->save(false);
+//                                }
+//                            }
+//                            if ($is_payment > 0) {
+////                                $customer_remain_amount->payment_status = 1; // update payment status
+////                                $customer_remain_amount->save(false);
+//                            }
+
+                            $sql = "select distinct(t1.order_total_amt) as order_total_amt";
+                            $sql .= " FROM orders as t1 INNER JOIN order_line as t2 ON t2.order_id = t1.id ";
+                            $sql .= " WHERE (t1.customer_id =" . $model->customer_id." OR t2.customer_id=".$model->customer_id.")";
+                            $sql .= " AND t1.id =". $xlist[$i];
+
+                            $sql_query = \Yii::$app->db->createCommand($sql);
+                            $modelcheck = $sql_query->queryAll();
+                            if($modelcheck){
+                                for($x=0;$x<=count($modelcheck)-1;$x++){
+                                    $remain_amt = $modelcheck[$x]['order_total_amt'];
+                                    $model_line = new \common\models\CustomerInvoiceLine();
+                                    $model_line->customer_invoice_id = $model->id;
+                                    $model_line->order_id = $xlist[$i];
+                                    $model_line->amount = $remain_amt;
+                                    $model_line->remain_amount = $remain_amt;
+                                    $model_line->status = 1;
+                                    // $model_line->note = $list_note[$i]==null?'':$list_note[$i];
+                                    if ($model_line->save(false)) {
+                                        $is_payment += 1;
+
+                                        $model_wait_pey = new \common\models\OrderWaitPayment();
+                                        $model_wait_pey->order_id = $xlist[$i];
+                                        $model_wait_pey->created_at = time();
+                                        $model_wait_pey->created_by = \Yii::$app->user->id;
+                                        $model_wait_pey->save(false);
+                                    }
                                 }
                             }
-                            if ($is_payment > 0) {
-                                $customer_remain_amount->payment_status = 1; // update payment status
-                                $customer_remain_amount->save(false);
-                            }
+
                         }
                     }
                 }
@@ -258,7 +311,7 @@ class CustomerinvoiceController extends Controller
                                     $model_line_pay->payment_method_id = 2;
                                     $model_line_pay->status = 1;
                                     if($model_line_pay->save(false)){
-                                        \common\models\Orders::updateAll(['payment_status'=>1],['id'=>$model_update->order_id]);
+                                      //  \common\models\Orders::updateAll(['payment_status'=>1],['id'=>$model_update->order_id]);
                                     }
                                 }
                             }
@@ -291,7 +344,7 @@ class CustomerinvoiceController extends Controller
             $model_line = \common\models\CustomerInvoiceLine::find()->where(['customer_invoice_id' => $id])->all();
             if ($model_line) {
                 foreach ($model_line as $value){
-                    \common\models\Orders::updateAll(['payment_status'=>0],['id'=>$value->order_id]);
+                    \common\models\Orders::updateAll(['create_invoice'=>0],['id'=>$value->order_id]);
                 }
 
             }
@@ -325,19 +378,30 @@ class CustomerinvoiceController extends Controller
         $html = '';
         $total_amount = 0;
 //        $pre_date = date('Y-m-d', strtotime(date('Y-m-d') . "-3 month"));
-        $pre_date ="2022-10-01 00:00:01";
+        $pre_date ="2024-01-01 00:00:01";
         if ($cus_id) {
             // $model = \common\models\QuerySalePaySummary::find()->where(['customer_id' => $cus_id])->andFilterWhere(['>', 'remain_amount', 0])->all();
            // $model = \common\models\QuerySalePaySummary::find()->where(['customer_id' => $cus_id])->andfilterWhere(['OR', ['is', 'payment_amount', new \yii\db\Expression('null')], ['>', 'remain_amount', 0]])->andFilterWhere(['!=', 'payment_status', 1])->orderBy(['order_id' => SORT_DESC])->all();
          //   $model = \common\models\QuerySalePaySummary::find()->where(['customer_id' => $cus_id])->andfilterWhere(['OR', ['is', 'payment_amount', new \yii\db\Expression('null')], ['>', 'remain_amount', 0]])->andFilterWhere(['OR',['is', 'payment_status', new \yii\db\Expression('null')],['!=', 'payment_status', 1]])->orderBy(['order_id' => SORT_DESC])->all();
        //     $model = \common\models\QuerySalePaySummary::find()->where(['customer_id' => $cus_id])->andfilterWhere(['OR', ['is', 'payment_amount', new \yii\db\Expression('null')], ['>', 'remain_amount', 0]])->andFilterWhere(['OR',['is', 'payment_status', new \yii\db\Expression('null')],['!=', 'payment_status', 1]])->orderBy(['order_id' => SORT_DESC])->all();
            // $model = \common\models\QuerySalePaySummary::find()->where(['customer_id' => $cus_id])->andFilterWhere(['!=', 'payment_status', 1])->orderBy(['order_id' => SORT_DESC])->all();
+
+//            $sql = "select t1.id as order_id,t1.order_date,sum(t2.line_total) AS remain_amt";
+//            $sql .= " FROM orders as t1 INNER JOIN order_line as t2 ON t1.id = t2.order_id ";
+//            $sql .= " WHERE  (t1.customer_id =" . $cus_id. " OR t2.customer_id=".$cus_id.")";
+//            $sql .= " AND (t1.payment_status !=1 OR ISNULL(t1.payment_status))";
+//            $sql .= " AND t1.payment_method_id = 2";
+//            $sql .= " AND t1.status != 3";
+
+
             $sql = "select t1.id as order_id,t1.order_date,sum(t2.line_total) AS remain_amt";
             $sql .= " FROM orders as t1 INNER JOIN order_line as t2 ON t1.id = t2.order_id ";
             $sql .= " WHERE  (t1.customer_id =" . $cus_id. " OR t2.customer_id=".$cus_id.")";
-            $sql .= " AND (t1.payment_status !=1 OR ISNULL(t1.payment_status))";
             $sql .= " AND t1.payment_method_id = 2";
             $sql .= " AND t1.status != 3";
+            $sql .= " AND (t1.create_invoice != 1 OR ISNULL(t1.create_invoice))";
+
+
 //            $sql .= " AND year(t1.order_date)>=2022";
 //            $sql .= " AND month(t1.order_date)>=10";
             $sql .= " AND date(t1.order_date) >='". date('Y-m-d',strtotime($pre_date))."'";
@@ -485,5 +549,47 @@ class CustomerinvoiceController extends Controller
 
     public function actionBillcycle(){
       return $this->render('_billlist');
+    }
+
+    public function actionCloseorderpayment(){
+        $res = 0;
+        $data = [];
+       // $model = \common\models\OrderWaitPayment::find()->select(['order_id'])->limit(5)->all();
+        $model = \common\models\OrderWaitPayment::find()->select(['order_id'])->limit(5)->orderBy(['id'=>SORT_ASC])->all();
+        if($model){
+            foreach($model as $value){
+              //  $model_update_order = \common\models\Orders::find()->where(['id'=>$value->order_id])->andFilterWhere(['!=','create_invoice',1])->one();
+                $model_update_order = \common\models\Orders::find()->where(['id'=>$value->order_id])->one();
+                if($model_update_order){
+                    $model_update_order->create_invoice = 1;
+                    if($model_update_order->save(false)){
+                        if(\common\models\OrderWaitPayment::deleteAll(['order_id'=>$value->order_id])){
+                            $res += 1;
+                        }
+                       // $res+=1;
+                        array_push($data,['id'=>$value->order_id]);
+                    }
+                }
+
+            }
+        }
+        if($res > 0){
+           // $this->del
+            echo "success ".$res.' records';
+        }else{
+            echo "not success";
+        }
+    }
+    public function actionDeleteorderpayment(){
+        $res = 0;
+        if(\common\models\OrderWaitPayment::deleteAll()){
+            $res = 1;
+        }
+
+        if($res > 0){
+            echo "success";
+        }else{
+            echo "not success";
+        }
     }
 }

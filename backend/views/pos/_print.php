@@ -134,6 +134,7 @@ $mpdf->AddPageByArray([
                 $qr = new QRCode();
                 echo '<img src="' . $qr->render($data) . '" />';
                 ?>
+<!--                <img src="https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=--><?//=$model->order_no?><!--&choe=UTF-8" alt="">-->
             </div>
         </td>
         <td style="width: 98%">

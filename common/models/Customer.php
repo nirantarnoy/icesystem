@@ -50,7 +50,7 @@ class Customer extends \yii\db\ActiveRecord
             [['code', 'name', 'description', 'location_info', 'logo', 'shop_photo','address','address2','phone','branch_no','sort_name'], 'string', 'max' => 255],
             [['branch_id'], 'exist', 'skipOnError' => true, 'targetClass' => Branch::className(), 'targetAttribute' => ['branch_id' => 'id']],
             [['company_id'], 'exist', 'skipOnError' => true, 'targetClass' => Company::className(), 'targetAttribute' => ['company_id' => 'id']],
-            [['customer_type_id','payment_method_id','payment_term_id',],'integer']
+            [['customer_type_id','payment_method_id','payment_term_id','is_invoice_req'],'integer']
         ];
     }
 
@@ -78,6 +78,7 @@ class Customer extends \yii\db\ActiveRecord
             'address' => Yii::t('app', 'ที่อยู่วางบิล'),
             'address2' => Yii::t('app', 'ที่อยู่ส่งของ'),
             'phone' => Yii::t('app', 'โทร'),
+            'is_invoice_req' => Yii::t('app', 'เอาใบกำกับ'),
             'branch_no' => Yii::t('app', 'รหัสสาขา'),
             'company_id' => Yii::t('app', 'Company ID'),
             'branch_id' => Yii::t('app', 'Branch ID'),
