@@ -24,7 +24,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </p>
         </div>
         <div class="col-lg-2" style="text-align: right">
-            <form id="form-perpage" class="form-inline" action="<?= Url::to(['location/index'], true) ?>"
+            <form id="form-perpage" class="form-inline" action="<?= Url::to(['customertaxinvoice/index'], true) ?>"
                   method="post">
                 <div class="form-group">
                     <label>แสดง </label>
@@ -32,6 +32,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         <option value="20" <?= $perpage == '20' ? 'selected' : '' ?>>20</option>
                         <option value="50" <?= $perpage == '50' ? 'selected' : '' ?> >50</option>
                         <option value="100" <?= $perpage == '100' ? 'selected' : '' ?>>100</option>
+                        <option value="10000" <?= $perpage == '10000' ? 'selected' : '' ?>>All</option>
                     </select>
                     <label> รายการ</label>
                 </div>

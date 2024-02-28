@@ -42,7 +42,13 @@ class CustomertaxinvoiceController extends Controller
         $searchModel = new CustomertaxinvoiceSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         $dataProvider->setSort(['defaultOrder' => ['id' => SORT_DESC]]);
-        $dataProvider->pagination->pageSize = $pageSize;
+       // if($pageSize != '10000'){
+            $dataProvider->pagination->pageSize = $pageSize;
+//        }else{
+//            $dataProvider->pagination->pageSize = $pageSize;
+//        }
+
+        //echo $pageSize;return ;
 
         return $this->render('index', [
             'searchModel' => $searchModel,
