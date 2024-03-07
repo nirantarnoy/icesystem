@@ -6,6 +6,7 @@ use common\models\LoginLog;
 use common\models\QuerySaleorderByCustomerLoanSumNew;
 use kartik\daterange\DateRangePicker;
 use yii\web\Response;
+use yii\web\Session;
 
 //require_once __DIR__ . '/vendor/autoload.php';
 //require_once 'vendor/autoload.php';
@@ -129,7 +130,9 @@ $mpdf->AddPageByArray([
     <!--    <script type="text/javascript" src="js/ThaiBath-master/thaibath.js"></script>-->
 </head>
 <body>
-
+<?php if (!empty(\Yii::$app->session->getFlash('msg-already'))) :?>
+    <div class="alert alert-success"><?=\Yii::$app->session->getFlash('msg-already')?></div>
+<?php endif;?>
 <form action="<?=\yii\helpers\Url::to(['salecomreport/comdailycalbkt'],true)?>" id="form-cal" method="post">
     <div class="row">
         <div class="col-lg-3">

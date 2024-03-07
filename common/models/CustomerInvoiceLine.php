@@ -30,7 +30,7 @@ class CustomerInvoiceLine extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['customer_invoice_id', 'order_id', 'status','emp_id','created_at','created_by','updated_at','updated_by'], 'integer'],
+            [['customer_invoice_id', 'order_id', 'status','emp_id','created_at','created_by','updated_at','updated_by','unit_id'], 'integer'],
             [['amount', 'remain_amount','recieve_amount'], 'number'],
         ];
     }
@@ -46,6 +46,7 @@ class CustomerInvoiceLine extends \yii\db\ActiveRecord
             'order_id' => 'Order ID',
             'amount' => 'Amount',
             'status' => 'Status',
+            'unit_id'=>'Unit',
             'remain_amount' => 'Remain Amount',
         ];
     }

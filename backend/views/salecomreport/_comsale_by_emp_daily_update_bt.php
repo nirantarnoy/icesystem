@@ -135,9 +135,8 @@ $mpdf->AddPageByArray([
         <h3>คำนวนค่าคอมย้อนหลัง</h3>
     </div>
 </div>
-<form action="<?=\yii\helpers\Url::to(['salecomreport/comdailycalprevbt'],true)?>" id="form-cal" method="post">
+<form action="<?= \yii\helpers\Url::to(['salecomreport/comdailycalprevbt'], true) ?>" id="form-cal" method="post">
     <div class="row">
-
         <div class="col-lg-3">
             <?php
             echo \kartik\date\DatePicker::widget([
@@ -146,6 +145,7 @@ $mpdf->AddPageByArray([
                 //    'useWithAddon'=>true,
                 'convertFormat' => true,
                 'options' => [
+                    'id' => 'cal-date',
                     'class' => 'form-control',
                     'placeholder' => 'วันที่',
                     //  'onchange' => 'this.form.submit();',
@@ -161,10 +161,21 @@ $mpdf->AddPageByArray([
         <div class="col-lg-3">
             <input type="submit" class="btn btn-warning" value="คำนวน">
         </div>
+
     </div>
 </form>
 <br />
-<form action="<?= \yii\helpers\Url::to(['salecomreport/index'], true) ?>" method="post" id="form-search" style="display: none;">
+<div class="row">
+    <div class="col-lg-3">
+        <div class="btn btn-danger" onclick="deletecalresult()">ลบผลการคำนวน</div>
+    </div>
+</div>
+<br/>
+<form id="form-delete-cal" action="<?= \yii\helpers\Url::to(['salecomreport/deletecal'], true)?>" method="post">
+    <input type="hidden" class="delete-cal" name="delete_cal" value="">
+</form>
+<form action="<?= \yii\helpers\Url::to(['salecomreport/index'], true) ?>" method="post" id="form-search"
+      style="display: none;">
     <table class="table-header" style="width: 100%;font-size: 18px;" border="0">
         <tr>
 
@@ -461,6 +472,11 @@ $js = <<<JS
           });
     });
  });
+function deletecalresult(){
+    var cal_delete_date = $("#cal-date").val();
+    $(".delete-cal").val(cal_delete_date);
+    $("form#form-delete-cal").submit();
+}
 function printContent(el)
       {
          var restorepage = document.body.innerHTML;

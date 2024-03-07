@@ -175,7 +175,7 @@ class CustomerinvoiceController extends Controller
                                 $model_line->status = 1;
                             //    $model_line->note = $list_note[$i]==null?'':$list_note[$i];
                                 if ($model_line->save(false)) {
-                                  //  \common\models\Orders::updateAll(['payment_status'=>1],['id'=>$xlist[$i]]);
+                                    \common\models\Orders::updateAll(['create_invoice'=>1],['id'=>$xlist[$i]]);
                                     // update payment_status in order table
 
 //                                    $model_update_order = \common\models\Orders::find()->where(['id'=>$xlist[$i]])->one();
@@ -184,13 +184,13 @@ class CustomerinvoiceController extends Controller
 //                                        $model_update_order->save(false);
 //                                    }
 
-                                    if(\common\models\Orders::updateAll(['create_invoice'=>1],['id'=>$xlist[$i]])){
-                                        $model_wait_pey = new \common\models\OrderWaitPayment();
-                                        $model_wait_pey->order_id = $xlist[$i];
-                                        $model_wait_pey->created_at = time();
-                                        $model_wait_pey->created_by = \Yii::$app->user->id;
-                                        $model_wait_pey->save(false);
-                                    }
+//                                    if(\common\models\Orders::updateAll(['create_invoice'=>1],['id'=>$xlist[$i]])){
+//                                        $model_wait_pey = new \common\models\OrderWaitPayment();
+//                                        $model_wait_pey->order_id = $xlist[$i];
+//                                        $model_wait_pey->created_at = time();
+//                                        $model_wait_pey->created_by = \Yii::$app->user->id;
+//                                        $model_wait_pey->save(false);
+//                                    }
                                 }
                             }
                         } else {
@@ -240,11 +240,13 @@ class CustomerinvoiceController extends Controller
                                     if ($model_line->save(false)) {
                                         $is_payment += 1;
 
-                                        $model_wait_pey = new \common\models\OrderWaitPayment();
-                                        $model_wait_pey->order_id = $xlist[$i];
-                                        $model_wait_pey->created_at = time();
-                                        $model_wait_pey->created_by = \Yii::$app->user->id;
-                                        $model_wait_pey->save(false);
+                                        \common\models\Orders::updateAll(['create_invoice'=>1],['id'=>$xlist[$i]]);
+
+//                                        $model_wait_pey = new \common\models\OrderWaitPayment();
+//                                        $model_wait_pey->order_id = $xlist[$i];
+//                                        $model_wait_pey->created_at = time();
+//                                        $model_wait_pey->created_by = \Yii::$app->user->id;
+//                                        $model_wait_pey->save(false);
                                     }
                                 }
                             }

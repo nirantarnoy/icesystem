@@ -9,6 +9,19 @@ if($cnt_arr > 0){
     $to_date = date('Y-m-d', strtotime($model_min_max[$cnt_arr-1]['date']));
 }
 
+$to_date_new = '';
+$has_29_02 = 0;
+$xxtodate = explode('-', $to_date);
+if (count($xxtodate) > 1) {
+    if ($xxtodate[1] == '02' && $xxtodate[2] == '29') {
+        $has_29_02 = 1;
+        $to_date_new = '29-02-' . ($xxtodate[0] + 543);
+    } else {
+        $to_date_new = ($xxtodate[0] + 543) . '/' . $xxtodate[1] . '/' . $xxtodate[2];
+    }
+
+}
+
 ?>
 <html>
 <head>
@@ -99,8 +112,9 @@ if($cnt_arr > 0){
         </tr>
 
         <tr>
-            <td colspan="2" style="text-align: left;border: none">วันที่เริ่ม <span><b><?=date('d-m-Y', strtotime('+543 years',strtotime($from_date)))?></b></span> ถึงวันที่ <span><b><?=date('d-m-Y', strtotime('+543 years',strtotime($to_date)))?></b></td>
-
+            <td colspan="2" style="text-align: left;border: none">วันที่เริ่ม
+                <span><b><?= date('d-m-Y', strtotime('+543 years', strtotime($from_date))) ?></b></span> ถึงวันที่
+                <span><b><?= $has_29_02 == 0 ? date('d-m-Y', strtotime('+543 years', strtotime($to_date))) : $to_date_new ?></b></td>
         </tr>
     </table>
     <br/>
@@ -194,10 +208,30 @@ if($cnt_arr > 0){
             $total_all_line_qty = $total_all_line_qty + $line_qty;
 //              $order_product = getOrderQty2($value->order_id);
 //              $total_all_line_qty = 0;
+
+            $to_date_new2 = '';
+            $is_29_02 = 0;
+            $find_order_date = date('Y-m-d');
+            $find_or_date = \backend\models\Orders::getOrderdate($value->order_id);
+            $xdate2 = explode(' ', $find_or_date);
+             if (count($xdate2) > 1) {
+                 $xxtodate2 = explode('-', $xdate2[0]);
+                 if (count($xxtodate2) > 1) {
+                     if ($xxtodate2[1] == '02' && $xxtodate2[2] == '29') {
+                         $is_29_02 = 1;
+                         $to_date_new2 = '29-02-' . ($xxtodate2[0] + 543);
+                     } else {
+                         $is_29_02 = 0;
+                         $to_date_new2 = ($xxtodate2[0] + 543) . '/' . $xxtodate2[1] . '/' . $xxtodate2[2];
+                     }
+
+                 }
+             }
+
             ?>
             <tr>
                 <td style="text-align: center;padding: 8px;border: 1px solid grey"><?= $num ?><input type="hidden" value="<?=$value->id;?>"></td>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey"><?= date('d-m-Y', strtotime('+543 years',strtotime(\backend\models\Orders::getOrderdate($value->order_id)))) ?></td>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey"><?= $is_29_02 ==1 ? $to_date_new2 :date('d-m-Y',strtotime($to_date_new2))?></td>
                 <td style="text-align: center;padding: 8px;border: 1px solid grey"><?= \backend\models\Orders::getCustomerrefno($value->order_id) ?></td>
                 <?php for ($x = 0; $x <= count($product_header) - 1; $x++): ?>
                     <?php

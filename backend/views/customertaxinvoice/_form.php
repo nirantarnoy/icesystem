@@ -33,10 +33,12 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
         }
     }
 }
+$unit_data = \backend\models\Unit::find()->all();
+
 ?>
 <?php //echo \Yii::$app->getUrlManager()->baseUrl?>
 <input type="hidden" class="slip-print" value="<?= $filename ?>">
-<iframe id="iFramePdf" src="<?=$filename?>" style="display:none;"></iframe>
+<iframe id="iFramePdf" src="<?= $filename ?>" style="display:none;"></iframe>
 <div class="customertaxinvoice-form">
     <?php $form = ActiveForm::begin(); ?>
     <input type="hidden" class="orderline-id-list" name="order_line_id_list" value="">
@@ -98,6 +100,7 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
                 <tr>
                     <th style="text-align: center">รายการ/รายละเอียด</th>
                     <th style="text-align: right">จำนวน</th>
+                    <th style="text-align: center">หน่วยนับ</th>
                     <th style="text-align: right">หน่วยละ</th>
                     <th style="text-align: right">ส่วนลด</th>
                     <th style="text-align: right">รวมเงิน</th>
@@ -117,8 +120,15 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
                                    style="text-align: right;" readonly value="">
                         </td>
                         <td>
+                            <select id="" class="form-control" name="line_unit_id[]">
+                                <?php foreach ($unit_data as $unit_value): ?>
+                                    <option value="<?= $unit_value->id ?>"><?= $unit_value->name; ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </td>
+                        <td>
                             <input type="text" class="form-control line-price" name="line_price[]"
-                                   style="text-align: right;" readonly value="">
+                                   style="text-align: right;" value="" onchange="caltaxinvoice2($(this))">
                         </td>
                         <td>
                             <input type="text" class="form-control line-discount" name="line_discount[]"
@@ -129,7 +139,9 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
                                    style="text-align: right;" readonly value="">
                         </td>
                         <td>
-                            <div class="btn btn-sm btn-danger" onclick="removeline($(this))"><i class="fa fa-trash"></i></div>
+                            <input type="hidden" class="line-order-selected-id" value="">
+                            <div class="btn btn-sm btn-danger" onclick="removeline($(this))"><i class="fa fa-trash"></i>
+                            </div>
                         </td>
                     </tr>
                 <?php else: ?>
@@ -147,8 +159,22 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
                                        style="text-align: right;" readonly value="<?= number_format($value->qty, 2) ?>">
                             </td>
                             <td>
+                                <select id="" class="form-control" name="line_unit_id[]">
+                                    <?php foreach ($unit_data as $unit_value): ?>
+                                        <?php
+                                        $selected = '';
+                                        if ($unit_value->id == $value->unit_id) {
+                                            $selected = 'selected';
+                                        }
+                                        ?>
+                                        <option value="<?= $unit_value->id ?>" <?=$selected?>><?= $unit_value->name; ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </td>
+
+                            <td>
                                 <input type="text" class="form-control line-price" name="line_price[]"
-                                       style="text-align: right;" readonly
+                                       style="text-align: right;" onchange="caltaxinvoice2($(this))"
                                        value="<?= number_format($value->price, 2) ?>">
                             </td>
                             <td>
@@ -162,7 +188,9 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
                                        value="<?= number_format($value->line_total, 2) ?>">
                             </td>
                             <td>
-                                <div class="btn btn-sm btn-danger" onclick="removeline($(this))"><i class="fa fa-trash"></i></div>
+                                <input type="hidden" class="line-order-selected-id" value="">
+                                <div class="btn btn-sm btn-danger" onclick="removeline($(this))"><i
+                                            class="fa fa-trash"></i></div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -216,7 +244,7 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
             <?php if (!$model->isNewRecord): ?>
                 <form action="<?= \yii\helpers\Url::to(['customertaxinvoice/printfull'], true) ?>"
                       method="post">
-                    <input type="hidden" name="print_id" value="<?=$model->id?>">
+                    <input type="hidden" name="print_id" value="<?= $model->id ?>">
                     <button class="btn btn-warning">พิมพ์แบบเต็ม</button>
                 </form>
             <?php endif; ?>
@@ -225,7 +253,7 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
             <?php if (!$model->isNewRecord): ?>
                 <form action="<?= \yii\helpers\Url::to(['customertaxinvoice/printshort'], true) ?>"
                       method="post">
-                    <input type="hidden" name="print_id" value="<?=$model->id?>">
+                    <input type="hidden" name="print_id" value="<?= $model->id ?>">
                     <button class="btn btn-info">พิมพ์แบบย่อ</button>
                 </form>
             <?php endif; ?>
@@ -240,7 +268,7 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
             <div class="modal-header">
                 <div class="row">
                     <div class="col-lg-12">
-                        <b>ค้นหารายการขาย</b>
+                        <b>ค้นหารายการขาย <span class="checkseleted"></span></b>
                     </div>
                 </div>
             </div>
@@ -359,7 +387,6 @@ if (!empty(\Yii::$app->session->getFlash('msg-slip-tax-full'))) {
 </div>
 
 
-
 <?php
 $url_to_find_order = \yii\helpers\Url::to(['customertaxinvoice/findorder'], true);
 $url_to_convertnumtotext = \yii\helpers\Url::to(['customertaxinvoice/convertnumtostring'], true);
@@ -369,6 +396,7 @@ $js = <<<JS
 var selecteditem = [];
 var selectedorderlineid = [];
 var selectedorderid = [];
+var selectedlineorderid = [];
 var selecteditemgroup = [];
 var selectedorderproductid = [];
 $(function(){
@@ -382,15 +410,20 @@ $(function(){
        var from_date = $("#search-from-date").val();
        var to_date = $("#search-to-date").val();
        var find_price = $(".find-price").val();
+       
+       
+      // $(".checkseleted").html(selectedorderid);
    // alert(customer_id);
   //  alert(from_date);
   //  alert(to_date);
+  
+   // alert(selectedorderid);
     $.ajax({
       type: 'post',
       dataType: 'html',
       url:'$url_to_searchorder',
       async: false,
-      data: {'customer_id': customer_id,'search_from_date': from_date,'search_to_date': to_date,'find_price':find_price},
+      data: {'customer_id': customer_id,'search_from_date': from_date,'search_to_date': to_date,'find_price':find_price,'selecteditem': selectedorderid},
       success: function(data){
         //  alert(data);
           $(".table-find-list tbody").html(data);
@@ -400,6 +433,7 @@ $(function(){
       }
       
     });
+    
    });
    
     var xx = $(".slip-print").val();
@@ -466,6 +500,7 @@ function addselecteditem(e) {
                 selecteditem.push(obj);
                 selectedorderlineid.push(obj['id']);
                 selectedorderid.push(obj['code']);
+                selectedlineorderid.push(obj['code']);
                 selectedorderproductid.push(obj['product_id']);
                     var obj_after = {};
                     obj_after['product_group_id'] = order_line_product_group_id;
@@ -633,6 +668,7 @@ function addselecteditem(e) {
                     tr.closest("tr").find(".line-price").val(price);
                     tr.closest("tr").find(".line-discount").val(discount);
                     tr.closest("tr").find(".line-total").val(total);
+                    tr.closest("tr").find(".line-order-selected-id").val(selectedlineorderid);
                     //console.log(line_prod_code);
                 } else {
                    // alert("dd");
@@ -648,6 +684,7 @@ function addselecteditem(e) {
                     clone.closest("tr").find(".line-price").val(price);
                     clone.closest("tr").find(".line-discount").val(discount);
                     clone.closest("tr").find(".line-total").val(total);
+                    clone.closest("tr").find(".line-order-selected-id").val(selectedlineorderid);
                     
                     tr.after(clone);
                     //cal_num();
@@ -664,12 +701,15 @@ function addselecteditem(e) {
       
         selecteditem = [];
         selectedorderlineid = [];
+        selectedlineorderid = [];
         selecteditemgroup = [];
 
         $("#table-find-list tbody tr").each(function () {
             $(this).closest("tr").find(".btn-line-select").removeClass('btn-success');
             $(this).closest("tr").find(".btn-line-select").addClass('btn-outline-success');
         });
+        
+       
         
         $(".btn-emp-selected").removeClass('btn-success');
         $(".btn-emp-selected").addClass('btn-outline-success');
@@ -688,6 +728,26 @@ function addselecteditem(e) {
       $("#total-amount").val(parseFloat(total_amt).toFixed(2));
       $("#vat-amount").val(parseFloat(vat_amt).toFixed(2));
       $("#net-amount").val(parseFloat(grand_total).toFixed(2));
+      
+      shownumtotext(parseFloat(grand_total).toFixed(2));
+  }
+  
+   function caltaxinvoice2(e){
+      var total_amt = 0;
+      var vat_amt = 0;
+      var grand_total = 0;
+      $("#table-list tbody tr").each(function(){
+          var line_total = parseFloat($(this).closest("tr").find(".line-price").val()) * parseFloat($(this).closest("tr").find(".line-qty").val());
+          total_amt = parseFloat(total_amt) + parseFloat(line_total);
+      });
+      vat_amt = (parseFloat(total_amt) * 7)/100;
+      grand_total = parseFloat(total_amt) + parseFloat(vat_amt);
+      $("#total-amount").val(parseFloat(total_amt).toFixed(2));
+      $("#vat-amount").val(parseFloat(vat_amt).toFixed(2));
+      $("#net-amount").val(parseFloat(grand_total).toFixed(2));
+      
+      var new_line_total = parseFloat(e.closest("tr").find(".line-price").val()) * parseFloat(e.closest("tr").find(".line-qty").val());
+      e.closest("tr").find(".line-total").val(new_line_total);
       
       shownumtotext(parseFloat(grand_total).toFixed(2));
   }
@@ -729,11 +789,36 @@ function addselecteditem(e) {
                    e.closest("tr").find(".line-qty").val('');
                    e.closest("tr").find(".line-price").val('');
                    e.closest("tr").find(".line-total").val('');
+                   
+                    $(".table-after-list tbody tr").each(function(){
+                        $(this).closest("tr").find("td:eq(0)").html('');
+                        $(this).closest("tr").find("td:eq(1)").html('');
+                        $(this).closest("tr").find("td:eq(2)").html('');
+                        $(this).closest("tr").find("td:eq(3)").html('');
+                        $(this).closest("tr").find("td:eq(4)").html('');
+                        $(this).closest("tr").find(".product-group-line-id").val('');
+                    });
+                   
                  }else{
                    e.parent().parent().remove();
                }
+               
+               var line_order_id = e.closest("tr").find(".line-order-selected-id").val();
+               if(line_order_id != ''){
+                   var result = line_order_id.split(',');
+                   for(var x= 0; x<= result.length -1 ;x++){
+                       for(var z=0;z<=selectedorderid.length-1;z++){
+                           if(selectedorderid[z] == result[x]){
+                                selectedorderid.splice(z, 1);
+                           }
+                       }
+                   }
+               }
+              
+               
           }
           
+          caltaxinvoice();
           
       var linenum = 0;
        $("#table-list tbody tr").each(function () {
@@ -741,6 +826,14 @@ function addselecteditem(e) {
        });
        //$(".selected-emp-qty").val(linenum);
   }  
+  
+  // function checkallreadyseleled(order_id){
+  //     selectedorderid.forEach((item){
+  //        if(item.code == order_id){
+  //            alert();
+  //        } 
+  //     });
+  // }
 
 JS;
 

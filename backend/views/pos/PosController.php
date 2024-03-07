@@ -42,8 +42,8 @@ class PosController extends Controller
                     [
                         'actions' => [
                             'logout', 'index', 'indextest', 'indextest2', 'print', 'printindex', 'dailysum', 'getcustomerprice', 'getoriginprice', 'closesale', 'cancelorder', 'manageclose',
-                            'salehistory', 'getbasicprice', 'delete', 'orderedit', 'posupdate', 'posttrans', 'saledailyend', 'saledailyend2', 'printdo', 'createissue', 'updatestock', 'listissue', 'updateissue', 'printsummary', 'printcarsummary'
-                            , 'finduserdate', 'editsaleclose', 'createscreenshort', 'print2', 'calcloseshift', 'closesaletest','printtestnew','printtestnewdo','printpossummary'
+                            'salehistory', 'getbasicprice', 'delete', 'orderedit', 'posupdate', 'posttrans', 'saledailyend', 'saledailyend2', 'printdo', 'createissue', 'updatestock', 'listissue', 'updateissue', 'printsummary','printpossummary', 'printcarsummary','startcaldailymanager'
+                            , 'finduserdate', 'editsaleclose', 'createscreenshort', 'print2', 'calcloseshift', 'closesaletest','printtestnew','printtestnewdo'
                         ],
                         'allow' => true,
                         'roles' => ['@'],
@@ -1662,7 +1662,7 @@ class PosController extends Controller
     public function getTransShift($company_id, $branch_id)
     {
         $nums = 1;
-        $model = \common\models\TransactionPosSaleSum::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id])->max('shift');
+        $model = \common\models\SaleDailySum::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id])->max('trans_shift');
         if ($model) {
             $nums = $model + 1;
         }
@@ -2380,7 +2380,7 @@ class PosController extends Controller
             $sql2 .= " FROM orders inner join order_line on orders.id = order_line.order_id";
             $sql2 .= " WHERE orders.sale_channel_id = 2 and orders.status <> 3 ";
             $sql2 .= " AND orders.payment_method_id = 2";
-            //$sql2 .= " AND orders.order_channel_id = 0";
+          //  $sql2 .= " AND orders.order_channel_id = 0";
             $sql2 .= " AND orders.order_date>=" . "'" . date('Y-m-d H:i:s', strtotime($user_login_datetime)) . "'";
             $sql2 .= " AND orders.order_date<=" . "'" . date('Y-m-d H:i:s') . "'";
             //$sql .= " AND orders.created_by=181";
@@ -2504,7 +2504,6 @@ class PosController extends Controller
         }
         return $this->redirect(['pos/posttrans']);
     }
-
     public function actionPrintpossummary()
     {
         $company_id = 0;
@@ -2533,6 +2532,338 @@ class PosController extends Controller
             'is_invoice_req' => $is_invoice_req,
             'btn_order_type'=>$btn_order_type,
         ]);
+    }
+
+    ///// NEW FOR CAL MANAGER SUMMARY
+
+    public function actionStartcaldailymanager($caldate)
+    {
+        $company_id = 1;
+        $branch_id = 2;
+        $xdate = explode('-',$caldate);
+
+        // $create_date = date_create('2024-02-20');
+
+        $from_date = date('Y-m-d');
+        $to_date = date('Y-m-d');
+
+        $findcaldate = date('Y-m-d');
+        if(count($xdate) >1){
+            $findcaldate = $xdate[2].'/'.$xdate[1].'/'.$xdate[0].' '.'00:01:01';
+            $from_date = $findcaldate;
+            $to_date = $findcaldate;
+        }
+
+        $find_sale_type = 0;
+        $sum_qty_all = 0;
+        $sum_total_all = 0;
+
+        $total_qty = 0;
+        $total_qty2 = 0;
+        $total_qty3 = 0;
+        $total_qty4 = 0;
+        $total_qty5 = 0;
+        $total_qty_all = 0;
+
+        $total_amount = 0;
+        $total_amount2 = 0;
+        $total_amount3 = 0;
+        $total_amount4 = 0;
+        $total_amount5 = 0;
+        $total_amount_all = 0;
+        $find_user_id = null;
+        $is_invoice_req = null;
+        $btn_order_type = null;
+
+        $model_product_daily = \backend\models\Product::find()->where(['status' => 1, 'company_id' => $company_id, 'branch_id' => $branch_id])->orderBy(['item_pos_seq' => SORT_ASC])->all();
+        \common\models\TransactionManagerDaily::deleteAll(['date(trans_date)'=>date('Y-m-d',strtotime($findcaldate))]);
+        foreach ($model_product_daily as $value) {
+            $line_product_price_list = $this->getProductpricelist($value->id, $from_date, $to_date, $company_id, $branch_id);
+            if ($line_product_price_list != null) {
+
+
+
+                for ($x = 0; $x <= count($line_product_price_list) - 1; $x++) {
+
+                    $find_order = $this->getOrdercash($value->id, $from_date, $to_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_product_price_list[$x]['line_price']);
+                    $find_order2 = $this->getOrderCredit($value->id, $from_date, $to_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_product_price_list[$x]['line_price']);
+                    $find_order4 = $this->getOrderCarOtherCredit($value->id, $from_date, $to_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_product_price_list[$x]['line_price']);
+                    $find_order5 = $this->getOrderRoute($value->id, $from_date, $to_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_product_price_list[$x]['line_price']);
+
+                    $line_qty = $find_order != null ? $find_order[0]['qty'] : 0;
+                    $line_qty2 = $find_order2 != null ? $find_order2[0]['qty'] : 0;
+//                        $line_qty3 = $find_order3 != null ? $find_order3[0]['qty'] : 0;
+                    $line_qty4 = $find_order4 != null ? $find_order4[0]['qty'] : 0;
+                    $line_qty5 = $find_order5 != null ? $find_order5[0]['qty'] : 0;
+
+                    $line_total_qty = ($line_qty + $line_qty2 + $line_qty4 + $line_qty5);
+                    $total_qty_all = ($total_qty_all + $line_total_qty);
+
+                    $line_amount = $find_order != null ? $find_order[0]['line_total'] : 0;
+                    $line_amount2 = $find_order2 != null ? $find_order2[0]['line_total'] : 0;
+                    // $line_amount3 = $find_order3 != null ? $find_order3[0]['line_total']:0;
+                    $line_amount4 = $find_order4 != null ? $find_order4[0]['line_total'] : 0;
+                    $line_amount5 = $find_order5 != null ? $find_order5[0]['line_total'] : 0;
+
+                    $line_total_amt = ($line_amount + $line_amount2 + $line_amount4 + $line_amount5);
+                    $total_amount_all = ($total_amount_all + $line_total_amt);
+
+                    $total_qty = ($total_qty + $line_qty);
+                    $total_qty2 = ($total_qty2 + $line_qty2);
+                    //  $total_qty3 = ($total_qty3 + $line_qty3);
+                    $total_qty4 = ($total_qty4 + $line_qty4);
+                    $total_qty5 = ($total_qty5 + $line_qty5);
+
+                    $total_amount = ($total_amount + $line_amount);
+                    $total_amount2 = ($total_amount2 + $line_amount2);
+                    //  $total_amount3 = ($total_amount3 + $line_amount3);
+                    $total_amount4 = ($total_amount4 + $line_amount4);
+                    $total_amount5 = ($total_amount5 + $line_amount5);
+
+
+                    $model_add = new \common\models\TransactionManagerDaily();
+                    $model_add->trans_date = date('Y-m-d H:i:s',strtotime($findcaldate));
+                    $model_add->product_id = $value->id;
+                    $model_add->price = $line_product_price_list[$x]['line_price'];
+                    $model_add->cash_qty = $line_qty;
+                    $model_add->credit_pos_qty = $line_qty2;
+                    $model_add->car_qty = $line_qty5;
+                    $model_add->other_branch_qty = $line_qty4;
+                    $model_add->qty_total = $line_total_qty;
+                    $model_add->cash_amount = $line_amount;
+                    $model_add->credit_pos_amount = $line_amount2;
+                    $model_add->car_amount = $line_amount5;
+                    $model_add->other_branch_amount = $line_amount4;
+                    $model_add->amount_total = $line_total_amt;
+                    $model_add->save(false);
+
+
+                }
+            }else{
+                echo "no data";
+            }
+        }
+    }
+
+
+    function getProductpricelist($product_id, $f_date, $t_date, $company_id, $branch_id)
+    {
+        $data = [];
+        $sql = "SELECT t1.price
+              FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id
+             WHERE  date(t2.order_date) >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
+             AND date(t2.order_date) <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
+             AND t1.product_id=" . $product_id . " 
+             AND t2.status <> 3
+             AND t1.qty > 0
+             AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
+        $sql .= " GROUP BY t1.price";
+        $sql .= " ORDER BY t1.price asc";
+        $query = \Yii::$app->db->createCommand($sql);
+        $model = $query->queryAll();
+        if ($model) {
+            for ($i = 0; $i <= count($model) - 1; $i++) {
+                array_push($data, [
+                    'line_price' => $model[$i]['price'],
+                ]);
+            }
+        }
+        return $data;
+    }
+
+    function getOrderRoute($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_price)
+    {
+        $data = [];
+        $sql = "SELECT sum(qty) as qty, sum(line_total) as line_total
+              FROM query_sale_mobile_data_new
+             WHERE  date(order_date) >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . "
+             AND date(order_date) <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . "
+             AND product_id=" . $product_id . "
+             AND price=" . $line_price . "
+             AND company_id=" . $company_id . " AND branch_id=" . $branch_id;
+
+
+        if ($find_user_id != null) {
+            $sql .= " AND created_by=" . $find_user_id;
+        }
+//    if ($is_invoice_req != null) {
+//        $sql .= " AND t3.is_invoice_req =" . $is_invoice_req;
+//    }
+        $sql .= " GROUP BY product_id";
+
+        $query = \Yii::$app->db->createCommand($sql);
+        $model = $query->queryAll();
+        if ($model) {
+            for ($i = 0; $i <= count($model) - 1; $i++) {
+
+
+                array_push($data, [
+                    'qty' => $model[$i]['qty'],
+                    'line_total' => $model[$i]['line_total'],
+                ]);
+            }
+        }
+//                array_push($data, [
+//                'qty' => 0,
+//                'line_total' =>0,
+//            ]);
+        return $data;
+    }
+
+    function getOrdercash($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_price)
+    {
+        $data = [];
+        $sql = "SELECT sum(t1.qty) as qty, sum(t1.line_total) as line_total
+              FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id 
+             WHERE  date(t2.order_date) >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
+             AND date(t2.order_date) <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
+             AND t1.product_id=" . $product_id . " 
+             AND t2.status <> 3
+             AND t2.sale_channel_id = 2
+             AND t1.price=" . $line_price . "
+             AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
+
+        $sql .= " AND t2.payment_method_id=1";
+
+
+        if ($find_user_id != null) {
+            $sql .= " AND t2.created_by=" . $find_user_id;
+        }
+        if ($is_invoice_req != null) {
+            $sql .= " AND t3.is_invoice_req =" . $is_invoice_req;
+        }
+        $sql .= " GROUP BY t1.product_id";
+
+        $query = \Yii::$app->db->createCommand($sql);
+        $model = $query->queryAll();
+        if ($model) {
+            for ($i = 0; $i <= count($model) - 1; $i++) {
+
+
+                array_push($data, [
+                    'qty' => $model[$i]['qty'],
+                    'line_total' => $model[$i]['line_total'],
+                ]);
+            }
+        }
+        return $data;
+    }
+
+    function getOrderCredit($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_price)
+    {
+        $data = [];
+        $sql = "SELECT sum(t1.qty) as qty, sum(t1.line_total) as line_total
+              FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id 
+             WHERE  date(t2.order_date) >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
+             AND date(t2.order_date) <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
+             AND t1.product_id=" . $product_id . " 
+             AND t2.status <> 3
+             AND t2.sale_channel_id = 2
+              AND t1.price=" . $line_price . "
+             AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
+
+        $sql .= " AND (t2.order_channel_id = 0 OR t2.order_channel_id is null) AND t2.payment_method_id= 2";
+
+
+        if ($find_user_id != null) {
+            $sql .= " AND t2.created_by=" . $find_user_id;
+        }
+        if ($is_invoice_req != null) {
+            $sql .= " AND t3.is_invoice_req =" . $is_invoice_req;
+        }
+        $sql .= " GROUP BY t1.product_id";
+
+        $query = \Yii::$app->db->createCommand($sql);
+        $model = $query->queryAll();
+        if ($model) {
+            for ($i = 0; $i <= count($model) - 1; $i++) {
+
+
+                array_push($data, [
+                    'qty' => $model[$i]['qty'],
+                    'line_total' => $model[$i]['line_total'],
+                ]);
+            }
+        }
+        return $data;
+    }
+
+    function getOrderCarCredit($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_price)
+    {
+        $data = [];
+        $sql = "SELECT sum(t1.qty) as qty, sum(t1.line_total) as line_total
+              FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id INNER JOIN delivery_route as t4 on t2.order_channel_id = t4.id
+             WHERE  date(t2.order_date) >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
+             AND date(t2.order_date) <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
+             AND t1.product_id=" . $product_id . " 
+             AND t2.status <> 3
+             AND t2.sale_channel_id = 2
+              AND t1.price=" . $line_price . "
+             AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
+
+        $sql .= " AND t2.order_channel_id > 0";
+        $sql .= " AND t4.is_other_branch = 0";
+
+        if ($find_user_id != null) {
+            $sql .= " AND t2.created_by=" . $find_user_id;
+        }
+        if ($is_invoice_req != null) {
+            $sql .= " AND t3.is_invoice_req =" . $is_invoice_req;
+        }
+        $sql .= " GROUP BY t1.product_id";
+
+        $query = \Yii::$app->db->createCommand($sql);
+        $model = $query->queryAll();
+        if ($model) {
+            for ($i = 0; $i <= count($model) - 1; $i++) {
+
+
+                array_push($data, [
+                    'qty' => $model[$i]['qty'],
+                    'line_total' => $model[$i]['line_total'],
+                ]);
+            }
+        }
+        return $data;
+    }
+
+    function getOrderCarOtherCredit($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_price)
+    {
+        $data = [];
+        $sql = "SELECT sum(t1.qty) as qty, sum(t1.line_total) as line_total
+              FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id INNER JOIN delivery_route as t4 on t2.order_channel_id = t4.id
+             WHERE  date(t2.order_date) >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
+             AND date(t2.order_date) <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
+             AND t1.product_id=" . $product_id . " 
+             AND t2.status <> 3
+             AND t2.sale_channel_id = 2
+              AND t1.price=" . $line_price . "
+             AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
+
+        $sql .= " AND t2.order_channel_id > 0";
+        $sql .= " AND t4.is_other_branch = 1";
+
+        if ($find_user_id != null) {
+            $sql .= " AND t2.created_by=" . $find_user_id;
+        }
+        if ($is_invoice_req != null) {
+            $sql .= " AND t3.is_invoice_req =" . $is_invoice_req;
+        }
+        $sql .= " GROUP BY t1.product_id";
+
+        $query = \Yii::$app->db->createCommand($sql);
+        $model = $query->queryAll();
+        if ($model) {
+            for ($i = 0; $i <= count($model) - 1; $i++) {
+
+
+                array_push($data, [
+                    'qty' => $model[$i]['qty'],
+                    'line_total' => $model[$i]['line_total'],
+                ]);
+            }
+        }
+        return $data;
     }
 
 }

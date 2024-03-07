@@ -25,6 +25,7 @@ $route_id = $selected_route_id;
 $model_line = $dataProvider->getModels();
 //echo count($model_line);
 
+
 //echo print_r($model_line);
 //print_r($model_line);
 ?>
@@ -122,7 +123,7 @@ $model_line = $dataProvider->getModels();
                         <td style="text-align: center;border: 1px solid grey"><b>รวมสินค้าออก</b></td>
 
                     </tr>
-                    <?php if ($isnew == 1): ?>
+                    <?php if (1 == 1): ?>
                         <?php
 
                         $product_trans = getProductdaily2($company_id, $branch_id, $route_id, $show_pos_date);
@@ -249,7 +250,7 @@ $model_line = $dataProvider->getModels();
         </td>
     </table>
     <br/>
-    <?php if ($isnew == 1): ?>
+    <?php if (1 == 1): ?>
         <div id="div2">
             <div class="row">
                 <div class="col-lg-12">

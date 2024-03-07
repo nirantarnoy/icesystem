@@ -4160,7 +4160,7 @@ class OrderController extends Controller
 //            }
 //        }
         // for borplub
-        $model = \common\models\QueryCustomerPrice::find()->where(['cus_id' => 71])->all(); //91 is สดหน้าบ้าน
+        $model = \common\models\QueryCustomerPrice::find()->where(['cus_id' => 91])->all(); //91 is สดหน้าบ้าน
         if ($model) {
             foreach ($model as $value) {
                 if ($value->product_id == null) continue;
@@ -4304,34 +4304,36 @@ class OrderController extends Controller
                     for ($i = 0; $i <= count($datalist) - 1; $i++) {
                         if ((float)$datalist[$i]['qty'] <= 0) continue;
 
-                        $line_price = $payment_type_id == 3 ? 0 : $datalist[$i]['price'];
-                        $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $datalist[$i]['price']);
+                      //  for other
+//                        $line_price = $payment_type_id == 3 ? 0 : $datalist[$i]['price'];
+//                        $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $datalist[$i]['price']);
 
-//                        // for boplub
-//                        $line_price = $payment_type_id == 3 ? 0 : $datalist[$i]['original_sale_price'];
-//                        $line_total = 0;
-//                        if ($datalist[$i]['haft_cal'] == 1) {
-//                            $xx = explode('.', $datalist[$i]['qty']);
-//                            if ($xx != null) {
-//                                if (count($xx) > 1) {
-//                                    if ($xx[0] > 0) {
-//                                        $line_total = ($xx[0] * $datalist[$i]['original_sale_price']);
-//                                        $line_total += ($datalist[$i]['price']);
-//                                    } else {
-//                                        $line_total += ($datalist[$i]['price']);
-//                                    }
-//                                } else {
-//                                    $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $line_price);
-//                                }
-//                            } else {
-//                                $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $datalist[$i]['original_sale_price']);
-//                            }
-//
-//                        } else {
-//                            //$line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $datalist[$i]['original_sale_price']);
-//                            $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $line_price);
-//                        }
-//                        // end boplub
+
+                        // for boplub because has haft price
+                        $line_price = $payment_type_id == 3 ? 0 : $datalist[$i]['original_sale_price'];
+                        $line_total = 0;
+                        if ($datalist[$i]['haft_cal'] == 1) {
+                            $xx = explode('.', $datalist[$i]['qty']);
+                            if ($xx != null) {
+                                if (count($xx) > 1) {
+                                    if ($xx[0] > 0) {
+                                        $line_total = ($xx[0] * $datalist[$i]['original_sale_price']);
+                                        $line_total += ($datalist[$i]['price']);
+                                    } else {
+                                        $line_total += ($datalist[$i]['price']);
+                                    }
+                                } else {
+                                    $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $line_price);
+                                }
+                            } else {
+                                $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $datalist[$i]['original_sale_price']);
+                            }
+
+                        } else {
+                            //$line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $datalist[$i]['original_sale_price']);
+                            $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $line_price);
+                        }
+                        // end boplub
 
 
                         try {
@@ -4759,6 +4761,11 @@ class OrderController extends Controller
 
     function getFreeQty($product_id, $user_id, $user_login_datetime, $t_date, $company_id, $branch_id)
     {
+        if(date('H',strtotime($user_login_datetime)) == 23){
+            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
+            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
+        }
+
         $qty = 0;
         if ($user_id != null) {
             $qty = \common\models\QuerySalePosData::find()->where(['created_by' => $user_id, 'product_id' => $product_id])
@@ -4770,6 +4777,11 @@ class OrderController extends Controller
 
     function getIssueCarQty($product_id, $user_id, $user_login_datetime, $t_date, $company_id, $branch_id)
     {
+        if(date('H',strtotime($user_login_datetime)) == 23){
+            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
+            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
+        }
+
         $qty = 0;
         if ($user_id != null) {
             $qty = \common\models\QuerySalePosData::find()->where(['created_by' => $user_id, 'product_id' => $product_id])
@@ -4792,6 +4804,15 @@ class OrderController extends Controller
 
     function getOrderCashQty($product_id, $user_id, $user_login_datetime)
     {
+//        $hx = '23:45:00';
+//        $new_date = date_create(date('Y-m-d'). $hx);
+//        $xdate = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). ' - 1 day'));
+//        echo date('Y-m-d H:i:s',strtotime($xdate));
+        if(date('H',strtotime($user_login_datetime)) == 23){
+            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
+            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
+        }
+
         $qty = 0;
         if ($user_id != null) {
             $model = \common\models\SalePosCloseCashQty::find()->select('qty')->where(['user_id' => $user_id, 'product_id' => $product_id])->andFilterWhere(['between', 'start_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s')])->one();
@@ -4807,6 +4828,11 @@ class OrderController extends Controller
 
     function getOrderCreditQty($product_id, $user_id, $user_login_datetime)
     {
+        if(date('H',strtotime($user_login_datetime)) == 23){
+            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
+            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
+        }
+
         $qty = 0;
         $qty2 = 0;
         if ($user_id != null) {
@@ -4824,6 +4850,11 @@ class OrderController extends Controller
 
     function getProdDaily($product_id, $user_login_datetime, $company_id, $branch_id, $user_id)
     {
+        if(date('H',strtotime($user_login_datetime)) == 23){
+            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
+            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
+        }
+
         $qty = 0;
         $cancel_qty = 0;
         $second_user_id = [];
@@ -4858,6 +4889,11 @@ class OrderController extends Controller
 
     function getScrapDaily($product_id, $user_login_datetime, $user_id)
     {
+        if(date('H',strtotime($user_login_datetime)) == 23){
+            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
+            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
+        }
+
         $qty = 0;
         $second_user_id = [];
         if ($product_id != null) {
@@ -4886,6 +4922,7 @@ class OrderController extends Controller
 
     function getDailycount($product_id, $company_id, $branch_id, $user_id)
     {
+
         $qty = 0;
         if ($product_id != null && $company_id != null && $branch_id != null) {
             $model = \common\models\DailyCountStock::find()->where(['product_id' => $product_id, 'company_id' => $company_id, 'branch_id' => $branch_id, 'status' => 0, 'user_id' => $user_id])->andFilterWhere(['date(trans_date)' => date('Y-m-d')])->one();
@@ -4901,6 +4938,11 @@ class OrderController extends Controller
 
     function getIssueRefillDaily($product_id, $user_login_datetime, $user_id)
     {
+        if(date('H',strtotime($user_login_datetime)) == 23){
+            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
+            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
+        }
+
         $qty = 0;
         if ($product_id != null) {
             $qty = \backend\models\Stocktrans::find()->where(['activity_type_id' => 18])->andFilterWhere(['product_id' => $product_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s')])->sum('qty');
@@ -4913,6 +4955,11 @@ class OrderController extends Controller
 
     function getProdRepackDaily($product_id, $user_login_datetime, $user_id)
     {
+        if(date('H',strtotime($user_login_datetime)) == 23){
+            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
+            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
+        }
+
         $qty = 0;
         if ($product_id != null) {
             $qty = \backend\models\Stocktrans::find()->where(['in', 'activity_type_id', [27]])->andFilterWhere(['product_id' => $product_id, 'created_by' => $user_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s')])->sum('qty');
@@ -4964,6 +5011,11 @@ class OrderController extends Controller
 
     function getProdTransferDaily($product_id, $user_login_datetime, $user_id)
     {
+        if(date('H',strtotime($user_login_datetime)) == 23){
+            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
+            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
+        }
+
         $qty = 0;
         if ($product_id != null) {
             //  $qty = \backend\models\Stocktrans::find()->where(['in', 'activity_type_id', [26, 27]])->andFilterWhere(['product_id' => $product_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])->sum('qty');
@@ -4977,6 +5029,11 @@ class OrderController extends Controller
 
     function getProdReprocessCarDaily($product_id, $user_login_datetime, $t_date, $company_id, $branch_id)
     {
+        if(date('H',strtotime($user_login_datetime)) == 23){
+            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
+            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
+        }
+
         $qty = 0;
         if ($product_id != null) {
             //  $qty = \backend\models\Stocktrans::find()->where(['in', 'activity_type_id', [26, 27]])->andFilterWhere(['product_id' => $product_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])->sum('qty');
