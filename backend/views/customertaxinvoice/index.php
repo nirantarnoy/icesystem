@@ -7,6 +7,7 @@ use kartik\grid\GridView;
 use yii\widgets\Pjax;
 use yii\helpers\Url;
 use yii\widgets\LinkPager;
+use kartik\daterange\DateRangePicker;
 
 /* @var $this yii\web\View */
 /* @var $searchModel backend\models\CustomertaxinvoiceSearch */
@@ -15,6 +16,65 @@ use yii\widgets\LinkPager;
 $this->title = 'ออกใบกำกับ';
 $this->params['breadcrumbs'][] = $this->title;
 ?>
+<form action="<?=Url::to(['customertaxinvoice/recalno'],true)?>" method="post">
+    <div class="row">
+        <div class="col-lg-3">
+            <?php
+            echo DateRangePicker::widget([
+                'name' => 'from_date',
+                // 'value'=>'2015-10-19 12:00 AM',
+                'value' => $from_date != null ? date('d-m-Y', strtotime($from_date)) : date('d-m-Y'),
+                //    'useWithAddon'=>true,
+                'convertFormat' => true,
+                'options' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'ถึงวันที่',
+                    //  'onchange' => 'this.form.submit();',
+                    'autocomplete' => 'off',
+                ],
+                'pluginOptions' => [
+                    'timePicker' => false,
+                    'timePickerIncrement' => 1,
+                    'locale' => ['format' => 'd-m-Y'],
+                    'singleDatePicker' => true,
+                    'showDropdowns' => true,
+                    'timePicker24Hour' => true
+                ]
+            ]);
+            ?>
+        </div>
+        <div class="col-lg-3">
+            <?php
+            echo DateRangePicker::widget([
+                'name' => 'to_date',
+                // 'value'=>'2015-10-19 12:00 AM',
+                'value' => $to_date != null ? date('d-m-Y', strtotime($to_date)) : date('d-m-Y'),
+                //    'useWithAddon'=>true,
+                'convertFormat' => true,
+                'options' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'ถึงวันที่',
+                    //  'onchange' => 'this.form.submit();',
+                    'autocomplete' => 'off',
+                ],
+                'pluginOptions' => [
+                    'timePicker' => false,
+                    'timePickerIncrement' => 1,
+                    'locale' => ['format' => 'd-m-Y'],
+                    'singleDatePicker' => true,
+                    'showDropdowns' => true,
+                    'timePicker24Hour' => true
+                ]
+            ]);
+            ?>
+        </div>
+        <div class="col-lg-3">
+            <button class="btn btn-sm btn-info">เรียงเลขที่ใหม่</button>
+        </div>
+        <div class="col-lg-3"></div>
+    </div>
+</form>
+<br />
 <div class="customertaxinvoice-index">
     <?php Pjax::begin(); ?>
     <div class="row">

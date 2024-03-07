@@ -562,7 +562,7 @@ class PaymentreceivecarController extends Controller
     public function actionCheckordercarpayment()
     {
         $sql = "SELECT id,customer_id,total_sum
-              FROM query_sale_car_credit_amount WHERE date(order_date)>='".date('Y-m-d',strtotime('2024-02-16'))."'";
+              FROM query_sale_car_credit_amount WHERE date(order_date)>='".date('Y-m-d',strtotime('2024-01-01'))."'";
         $sql.=" AND date(order_date)<='".date('Y-m-d',strtotime('2024-02-23'))."'";
         $query = \Yii::$app->db->createCommand($sql);
         $model = $query->queryAll();

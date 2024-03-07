@@ -42,8 +42,8 @@ class CustomertaxinvoiceController extends Controller
         $searchModel = new CustomertaxinvoiceSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
         $dataProvider->setSort(['defaultOrder' => ['id' => SORT_DESC]]);
-       // if($pageSize != '10000'){
-            $dataProvider->pagination->pageSize = $pageSize;
+        // if($pageSize != '10000'){
+        $dataProvider->pagination->pageSize = $pageSize;
 //        }else{
 //            $dataProvider->pagination->pageSize = $pageSize;
 //        }
@@ -54,9 +54,11 @@ class CustomertaxinvoiceController extends Controller
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'perpage' => $pageSize,
+            'from_date' => null,
+            'to_date' => null,
         ]);
 
-      //  return $this->render('_printshortpreview');
+        //  return $this->render('_printshortpreview');
     }
 
     /**
@@ -89,33 +91,35 @@ class CustomertaxinvoiceController extends Controller
             $line_product_group_id = \Yii::$app->request->post('line_product_group_id');
             $line_qty = \Yii::$app->request->post('line_qty');
             $line_price = \Yii::$app->request->post('line_price');
+            $line_unit = \Yii::$app->request->post('line_unit_id');
             $line_discount = \Yii::$app->request->post('line_discount');
             $line_total = \Yii::$app->request->post('line_total');
 
             $inv_date = date('Y-m-d');
             $pay_date = date('Y-m-d');
 
-            $x1 = explode('-',$model->invoice_date);
-            $x2 = explode('-',$model->payment_date);
-            if($x1!=null && count($x1)>1){
-                $inv_date = $x1[2].'-'.$x1[1].'-'.$x1[0];
+            $x1 = explode('-', $model->invoice_date);
+            $x2 = explode('-', $model->payment_date);
+            if ($x1 != null && count($x1) > 1) {
+                $inv_date = $x1[2] . '-' . $x1[1] . '-' . $x1[0];
             }
-            if($x2!=null && count($x2)>1){
-                $pay_date = $x2[2].'-'.$x2[1].'-'.$x2[0];
+            if ($x2 != null && count($x2) > 1) {
+                $pay_date = $x2[2] . '-' . $x2[1] . '-' . $x2[0];
             }
 
             $find_product_group_id = \backend\models\Product::findGroupId($model->find_product_id);
 
             $model->invoice_date = date('Y-m-d', strtotime($inv_date));
             $model->payment_date = date('Y-m-d', strtotime($pay_date));
-           // $model->total_text = '';
-            if($model->save(false)){
-                if($line_product_group_id != null){
-                    for($i=0;$i<=count($line_product_group_id)-1;$i++){
+            // $model->total_text = '';
+            if ($model->save(false)) {
+                if ($line_product_group_id != null) {
+                    for ($i = 0; $i <= count($line_product_group_id) - 1; $i++) {
                         $modelline = new \common\models\CustomerTaxInvoiceLine();
                         $modelline->tax_invoice_id = $model->id;
                         $modelline->product_group_id = $line_product_group_id[$i];
                         $modelline->qty = $line_qty[$i];
+                        $modelline->unit_id = $line_unit[$i];
                         $modelline->price = $line_price[$i];
                         $modelline->discount_amount = $line_discount[$i];
                         $modelline->line_total = $line_total[$i];
@@ -156,7 +160,8 @@ class CustomertaxinvoiceController extends Controller
                     }
                 }
             }
-            return $this->redirect(['view', 'id' => $model->id]);
+         //   return $this->redirect(['view', 'id' => $model->id]);
+            return $this->redirect(['customertaxinvoice/index']);
         }
 
         return $this->render('create', [
@@ -175,17 +180,47 @@ class CustomertaxinvoiceController extends Controller
     public function actionUpdate($id)
     {
         $model = $this->findModel($id);
-        $model_line = \common\models\CustomerTaxInvoiceLine::find()->where(['tax_invoice_id'=>$id])->all();
-        $model_order_line = \common\models\CustomerTaxInvoiceDetail::find()->select('order_line_id')->where(['customer_tax_invoice_id'=>$id])->all();
+        $model_line = \common\models\CustomerTaxInvoiceLine::find()->where(['tax_invoice_id' => $id])->all();
+        $model_order_line = \common\models\CustomerTaxInvoiceDetail::find()->select('order_line_id')->where(['customer_tax_invoice_id' => $id])->all();
         $order_list = [];
-        if($model_order_line){
-            foreach ($model_order_line as $value){
-                array_push($order_list,$value->order_line_id);
+        if ($model_order_line) {
+            foreach ($model_order_line as $value) {
+                array_push($order_list, $value->order_line_id);
             }
         }
 
 
-        if ($model->load(Yii::$app->request->post()) && $model->save()) {
+        if ($model->load(Yii::$app->request->post())) {
+            $line_product_group_id = \Yii::$app->request->post('line_product_group_id');
+            $line_qty = \Yii::$app->request->post('line_qty');
+            $line_price = \Yii::$app->request->post('line_price');
+            $line_unit = \Yii::$app->request->post('line_unit_id');
+            $line_discount = \Yii::$app->request->post('line_discount');
+            $line_total = \Yii::$app->request->post('line_total');
+
+            if($model->save(false)){
+                for ($i = 0; $i <= count($line_product_group_id) - 1; $i++) {
+
+                    $model_check = \common\models\CustomerTaxInvoiceLine::find()->where(['product_group_id'=>$line_product_group_id[$i],'price'=>$line_price[$i]])->one();
+                    if($model_check){
+                        $model_check->qty = $line_qty[$i];
+                        $model_check->unit_id = $line_unit[$i];
+                        $model_check->line_total = $line_total[$i];
+                        $model_check->save(false);
+                    }else{
+                        $modelline = new \common\models\CustomerTaxInvoiceLine();
+                        $modelline->tax_invoice_id = $model->id;
+                        $modelline->product_group_id = $line_product_group_id[$i];
+                        $modelline->qty = $line_qty[$i];
+                        $modelline->unit_id = $line_unit[$i];
+                        $modelline->price = $line_price[$i];
+                        $modelline->discount_amount = $line_discount[$i];
+                        $modelline->line_total = $line_total[$i];
+                        $modelline->save(false);
+                    }
+
+                }
+            }
             return $this->redirect(['view', 'id' => $model->id]);
         }
 
@@ -205,8 +240,8 @@ class CustomertaxinvoiceController extends Controller
      */
     public function actionDelete($id)
     {
-        \common\models\OrderTaxTemp::deleteAll(['tax_invoice_id'=>$id]);
-        \common\models\CustomerTaxInvoiceLine::deleteAll(['tax_invoice_id'=>$id]);
+        \common\models\OrderTaxTemp::deleteAll(['tax_invoice_id' => $id]);
+        \common\models\CustomerTaxInvoiceLine::deleteAll(['tax_invoice_id' => $id]);
         $this->findModel($id)->delete();
 
         return $this->redirect(['index']);
@@ -231,7 +266,7 @@ class CustomertaxinvoiceController extends Controller
     public function actionFindorder()
     {
         $customer_id = 210;// \Yii::$app->request->post('customer_id');
-       // $customer_id =  \Yii::$app->request->post('customer_id');
+        // $customer_id =  \Yii::$app->request->post('customer_id');
         $html = '';
 //        if ($customer_id > 0) {
 //            $model = \backend\models\Orders::find()->select(['id', 'order_date'])->where(['customer_id' => $customer_id])->limit(50)->all();
@@ -340,11 +375,13 @@ class CustomertaxinvoiceController extends Controller
 //        echo $html;
 //    }
 
-    public function actionOrdersearch(){
+    public function actionOrdersearch()
+    {
         $from_date = \Yii::$app->request->post('search_from_date');
         $to_date = \Yii::$app->request->post('search_to_date');
         $product_id = \Yii::$app->request->post('customer_id'); // new pattern
         $price = \Yii::$app->request->post('find_price'); // new pattern
+        $selectedorder = \Yii::$app->request->post('selecteditem');
         //  $customer_id =  \Yii::$app->request->post('customer_id');
         $html = 'no data';
 
@@ -353,13 +390,13 @@ class CustomertaxinvoiceController extends Controller
             $search_from_date = null;
             $search_to_date = null;
 
-            $x1 = explode('/',$from_date);
-            $x2 = explode('/',$to_date);
-            if($x1!=null && count($x1)>1){
-                $search_from_date = $x1[2].'-'.$x1[1].'-'.$x1[0];
+            $x1 = explode('/', $from_date);
+            $x2 = explode('/', $to_date);
+            if ($x1 != null && count($x1) > 1) {
+                $search_from_date = $x1[2] . '-' . $x1[1] . '-' . $x1[0];
             }
-            if($x2!=null && count($x2)>1){
-                $search_to_date = $x2[2].'-'.$x2[1].'-'.$x2[0];
+            if ($x2 != null && count($x2) > 1) {
+                $search_to_date = $x2[2] . '-' . $x2[1] . '-' . $x2[0];
             }
 
             //  $html.= $search_from_date. ' and '.$search_to_date;
@@ -374,8 +411,8 @@ class CustomertaxinvoiceController extends Controller
              AND t2.status <> 3
              AND t1.qty > 0";
 
-            if($price > 0){
-                $sql .= " AND t1.price =".(float)$price;
+            if ($price > 0) {
+                $sql .= " AND t1.price =" . (float)$price;
             }
 
 
@@ -383,47 +420,66 @@ class CustomertaxinvoiceController extends Controller
             $query = \Yii::$app->db->createCommand($sql);
             $model = $query->queryAll();
             if ($model) {
+                // $html.='ok first level';
                 for ($i = 0; $i <= count($model) - 1; $i++) {
                     $product_group_id = \backend\models\Product::findGroupId($product_id);
-                    $model_check_already = \common\models\OrderTaxTemp::find()->where(['order_id'=>$model[$i]['order_id'],'product_group_id'=>$product_group_id,'product_id'=>$model[$i]['product_id']])->one();
-                    if($model_check_already)continue;
+                    $model_check_already = \common\models\OrderTaxTemp::find()->where(['order_id' => $model[$i]['order_id'], 'product_group_id' => $product_group_id, 'product_id' => $model[$i]['product_id']])->one();
+                    if ($model_check_already) continue;
 
                     $product_group_name = \backend\models\Product::findGroupName($model[$i]['product_id']);
                     $customer_name = '';
 
                     $check_customer_id = 0;
 
-                    if($model[$i]['order_channel_id'] != null || $model[$i]['order_channel_id'] > 0){
-                        if($model[$i]['sale_from_mobile'] == 1){
-                            $customer_name =  \backend\models\Customer::findName($model[$i]['t1_customer_id']);
+                    if ($model[$i]['order_channel_id'] != null || $model[$i]['order_channel_id'] > 0) {
+                        if ($model[$i]['sale_from_mobile'] == 1) {
+                            $customer_name = \backend\models\Customer::findName($model[$i]['t1_customer_id']);
                             $check_customer_id = $model[$i]['t1_customer_id'];
-                        }else{
-                            $customer_name =  \backend\models\Deliveryroute::findName($model[$i]['order_channel_id']);
+                        } else {
+                            $customer_name = \backend\models\Deliveryroute::findName($model[$i]['order_channel_id']);
                             $check_customer_id = 'xxx';
                         }
 
-                    }else{
-                        if($model[$i]['customer_id'] == null || $model[$i]['customer_id'] == 0 || $model[$i]['customer_id'] == '' ){
+                    } else {
+                        if ($model[$i]['customer_id'] == null || $model[$i]['customer_id'] == 0 || $model[$i]['customer_id'] == '') {
 
                             $customer_name = \backend\models\Customer::findName($model[$i]['t1_customer_id']);
                             $check_customer_id = $model[$i]['t1_customer_id'];
 
-                        } else if($model[$i]['customer_id'] != null || $model[$i]['customer_id'] != 0 || $model[$i]['customer_id'] != ''){
+                        } else if ($model[$i]['customer_id'] != null || $model[$i]['customer_id'] != 0 || $model[$i]['customer_id'] != '') {
 
                             $customer_name = \backend\models\Customer::findName($model[$i]['customer_id']);
                             $check_customer_id = $model[$i]['customer_id'];
                         }
                     }
 
-                    if($check_customer_id !='xxx'){
-                        $model_customer_reg_inv = \backend\models\Customer::find()->where(['id'=>$check_customer_id])->one();
-                        if($model_customer_reg_inv){
-                            if($model_customer_reg_inv->is_invoice_req == 1)continue;
+                    if ($check_customer_id != 'xxx') {
+                        $model_customer_reg_inv = \backend\models\Customer::find()->where(['id' => $check_customer_id])->one();
+                        if ($model_customer_reg_inv) {
+                            if ($model_customer_reg_inv->is_invoice_req == 1) continue;
                         }
                     }
 
+                    $line_color = '';
+                    if($selectedorder != null || $selectedorder !=''){
+                     //   $selectedlist = explode(',',(String)$selectedorder);
+//                        if(count($selectedlist) >0){
+//                            // if($selectedorder[$i] == $model[$i]['order_id']){
+                            for($xx=0;$xx<=count($selectedorder)-1;$xx++){
+                                if($selectedorder[$xx] == $model[$i]['order_id']){
+                                 $line_color = 'background-color: yellow;';
+                                 }
 
-                    $html .= '<tr>';
+                            }
+//
+//                            //  }
+//                        }
+
+                    }
+
+
+
+                    $html .= '<tr style="'.$line_color.'">';
                     $html .= '<td style="text-align: center">
                             <div class="btn btn-outline-success btn-sm" onclick="addselecteditem($(this))" data-var="' . $model[$i]['id'] . '">เลือก</div>
                             <input type="hidden" class="line-find-order-id" value="' . $model[$i]['order_id'] . '">
@@ -443,21 +499,21 @@ class CustomertaxinvoiceController extends Controller
                     $html .= '<td style="text-align: right">' . number_format((float)$model[$i]['qty'] * (float)$model[$i]['price'], 2) . '</td>';
                     $html .= '</tr>';
                 }
-            }else{
-                $html.='<tr>';
-                $html.='<td colspan="9" style="text-align: center;color: red;">';
-                $html.='ไม่พบข้อมูล inner';
-                $html.='</td>';
-                $html.='</tr>';
+            } else {
+                $html .= '<tr>';
+                $html .= '<td colspan="9" style="text-align: center;color: red;">';
+                $html .= 'ไม่พบข้อมูล inner';
+                $html .= '</td>';
+                $html .= '</tr>';
             }
 
 
-        }else{
-            $html.='<tr>';
-            $html.='<td colspan="9" style="text-align: center;color: red;">';
-            $html.='ไม่พบข้อมูล outer';
-            $html.='</td>';
-            $html.='</tr>';
+        } else {
+            $html .= '<tr>';
+            $html .= '<td colspan="9" style="text-align: center;color: red;">';
+            $html .= 'ไม่พบข้อมูล outer';
+            $html .= '</td>';
+            $html .= '</tr>';
         }
         echo $html;
     }
@@ -465,12 +521,13 @@ class CustomertaxinvoiceController extends Controller
     public function actionConvertnumtostring()
     {
         $txt = '';
-       $amount = \Yii::$app->request->post('amount');
-       if($amount >=0){
-           $txt = self::numtothai($amount);
-       }
-       echo $txt;
+        $amount = \Yii::$app->request->post('amount');
+        if ($amount >= 0) {
+            $txt = self::numtothai($amount);
+        }
+        echo $txt;
     }
+
     public function numtothai($num)
     {
         $return = "";
@@ -520,6 +577,7 @@ class CustomertaxinvoiceController extends Controller
         }
         return $return;
     }
+
     public function numtothaistring($num)
     {
         $return_str = "";
@@ -544,38 +602,119 @@ class CustomertaxinvoiceController extends Controller
     }
 
 
-    public function actionPrintshort(){
+    public function actionPrintshort()
+    {
         $id = \Yii::$app->request->post('print_id');
-         $this->renderPartial('_printshort',[
-            'print_id'=>$id,
-            'branch_id'=>1
+        $this->renderPartial('_printshort', [
+            'print_id' => $id,
+            'branch_id' => 1
         ]);
 
         $session = \Yii::$app->session;
         $session->setFlash('msg-slip-tax', 'slip_tax.pdf');
-        return $this->redirect(['customertaxinvoice/update','id'=>$id]);
-       // return $this->render('_printshortpreview');
+        return $this->redirect(['customertaxinvoice/update', 'id' => $id]);
+        // return $this->render('_printshortpreview');
     }
-    public function actionPrintfull(){
+
+    public function actionPrintfull()
+    {
         $id = \Yii::$app->request->post('print_id');
-        $this->renderPartial('_printfull',[
-            'print_id'=>$id,
-            'branch_id'=>1
+        $this->renderPartial('_printfull', [
+            'print_id' => $id,
+            'branch_id' => 1
         ]);
 
         $session = \Yii::$app->session;
         $session->setFlash('msg-slip-tax-full', 'slip_tax_full.pdf');
-        return $this->redirect(['customertaxinvoice/update','id'=>$id]);
+        return $this->redirect(['customertaxinvoice/update', 'id' => $id]);
     }
 
-    public function actionPrintcheck(){
+    public function actionPrintcheck()
+    {
         $from_date = \Yii::$app->request->post('from_date');
         $to_date = \Yii::$app->request->post('to_date');
 
-        return $this->render('_printcheck',[
+        return $this->render('_printcheck', [
             'from_date' => $from_date,
             'to_date' => $to_date,
         ]);
 
+    }
+
+    public function actionRecalno()
+    {
+        $from_date = \Yii::$app->request->post('from_date');
+        $to_date = \Yii::$app->request->post('to_date');
+
+        $f_date = date('Y-m-d');
+        $t_date = date('Y-m-d');
+        $cal_year = '';
+        $cal_month = '';
+        $cal_day = '';
+        $xdate = explode('-', $from_date);
+        if (count($xdate) > 1) {
+            $f_date = $xdate[2] . '/' . $xdate[1] . '/' . $xdate[0];
+
+        }
+        $xdate2 = explode('-', $to_date);
+        if (count($xdate2) > 1) {
+            $t_date = $xdate2[2] . '/' . $xdate2[1] . '/' . $xdate2[0];
+        }
+       // echo $f_date.' and '. $t_date; return;
+
+        $model = \common\models\CustomerTaxInvoice::find()->where(['>=', 'date(invoice_date)', date('Y-m-d',strtotime($f_date))])->andFilterWhere(['<=', 'date(invoice_date)', date('Y-m-d',strtotime($t_date))])->orderBy(['id' => SORT_ASC])->all();
+        if ($model) {
+            $first_no = '';
+            $last_day = 0;
+            foreach ($model as $value) {
+                $cnum = 0;
+                $cal_year = substr(date("Y",strtotime($value->invoice_date)),2,4);
+                    $cal_month = date('m', strtotime($value->invoice_date)) ;
+                    $cal_day = date('d', strtotime($value->invoice_date));
+
+                if ($first_no != '') {
+
+                    $prefix = $cal_year.$cal_month.$cal_day;
+
+                    $cnum = substr((string)$first_no, 6, 3);
+
+                    $len = strlen($cnum);
+
+                    if($cnum == null || $cnum ==0){
+                        $loop = 2;
+                        $cnum = 0;
+                    }else{
+                        $clen = strlen($cnum + 1);
+                        $loop = $len - $clen;
+                    }
+
+                    if($cal_day != $last_day){
+                        $loop = 2;
+                        $cnum = 0;
+                    }else{
+                        $clen = strlen($cnum + 1);
+                        $loop = $len - $clen;
+                    }
+
+                    for ($i = 1; $i <= $loop; $i++) {
+                        $prefix .= "0";
+                    }
+
+                    $prefix .= $cnum + 1;
+                    $first_no = $prefix;
+
+                } else {
+
+                    $prefix = $cal_year.$cal_month.$cal_day.'001';
+                    $first_no  = $prefix;
+                }
+
+                $last_day = $cal_day;
+
+                \backend\models\Customertaxinvoice::updateAll(['invoice_no' => $first_no], ['id' => $value->id]);
+
+            }
+        }
+        return $this->redirect(['customertaxinvoice/index']);
     }
 }

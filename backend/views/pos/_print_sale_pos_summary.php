@@ -130,8 +130,8 @@ $model_product_daily = \backend\models\Product::find()->where(['status' => 1, 'c
     <!--    <script src="vendor/jquery/jquery.min.js"></script>-->
     <!--    <script type="text/javascript" src="js/ThaiBath-master/thaibath.js"></script>-->
 </head>
-<div>
 
+<div>
     <form action="<?= \yii\helpers\Url::to(['pos/printpossummary'], true) ?>" method="post" id="form-search">
         <input type="hidden" class="btn-order-type" name="btn_order_type" value="<?= $btn_order_type ?>">
         <table class="table-header" style="width: 100%;font-size: 18px;" border="0">
@@ -140,6 +140,7 @@ $model_product_daily = \backend\models\Product::find()->where(['status' => 1, 'c
                                     class="btn btn-sm <?= $btn_order_type == 1 ? "btn-success" : "btn-default" ?> btn-order-date">วันที่ขาย</div><div
                                     class="btn btn-sm <?= $btn_order_type == 2 ? "btn-success" : "btn-default" ?> btn-order-price">ราคาขาย</div></div></span>
                 </td>
+
             </tr>
             <tr>
 
@@ -501,25 +502,25 @@ $js = <<<JS
              var line_product = $(this).attr('data-var');
              if(line_product == header_product){
                 // line_qty = parseFloat(line_qty) + parseFloat($(this).closest('tr').find('.line-qty').val());
-                 line_qty = parseFloat(line_qty) + parseFloat($(this).closest('tr').find('td:eq(3)').html().replace(',',''));
-                 line_qty2 = parseFloat(line_qty2) + parseFloat($(this).closest('tr').find('td:eq(4)').html().replace(',',''));
-                 line_qty5 = parseFloat(line_qty5) + parseFloat($(this).closest('tr').find('td:eq(5)').html().replace(',',''));
-                 line_qty4 = parseFloat(line_qty4) + parseFloat($(this).closest('tr').find('td:eq(6)').html().replace(',',''));
-                 line_total_qty = parseFloat(line_total_qty) + parseFloat($(this).closest('tr').find('td:eq(7)').html().replace(',',''));
+                 line_qty = parseFloat(line_qty) + parseFloat($(this).closest('tr').find('td:eq(3)').html().replace(',','').replace(',',''));
+                 line_qty2 = parseFloat(line_qty2) + parseFloat($(this).closest('tr').find('td:eq(4)').html().replace(',','').replace(',',''));
+                 line_qty5 = parseFloat(line_qty5) + parseFloat($(this).closest('tr').find('td:eq(5)').html().replace(',','').replace(',',''));
+                 line_qty4 = parseFloat(line_qty4) + parseFloat($(this).closest('tr').find('td:eq(6)').html().replace(',','').replace(',',''));
+                 line_total_qty = parseFloat(line_total_qty) + parseFloat($(this).closest('tr').find('td:eq(7)').html().replace(',','').replace(',',''));
                  
-                 line_amount = parseFloat(line_amount) + parseFloat($(this).closest('tr').find('td:eq(8)').html().replace(',',''));
-                 line_amount2 = parseFloat(line_amount2) + parseFloat($(this).closest('tr').find('td:eq(9)').html().replace(',',''));
-                 line_amount5 = parseFloat(line_amount5) + parseFloat($(this).closest('tr').find('td:eq(10)').html().replace(',',''));
-                 line_amount4 = parseFloat(line_amount4) + parseFloat($(this).closest('tr').find('td:eq(11)').html().replace(',',''));
-                 line_total_amount = parseFloat(line_total_amount) + parseFloat($(this).closest('tr').find('td:eq(12)').html().replace(',',''));
+                 line_amount = parseFloat(line_amount) + parseFloat($(this).closest('tr').find('td:eq(8)').html().replace(',','').replace(',',''));
+                 line_amount2 = parseFloat(line_amount2) + parseFloat($(this).closest('tr').find('td:eq(9)').html().replace(',','').replace(',',''));
+                 line_amount5 = parseFloat(line_amount5) + parseFloat($(this).closest('tr').find('td:eq(10)').html().replace(',','').replace(',',''));
+                 line_amount4 = parseFloat(line_amount4) + parseFloat($(this).closest('tr').find('td:eq(11)').html().replace(',','').replace(',',''));
+                 line_total_amount = parseFloat(line_total_amount) + parseFloat($(this).closest('tr').find('td:eq(12)').html().replace(',','').replace(',',''));
              }
              
          });
         
-        $(this).closest('tr').find('td:eq(3)').html(parseFloat(line_qty).toFixed(2));
-        $(this).closest('tr').find('td:eq(4)').html(parseFloat(line_qty2).toFixed(2));
-        $(this).closest('tr').find('td:eq(5)').html(parseFloat(line_qty5).toFixed(2));
-        $(this).closest('tr').find('td:eq(6)').html(parseFloat(line_qty4).toFixed(2));
+        $(this).closest('tr').find('td:eq(3)').html(addCommas(parseFloat(line_qty).toFixed(2)));
+        $(this).closest('tr').find('td:eq(4)').html(addCommas(parseFloat(line_qty2).toFixed(2)));
+        $(this).closest('tr').find('td:eq(5)').html(addCommas(parseFloat(line_qty5).toFixed(2)));
+        $(this).closest('tr').find('td:eq(6)').html(addCommas(parseFloat(line_qty4).toFixed(2)));
         $(this).closest('tr').find('td:eq(7)').html(addCommas(parseFloat(line_total_qty).toFixed(2)));
         
         $(this).closest('tr').find('td:eq(8)').html(addCommas(parseFloat(line_amount).toFixed(2)));

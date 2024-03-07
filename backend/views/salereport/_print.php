@@ -306,10 +306,30 @@ if ($find_from_date != null) {
                 $line_total_qty = 0;
                 $line_total_amt = 0;
                // echo 'xxx';
+
+                $to_date_new2 = '';
+                $is_29_02 = 0;
+                $find_order_date = date('Y-m-d');
+                $find_or_date = \backend\models\Orders::getOrderdate($value->id);
+                $xdate2 = explode(' ', $find_or_date);
+                if (count($xdate2) > 1) {
+                    $xxtodate2 = explode('-', $xdate2[0]);
+                    if (count($xxtodate2) > 1) {
+                        if ($xxtodate2[1] == '02' && $xxtodate2[2] == '29') {
+                            $is_29_02 = 1;
+                            $to_date_new2 = '29-02-' . ($xxtodate2[0] + 543);
+                        } else {
+                            $is_29_02 = 0;
+                            $to_date_new2 = ($xxtodate2[0] + 543) . '/' . $xxtodate2[1] . '/' . $xxtodate2[2];
+                        }
+
+                    }
+                }
+
                 ?>
                 <tr>
                     <td style="text-align: center;padding: 10px;border: 1px solid grey"><?= $num ?></td>
-                    <td style="text-align: center;padding: 0px;border: 1px solid grey"><?= date('d-m-Y', strtotime('+543 years', strtotime(\backend\models\Orders::getOrderdate($value->id)))) ?></td>
+                    <td style="text-align: center;padding: 0px;border: 1px solid grey"><?= $is_29_02 == 1 ? $to_date_new2 : date('d-m-Y', strtotime($to_date_new2)) ?></td>
                     <td style="text-align: center;padding: 0px;border: 1px solid grey"><?= $value->order_no ?></td>
                     <?php for ($x = 0; $x <= count($product_header_2) - 1; $x++): ?>
                         <?php

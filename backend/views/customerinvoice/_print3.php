@@ -4,10 +4,24 @@ $from_date = date('Y-m-d');
 $to_date = date('Y-m-d');
 
 $cnt_arr = count($model_min_max);
-if($cnt_arr > 0){
+if ($cnt_arr > 0) {
     $from_date = date('Y-m-d', strtotime($model_min_max[0]['date']));
-    $to_date = date('Y-m-d', strtotime($model_min_max[$cnt_arr-1]['date']));
+    $to_date = date('Y-m-d', strtotime($model_min_max[$cnt_arr - 1]['date']));
 }
+$to_date_new = '';
+$has_29_02 = 0;
+$xxtodate = explode('-', $to_date);
+if (count($xxtodate) > 1) {
+    if ($xxtodate[1] == '02' && $xxtodate[2] == '29') {
+        $has_29_02 = 1;
+        $to_date_new = '29-02-' . ($xxtodate[0] + 543);
+    } else {
+        $to_date_new = ($xxtodate[0] + 543) . '/' . $xxtodate[1] . '/' . $xxtodate[2];
+    }
+
+}
+
+
 ?>
 <html>
 <head>
@@ -93,12 +107,15 @@ if($cnt_arr > 0){
             <td style="text-align: left;border: none" colspan="2"><h3>สรุปรายการส่งน้ำแข็ง</h3></td>
         </tr>
         <tr>
-            <td style="text-align: left;border: none">ชื่อ <b><?= \backend\models\Customer::findDescription($model->customer_id) ?></b></td>
+            <td style="text-align: left;border: none">ชื่อ
+                <b><?= \backend\models\Customer::findDescription($model->customer_id) ?></b></td>
 
         </tr>
 
         <tr>
-            <td colspan="2" style="text-align: left;border: none">วันที่เริ่ม <span><b><?=date('d-m-Y', strtotime('+543 years',strtotime($from_date)))?></b></span> ถึงวันที่ <span><b><?=date('d-m-Y', strtotime('+543 years',strtotime($to_date)))?></b></td>
+            <td colspan="2" style="text-align: left;border: none">วันที่เริ่ม
+                <span><b><?= date('d-m-Y', strtotime('+543 years', strtotime($from_date))) ?></b></span> ถึงวันที่
+                <span><b><?= $has_29_02 == 0 ? date('d-m-Y', strtotime('+543 years', strtotime($to_date))) : $to_date_new ?></b></td>
         </tr>
     </table>
     <br/>
@@ -119,7 +136,7 @@ if($cnt_arr > 0){
     $product_header_new = [];
 
     foreach ($model_line as $valuex) {
-       // $modelx = \common\models\QueryOrderData::find()->join('inner join','product','order_line.product_id=product.id')->where(['order_id' => $valuex->order_id])->orderBy(['product.item_pos_seq' => SORT_DESC])->all();
+        // $modelx = \common\models\QueryOrderData::find()->join('inner join','product','order_line.product_id=product.id')->where(['order_id' => $valuex->order_id])->orderBy(['product.item_pos_seq' => SORT_DESC])->all();
         $sql = "SELECT description,item_pos_seq";
         $sql .= " FROM query_order_data";
         $sql .= " WHERE  id =" . $valuex->order_id;
@@ -128,12 +145,12 @@ if($cnt_arr > 0){
         $query = \Yii::$app->db->createCommand($sql);
         $modelx = $query->queryAll();
         if ($modelx) {
-            for($x=0;$x<=count($modelx)-1;$x++){
+            for ($x = 0; $x <= count($modelx) - 1; $x++) {
                 if (!in_array($modelx[$x]['description'], $product_check)) {
                     array_push($product_check, $modelx[$x]['description']);
-                  //  $item_seq = \backend\models\Product::find()->select('item_pos_seq')->where(['id'=>$valuexx->product_id])->one();
+                    //  $item_seq = \backend\models\Product::find()->select('item_pos_seq')->where(['id'=>$valuexx->product_id])->one();
 //                    array_push($product_header,$modelx[$x]['description']);
-                    array_push($product_header_new,['name'=>$modelx[$x]['description'],'sort_no'=>$modelx[$x]['item_pos_seq']]);
+                    array_push($product_header_new, ['name' => $modelx[$x]['description'], 'sort_no' => $modelx[$x]['item_pos_seq']]);
                 }
             }
 //            foreach ($modelx as $valuexx) {
@@ -148,30 +165,30 @@ if($cnt_arr > 0){
     // asort($product_header_new);
     // print_r($product_header_new);return;
 
-//    if($product_header_new!=null){
-//       // asort($product_header_new);
-//        //  print_r($product_header_new);echo"<br />";
-//        $new_arr = [];
-//        foreach ($product_header_new as $keys=>$value){
-//            $product_x = \backend\models\Product::find()->select('id')->where(['item_pos_seq' => $value,'branch_id'=>1])->one();
-//            array_push($product_header, $product_x->id);
-//        }
-////        for($c=0;$c<=count($product_header_new)-1;$c++){
-//////            array_push($new_arr,$product_header_new[])
-////          //  echo $product_header_new[$c];
-////          //  if (!in_array($product_header_new[$c], $product_header)) {
-////                $product_x = \backend\models\Product::find()->select('id')->where(['item_pos_seq' => $product_header_new[$c],'branch_id'=>1])->one();
-////                array_push($product_header, $product_x->id);
-////          //  }
-////        }
-//
-//    }
+    //    if($product_header_new!=null){
+    //       // asort($product_header_new);
+    //        //  print_r($product_header_new);echo"<br />";
+    //        $new_arr = [];
+    //        foreach ($product_header_new as $keys=>$value){
+    //            $product_x = \backend\models\Product::find()->select('id')->where(['item_pos_seq' => $value,'branch_id'=>1])->one();
+    //            array_push($product_header, $product_x->id);
+    //        }
+    ////        for($c=0;$c<=count($product_header_new)-1;$c++){
+    //////            array_push($new_arr,$product_header_new[])
+    ////          //  echo $product_header_new[$c];
+    ////          //  if (!in_array($product_header_new[$c], $product_header)) {
+    ////                $product_x = \backend\models\Product::find()->select('id')->where(['item_pos_seq' => $product_header_new[$c],'branch_id'=>1])->one();
+    ////                array_push($product_header, $product_x->id);
+    ////          //  }
+    ////        }
+    //
+    //    }
 
-    if($product_header_new!=null){
-        for($a=1;$a<=21;$a++){
-            for($b=0;$b<=count($product_header_new)-1;$b++){
-                if($a == $product_header_new[$b]['sort_no']){
-                    array_push($product_header,$product_header_new[$b]['name']);
+    if ($product_header_new != null) {
+        for ($a = 1; $a <= 21; $a++) {
+            for ($b = 0; $b <= count($product_header_new) - 1; $b++) {
+                if ($a == $product_header_new[$b]['sort_no']) {
+                    array_push($product_header, $product_header_new[$b]['name']);
                 }
             }
         }
@@ -206,10 +223,30 @@ if($cnt_arr > 0){
             $total_all_line_qty = $total_all_line_qty + $line_qty;
 //              $order_product = getOrderQty2($value->order_id);
 //              $total_all_line_qty = 0;
+            $is_29_02 = 0;
+            $find_order_date = date('Y-m-d');
+            $find_or_date = \backend\models\Orders::getOrderdate($value->order_id);
+            $xdate = explode(' ', $find_or_date);
+            $xxdate = null;
+            if (count($xdate) > 1) {
+                $xxdate = explode('-', $xdate[0]);
+                if (count($xxdate) > 1) {
+                    if ($xxdate[1] == '02' && $xxdate[2] == '29') {
+                        $is_29_02 = 1;
+                        $find_order_date = '29-02-' . ($xxdate[0] + 543);
+                    } else {
+                        $find_order_date = ($xxdate[0] + 543) . '/' . $xxdate[1] . '/' . $xxdate[2];
+                    }
+
+                }
+            }
+
             ?>
             <tr>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey"><?= $num ?><input type="hidden" value="<?=$value->id;?>"></td>
-                <td style="text-align: center;padding: 8px;border: 1px solid grey"><?= date('d-m-Y', strtotime('+543 years',strtotime(\backend\models\Orders::getOrderdate($value->order_id)))) ?></td>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey"><?= $num ?><input type="hidden"
+                                                                                                     value="<?= $value->id; ?>">
+                </td>
+                <td style="text-align: center;padding: 8px;border: 1px solid grey"><?= $is_29_02 == 1 ? $find_order_date : date('d-m-Y', strtotime($find_order_date)) ?></td>
                 <td style="text-align: center;padding: 8px;border: 1px solid grey"><?= \backend\models\Orders::getCustomerrefno($value->order_id) ?></td>
                 <?php for ($x = 0; $x <= count($product_header) - 1; $x++): ?>
                     <?php
@@ -224,12 +261,12 @@ if($cnt_arr > 0){
                         }
                     }
                     ?>
-                    <td style="text-align: center;padding: 8px;padding-right: 5px;border: 1px solid grey"><?= $product_line_qty==0?'-':number_format($product_line_qty,1) ?></td>
+                    <td style="text-align: center;padding: 8px;padding-right: 5px;border: 1px solid grey"><?= $product_line_qty == 0 ? '-' : number_format($product_line_qty, 1) ?></td>
                 <?php endfor; ?>
                 <!--                <td style="text-align: center;padding: 0px;padding-right: 5px;border: 1px solid grey">-->
                 <? //= number_format($line_qty) ?><!--</td>-->
-                <td style="text-align: center;padding: 8px;padding-right: 5px;border: 1px solid grey"><?= $total_line==0?'-':number_format($total_line, 2) ?></td>
-                <td style="text-align: center;padding: 8px;padding-right: 5px;border: 1px solid grey"><?=$value->note?></td>
+                <td style="text-align: center;padding: 8px;padding-right: 5px;border: 1px solid grey"><?= $total_line == 0 ? '-' : number_format($total_line, 2) ?></td>
+                <td style="text-align: center;padding: 8px;padding-right: 5px;border: 1px solid grey"><?= $value->note ?></td>
             </tr>
         <?php endforeach; ?>
         <tfoot>
@@ -239,16 +276,17 @@ if($cnt_arr > 0){
             <td style="text-align: right;padding: 5px;border: 0px solid grey"><b>รวม</b></td>
             <?php for ($z = 0; $z <= count($total_all_line_qty_data) - 1; $z++): ?>
                 <td style="text-align: center;padding: 2px;padding-right: 5px;border: 1px solid grey">
-                    <b><?= $total_all_line_qty_data[$z]['qty'] ==0?'-':number_format($total_all_line_qty_data[$z]['qty'],1) ?></b></td>
+                    <b><?= $total_all_line_qty_data[$z]['qty'] == 0 ? '-' : number_format($total_all_line_qty_data[$z]['qty'], 1) ?></b>
+                </td>
             <?php endfor; ?>
             <td style="text-align: center;padding: 2px;padding-right: 5px;border: 1px solid grey">
-                <b><?= $total_all==0?'-':number_format($total_all, 2) ?></b></td>
+                <b><?= $total_all == 0 ? '-' : number_format($total_all, 2) ?></b></td>
             <td style="text-align: center;padding: 2px;padding-right: 5px;border: 1px solid grey"></td>
         </tr>
         </tfoot>
     </table>
     <br/>
-    <br />
+    <br/>
     <br/>
     <table style="border: none">
         <tr>
@@ -310,7 +348,7 @@ function getOrderQty2($order_id, $product_description)
     if ($order_id) {
         $sql = "SELECT SUM(qty) as qty";
         $sql .= " FROM query_order_data";
-        $sql .= " WHERE  description =" . "'".$product_description."'";
+        $sql .= " WHERE  description =" . "'" . $product_description . "'";
         $sql .= " AND  id =" . $order_id;
         $sql .= " GROUP BY description";
         $query = \Yii::$app->db->createCommand($sql);

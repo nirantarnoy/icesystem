@@ -623,114 +623,144 @@ class SalecomreportController extends Controller
         }
 
         // echo date('Y-m-d',$t_date);return;
+        $model_route_data = [];
+        $counted = 0;
+        $loop = 0;
+        //$model_route_all = \common\models\DeliveryRoute::find()->select(['id'])->where(['status'=>1])->all();
+        $model_route_all = \common\models\Orders::find()->select(['distinct(order_channel_id)'])->where(['sale_from_mobile' => 1, 'date(order_date)' => date('Y-m-d', strtotime($t_date))])->groupBy(['order_channel_id'])->all();
+        if($model_route_all){
+
+            foreach ($model_route_all as $valuexx){
+                //$model_already_cal = \common\models\ComDailyCal::find()->where(['date(trans_date)'=>date('Y-m-d',strtotime($t_date))])->andFilterWhere(['route_idx'=>$valuexx->id])->count();
+                $model_already_cal = \common\models\ComDailyCal::find()->Where(['route_id'=>$valuexx->order_channel_id,'date(trans_date)'=>date('Y-m-d',strtotime($t_date))])->count();
+                if($model_already_cal == 0){
+                    array_push($model_route_data,$valuexx->order_channel_id);
+                    $loop+=1;
+
+                }else{
+                    $counted +=1;
+                }
+
+                if($loop == 8)break;
+            }
+            if(count($model_route_all) == $counted){
+                $session = Yii::$app->session;
+                $session->setFlash('msg-already', 'คำนวนครบทุกสายส่งแล้ว ');
+                return $this->redirect(['salecomreport/index']);
+            }
+
+        }
 
 
-        $model_route_data = \common\models\Orders::find()->select(['distinct(order_channel_id)'])->where(['sale_from_mobile' => 1, 'date(order_date)' => date('Y-m-d', strtotime($t_date))])->groupBy(['order_channel_id'])->all();
-        if ($model_route_data) {
-            foreach ($model_route_data as $val) {
-
-                $car_id = 0;
-                $emp_1 = 0;
-                $emp_2 = 0;
 
 
-                $total_com_all = 0;
-                $total_com_all_2 = 0;
-                $total_qty_all = 0;
-                $total_special_all = 0;
-                $total_com_sum_all = 0;
-                $total_amt_all = 0;
-                $total_amt = 0;
-                $xx = 0;
 
-                $route_emp_count = 0;
+       // $model_route_data = \common\models\Orders::find()->select(['distinct(order_channel_id)'])->where(['sale_from_mobile' => 1, 'date(order_date)' => date('Y-m-d', strtotime($t_date))])->groupBy(['order_channel_id'])->all();
+        if ($model_route_data != null) {
+            if(count($model_route_data) >0){
+                for($a=0;$a<=count($model_route_data)-1;$a++) {
 
-                $model_order_mobile = \common\models\Orders::find()->select(['id', 'order_date', 'order_channel_id', 'car_ref_id', 'emp_1', 'emp_2', 'car_ref_id'])
-                    ->Where(['company_id' => $company_id, 'branch_id' => $branch_id, 'order_channel_id' => $val->order_channel_id])
-                    ->andFilterWhere(['date(order_date)' => date('Y-m-d', strtotime($t_date))])
-                    ->andFilterWhere(['date(order_date)' => date('Y-m-d', strtotime($t_date))])
-                    ->andFilterWhere(['>', 'order_total_amt', 0])
-                    ->andFilterWhere(['sale_from_mobile' => 1])->all();
-                //print_r($model_order_mobile);return;
-                // echo count($model_order_mobile); return;
-                if ($model_order_mobile) {
-                    foreach ($model_order_mobile as $value) {
-                        $xx++;
-                        $com_rate = null;
-                        $route_emp_count = 0;
-
-                        $car_id = $value->car_ref_id;
-                        $emp_1 = $value->emp_1;
-                        $emp_2 = $value->emp_2;
-
-                        if ((int)$emp_1 > 0) {
-                            $route_emp_count += 1;
-                        }
-                        if ((int)$emp_2 > 0) {
-                            $route_emp_count += 1;
-                        }
-
-                        $route_total = null;
-                        $route_name = \backend\models\Deliveryroute::findName($value->order_channel_id);
-
-                        $order_data = null;
-                        if (substr($route_name, 0, 2) == 'CJ') {
-                            $order_data = $this->getOrderlineCJ($value->id, $company_id, $branch_id);
-                        } else {
-                            $order_data = $this->getOrderline($value->id, $company_id, $branch_id);
-                        }
-
-                        if ($order_data == null) continue 1;
-                        // print_r($order_data);return;
+                    $car_id = 0;
+                    $emp_1 = 0;
+                    $emp_2 = 0;
 
 
-                        $com_rate = $this->getComRateBktPrev($route_emp_count, $company_id, $branch_id, $t_date);
+                    $total_com_all = 0;
+                    $total_com_all_2 = 0;
+                    $total_qty_all = 0;
+                    $total_special_all = 0;
+                    $total_com_sum_all = 0;
+                    $total_amt_all = 0;
+                    $total_amt = 0;
+                    $xx = 0;
 
-                        $total_qty_all = $total_qty_all + (double)$order_data[0]['total_qty'];
-                        $total_amt_all = $total_amt_all + (double)$order_data[0]['total_amt'];
+                    $route_emp_count = 0;
 
-                        $line_com = 0;
-                        $line_com_2 = 0;
+                    $model_order_mobile = \common\models\Orders::find()->select(['id', 'order_date', 'order_channel_id', 'car_ref_id', 'emp_1', 'emp_2', 'car_ref_id'])
+                        ->Where(['company_id' => $company_id, 'branch_id' => $branch_id, 'order_channel_id' => $model_route_data[$a]])
+                        ->andFilterWhere(['date(order_date)' => date('Y-m-d', strtotime($t_date))])
+                        ->andFilterWhere(['>', 'order_total_amt', 0])
+                        ->andFilterWhere(['sale_from_mobile' => 1])->all();
+                    //print_r($model_order_mobile);return;
+                    // echo count($model_order_mobile); return;
+                    if ($model_order_mobile) {
+                        foreach ($model_order_mobile as $value) {
+                            $xx++;
+                            $com_rate = null;
+                            $route_emp_count = 0;
 
-                        if ($com_rate != null) {
+                            $car_id = $value->car_ref_id;
+                            $emp_1 = $value->emp_1;
+                            $emp_2 = $value->emp_2;
+
+                            if ((int)$emp_1 > 0) {
+                                $route_emp_count += 1;
+                            }
+                            if ((int)$emp_2 > 0) {
+                                $route_emp_count += 1;
+                            }
+
+                            $route_total = null;
+                            $route_name = \backend\models\Deliveryroute::findName($value->order_channel_id);
+
+                            $order_data = null;
                             if (substr($route_name, 0, 2) == 'CJ') {
+                                $order_data = $this->getOrderlineCJ($value->id, $company_id, $branch_id);
+                            } else {
+                                $order_data = $this->getOrderline($value->id, $company_id, $branch_id);
+                            }
 
-                                $com_pack2_rate = $this->getComRateBktPrevPack2($route_emp_count, $company_id, $branch_id, $t_date);
+                            if ($order_data == null) continue 1;
+                            // print_r($order_data);return;
+
+
+                            $com_rate = $this->getComRateBktPrev($route_emp_count, $company_id, $branch_id, $t_date);
+
+                            $total_qty_all = $total_qty_all + (double)$order_data[0]['total_qty'];
+                            $total_amt_all = $total_amt_all + (double)$order_data[0]['total_amt'];
+
+                            $line_com = 0;
+                            $line_com_2 = 0;
+
+                            if ($com_rate != null) {
+                                if (substr($route_name, 0, 2) == 'CJ') {
+
+                                    $com_pack2_rate = $this->getComRateBktPrevPack2($route_emp_count, $company_id, $branch_id, $t_date);
 //                if ($route_emp_count == 1) {
-                                if ($route_emp_count == 1) {
-                                    $line_com = (($order_data[0]['total_qty']  * $com_pack2_rate[0]['emp_1_rate']));
-                                }
+                                    if ($route_emp_count == 1) {
+                                        $line_com = (($order_data[0]['total_qty']  * $com_pack2_rate[0]['emp_1_rate']));
+                                    }
 
 //                } else {
 //                  $line_com = $order_data[0]['total_qty'] * $com_rate;
-                                if ($route_emp_count == 2) {
-                                    $line_com = ($order_data[0]['total_qty'] * $com_pack2_rate[0]['emp_1_rate']);
-                                    $line_com_2 = ($order_data[0]['total_qty'] * $com_pack2_rate[0]['emp_2_rate']);
-                                }
-
-                            } else {
-                                // Other
-
-                                $order_data_p2 = $this->getOrderlineP2($value->id, $company_id, $branch_id);
-                                $not_p2_qty = $order_data[0]['total_qty'];
-                                if ($order_data_p2 != null) {
-                                    $not_p2_qty = $order_data[0]['total_qty'] - $order_data_p2[0]['total_qty'];
-
-                                    $com_pack2_rate = $this->getComRateBktPrevPack2($route_emp_count, $company_id, $branch_id, $t_date);
-                                    if ($route_emp_count == 1) {
-                                        $line_com = ($not_p2_qty * $com_rate[0]['emp_1_rate']) + ($order_data_p2[0]['total_qty'] * $com_pack2_rate[0]['emp_1_rate']);
-                                    }
                                     if ($route_emp_count == 2) {
-                                        $line_com_2 = ($not_p2_qty * $com_rate[0]['emp_2_rate']) + ($order_data_p2[0]['total_qty'] * $com_pack2_rate[0]['emp_2_rate']);
+                                        $line_com = ($order_data[0]['total_qty'] * $com_pack2_rate[0]['emp_1_rate']);
+                                        $line_com_2 = ($order_data[0]['total_qty'] * $com_pack2_rate[0]['emp_2_rate']);
                                     }
+
                                 } else {
-                                    $line_com = $order_data[0]['total_qty'] * $com_rate[0]['emp_1_rate'];
-                                    if ($route_emp_count == 2) {
-                                        $line_com_2 = $order_data[0]['total_qty'] * $com_rate[0]['emp_2_rate'];
-                                    }
-                                }
+                                    // Other
 
-                                /// NKY
+                                    $order_data_p2 = $this->getOrderlineP2($value->id, $company_id, $branch_id);
+                                    $not_p2_qty = $order_data[0]['total_qty'];
+                                    if ($order_data_p2 != null) {
+                                        $not_p2_qty = $order_data[0]['total_qty'] - $order_data_p2[0]['total_qty'];
+
+                                        $com_pack2_rate = $this->getComRateBktPrevPack2($route_emp_count, $company_id, $branch_id, $t_date);
+                                        if ($route_emp_count == 1) {
+                                            $line_com = ($not_p2_qty * $com_rate[0]['emp_1_rate']) + ($order_data_p2[0]['total_qty'] * $com_pack2_rate[0]['emp_1_rate']);
+                                        }
+                                        if ($route_emp_count == 2) {
+                                            $line_com_2 = ($not_p2_qty * $com_rate[0]['emp_2_rate']) + ($order_data_p2[0]['total_qty'] * $com_pack2_rate[0]['emp_2_rate']);
+                                        }
+                                    } else {
+                                        $line_com = $order_data[0]['total_qty'] * $com_rate[0]['emp_1_rate'];
+                                        if ($route_emp_count == 2) {
+                                            $line_com_2 = $order_data[0]['total_qty'] * $com_rate[0]['emp_2_rate'];
+                                        }
+                                    }
+
+                                    /// NKY
 
 //                                $order_data_p2 = $this->getOrderlineP2($value->id, $company_id, $branch_id);
 //                                $not_p2_qty = $order_data[0]['total_qty'];
@@ -748,64 +778,66 @@ class SalecomreportController extends Controller
 //                                    }
 //                                }
 
-                                // $line_com = $order_data[0]['total_qty'] * $com_rate;
+                                    // $line_com = $order_data[0]['total_qty'] * $com_rate;
+                                }
                             }
+
+                            $total_amt = ($total_amt + $order_data[0]['total_amt']);
+
+                            $line_com_total = $line_com;
+                            $line_com_total_2 = $line_com_2;
+
+                            $total_com_all = $total_com_all + $line_com_total;
+                            $total_com_all_2 = $total_com_all_2 + $line_com_total_2;
+
                         }
-
-                        $total_amt = ($total_amt + $order_data[0]['total_amt']);
-
-                        $line_com_total = $line_com;
-                        $line_com_total_2 = $line_com_2;
-
-                        $total_com_all = $total_com_all + $line_com_total;
-                        $total_com_all_2 = $total_com_all_2 + $line_com_total_2;
-
+                    } else {
+                        //echo $val->order_channel_id;
                     }
-                } else {
-                    //echo $val->order_channel_id;
-                }
 
-                //echo $xx;return;
+                    //echo $xx;return;
 
-                \common\models\ComDailyCal::deleteAll(['date(trans_date)' => date('Y-m-d', strtotime($t_date)), 'route_id' => $val->order_channel_id]);
+                    \common\models\ComDailyCal::deleteAll(['date(trans_date)' => date('Y-m-d', strtotime($t_date)), 'route_id' => $model_route_data[$a]]);
 
-                $line_special = 0;
-                $extra_data = $this->getComspecial(date('Y-m-d', strtotime($t_date)), date('Y-m-d', strtotime($t_date)));
+                    $line_special = 0;
+                    $extra_data = $this->getComspecial(date('Y-m-d', strtotime($t_date)), date('Y-m-d', strtotime($t_date)));
 
-                if ($extra_data != null) {
-                    // echo $route_emp_count.' '. $total_amt.' '. $extra_data[0]['sale_price'];return;
-                    $line_special = (float)$total_amt >= (float)$extra_data[0]['sale_price'] && $route_emp_count == 1 ? (float)$extra_data[0]['com_extra'] : 0;
-                    //  $line_special = (float)$total_amt >= (float)$extra_data[0]['sale_price'] && $route_emp_count == 1 ? $route_emp_count : 0;
-                    $total_special_all = $total_special_all + $line_special;
-                    $total_com_sum_all = $total_com_sum_all + ($total_com_all + $line_special + $total_com_all_2);
-                } else {
-                    $total_com_sum_all = $total_com_sum_all + ($total_com_all + $total_com_all_2);
-                }
+                    if ($extra_data != null) {
+                        // echo $route_emp_count.' '. $total_amt.' '. $extra_data[0]['sale_price'];return;
+                        $line_special = (float)$total_amt >= (float)$extra_data[0]['sale_price'] && $route_emp_count == 1 ? (float)$extra_data[0]['com_extra'] : 0;
+                        //  $line_special = (float)$total_amt >= (float)$extra_data[0]['sale_price'] && $route_emp_count == 1 ? $route_emp_count : 0;
+                        $total_special_all = $total_special_all + $line_special;
+                        $total_com_sum_all = $total_com_sum_all + ($total_com_all + $line_special + $total_com_all_2);
+                    } else {
+                        $total_com_sum_all = $total_com_sum_all + ($total_com_all + $total_com_all_2);
+                    }
 
 //        $line_special = $total_amt >= 3500 && $route_emp_count == 1 ? 30 : 0;
 //        $total_special_all = $total_special_all + $line_special;
 //        $total_com_sum_all = $total_com_sum_all + ($total_com_all + $line_special);
 
-                if ($emp_1 == 0 || $total_qty_all <= 0) continue;
+                    if ($emp_1 == 0 || $total_qty_all <= 0) continue;
 
-                $model_com_daily = new \common\models\ComDailyCal();
-                $model_com_daily->trans_date = date('Y-m-d H:i:s', strtotime($t_date));
-                $model_com_daily->emp_1 = $emp_1;
-                $model_com_daily->emp_2 = $emp_2;
-                $model_com_daily->total_qty = $total_qty_all;
-                $model_com_daily->total_amt = $total_amt;
-                $model_com_daily->line_com_amt = $total_com_all;
-                $model_com_daily->line_com_amt_2 = $total_com_all_2;
-                $model_com_daily->line_com_special_amt = $total_special_all;
-                $model_com_daily->line_total_amt = $total_com_sum_all;
-                $model_com_daily->created_at = time();
-                $model_com_daily->route_id = $val->order_channel_id;
-                $model_com_daily->car_id = $car_id;
-                $model_com_daily->company_id = $company_id;
-                $model_com_daily->branch_id = $branch_id;
-                $model_com_daily->save(false);
+                    $model_com_daily = new \common\models\ComDailyCal();
+                    $model_com_daily->trans_date = date('Y-m-d H:i:s', strtotime($t_date));
+                    $model_com_daily->emp_1 = $emp_1;
+                    $model_com_daily->emp_2 = $emp_2;
+                    $model_com_daily->total_qty = $total_qty_all;
+                    $model_com_daily->total_amt = $total_amt;
+                    $model_com_daily->line_com_amt = $total_com_all;
+                    $model_com_daily->line_com_amt_2 = $total_com_all_2;
+                    $model_com_daily->line_com_special_amt = $total_special_all;
+                    $model_com_daily->line_total_amt = $total_com_sum_all;
+                    $model_com_daily->created_at = time();
+                    $model_com_daily->route_id = $model_route_data[$a];
+                    $model_com_daily->car_id = $car_id;
+                    $model_com_daily->company_id = $company_id;
+                    $model_com_daily->branch_id = $branch_id;
+                    $model_com_daily->save(false);
 
+                }
             }
+
         }
 
 
@@ -1052,8 +1084,8 @@ class SalecomreportController extends Controller
         if ($order_id != null) {
             $sql = "SELECT date(t2.order_date) as order_date, SUM(t3.qty / t4.nw) as total_qty, SUM(t3.line_total) as total_amt , t2.emp_1,t2.emp_2
               FROM orders as t2 INNER  JOIN order_line as t3 ON t3.order_id = t2.id INNER JOIN product as t4 ON t3.product_id = t4.id
-             WHERE  t2.id=" . $order_id . "
-             AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
+             WHERE  t2.id=" . $order_id ;
+           //  AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
 
             $sql .= " GROUP BY date(t2.order_date)";
             $sql .= " ORDER BY date(t2.order_date) ASC";
@@ -1078,15 +1110,45 @@ class SalecomreportController extends Controller
     }
 
     public
+    function getOrderlineOld($order_id, $company_id, $branch_id)
+    {
+        $data = [];
+        if ($order_id != null) {
+            $sql = "SELECT date(t2.order_date) as order_date, SUM(t2.qty/t2.nw) as total_qty, SUM(t2.line_total) as total_amt, t2.emp_1,t2.emp_2
+              FROM query_sale_mobile_data_new as t2
+             WHERE  t2.id=" . $order_id ;
+            //  AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
+
+            $sql .= " GROUP BY date(t2.order_date)";
+            $sql .= " ORDER BY date(t2.order_date) ASC";
+            $query = \Yii::$app->db->createCommand($sql);
+            $model = $query->queryAll();
+            if ($model) {
+                for ($i = 0; $i <= count($model) - 1; $i++) {
+                    array_push($data, [
+                        //   'order_no' => $model[$i]['order_no'],
+                        'order_date' => $model[$i]['order_date'],
+                        'total_qty' => $model[$i]['total_qty'],
+                        'total_amt' => $model[$i]['total_amt'],
+                        'emp_1' => $model[$i]['emp_1'],
+                        'emp_2' => $model[$i]['emp_2'],
+                    ]);
+                }
+            }
+        }
+
+        return $data;
+    }
+
+    public
     function getOrderline($order_id, $company_id, $branch_id)
     {
         $data = [];
         if ($order_id != null) {
-            $sql = "SELECT date(t2.order_date) as order_date, SUM((t2.line_qty_cash + t2.line_qty_credit)/t4.nw) as total_qty, SUM(t2.line_total) as total_amt, t3.emp_1,t3.emp_2
-              FROM query_sale_mobile_data_new as t2 INNER  JOIN  orders as t3 ON t2.id = t3.id INNER JOIN product as t4 ON t2.product_id = t4.id
-             WHERE  t2.id=" . $order_id . "
-             AND t2.qty > 0  
-              AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
+            $sql = "SELECT date(t2.order_date) as order_date, SUM(t2.qty/t2.nw) as total_qty, SUM(t2.line_total) as total_amt, t2.emp_1,t2.emp_2
+              FROM query_sale_mobile_data_new as t2
+             WHERE  t2.id=" . $order_id ;
+            //  AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
 
             $sql .= " GROUP BY date(t2.order_date)";
             $sql .= " ORDER BY date(t2.order_date) ASC";
@@ -1114,7 +1176,7 @@ class SalecomreportController extends Controller
     {
         $data = [];
         if ($order_id != null) {
-            $sql = "SELECT date(t2.order_date) as order_date, SUM((t2.line_qty_cash + t2.line_qty_credit)/t4.nw) as total_qty, SUM(t2.line_total) as total_amt, t3.emp_1,t3.emp_2
+            $sql = "SELECT date(t2.order_date) as order_date, SUM((t2.qty)/t4.nw) as total_qty, SUM(t2.line_total) as total_amt, t3.emp_1,t3.emp_2
               FROM query_sale_mobile_data_new as t2 INNER  JOIN  orders as t3 ON t2.id = t3.id INNER JOIN product as t4 ON t2.product_id = t4.id
              WHERE  t2.id=" . $order_id . "
              AND t2.qty > 0  
@@ -1152,5 +1214,17 @@ class SalecomreportController extends Controller
             }
         }
         return $com_amt;
+    }
+
+    public function actionDeletecal(){
+        $cal = \Yii::$app->request->post('delete_cal');
+        $xdate = explode('/', $cal);
+        $t_date = date('Y-m-d H:i:s');
+        if (count($xdate) > 1) {
+            $t_date = $xdate[2] . '-' . $xdate[1] . '-' . $xdate[0];
+        }
+
+        \common\models\ComDailyCal::deleteAll(['date(trans_date)'=>date('Y-m-d',strtotime($t_date))]);
+        return $this->redirect(['salecomreport/index2']);
     }
 }
