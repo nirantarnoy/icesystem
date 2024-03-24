@@ -5,7 +5,7 @@
 <!--             class="brand-image img-circle elevation-3"-->
 <!--             style="opacity: .8">-->
         <span class="brand-text font-weight-light">VORAPAT</span>
-<!--        <span class="brand-text font-weight-light">TARAICE</span>-->
+<!--        <span class="brand-text font-weight-light">NPT</span>-->
     </a>
 
     <!-- Sidebar -->
@@ -409,7 +409,7 @@
                         <?php endif; ?>
                         <?php if (\Yii::$app->user->can('pos/index')): ?>
                             <li class="nav-item">
-                                <a href="index.php?r=pos/index&id=0" class="nav-link pos">
+                                <a href="index.php?r=pos/indextest&id=0" class="nav-link pos">
                                     <i class="far fa-circlez nav-icon"></i>
                                     <p>ขาย POS</p>
                                 </a>

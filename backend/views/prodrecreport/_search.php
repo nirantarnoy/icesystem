@@ -76,6 +76,18 @@ if ($f_date != null && $t_date != null) {
                      ]
                  ])->label(false) ?>
                  <span style="margin-left: 2px;"></span>
+                 <?= $form->field($model, 'prodrec_type')->widget(\kartik\select2\Select2::className(), [
+                     'data' => \yii\helpers\ArrayHelper::map(\backend\helpers\ProductionType::asArrayObject(), 'id','name'),
+                     'options' => [
+                         'placeholder' => '--ประเภท--',
+                         'onchange' => 'this.form.submit();'
+                     ],
+                     'pluginOptions' => [
+                         'allowClear' => true,
+                         'width'=> '300px',
+                     ]
+                 ])->label(false) ?>
+                 <span style="margin-left: 2px;"></span>
                  <?php
                  echo DateRangePicker::widget([
                      'model' => $model,

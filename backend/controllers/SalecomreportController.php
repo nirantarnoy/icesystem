@@ -29,7 +29,8 @@ class SalecomreportController extends Controller
         //  $find_route_id = \Yii::$app->request->post('find_route_id');
         $find_emp_id = \Yii::$app->request->post('find_emp_id');
         return $this->render('_comsale_by_emp_daily_bt', [ //_comsale_by_emp_daily
-            'from_date' => $from_date,
+       //return $this->render('_comsale_by_emp_daily', [ //
+           'from_date' => $from_date,
             'to_date' => $to_date,
             'company_id' => $company_id,
             'branch_id' => $branch_id,

@@ -1,6 +1,6 @@
 <?php
 
-use yii\helpers\Html;
+use backend\models\Orders;use yii\helpers\Html;
 use kartik\grid\GridView;
 use yii\widgets\Pjax;
 
@@ -44,19 +44,19 @@ $this->params['breadcrumbs'][] = $this->title;
                 'groupHeader' => function ($model, $key, $index, $widget) { // Closure method
 
                     return [
-                        'mergeColumns' => [[0, 3]], // columns to merge in summary
+                        'mergeColumns' => [[0, 4]], // columns to merge in summary
                         'content' => [             // content to show in each summary cell
                             1 => 'ยอดรวม (' . \backend\models\Product::findName($model->product_id) . ')',
-                            4 => GridView::F_SUM,
+                            5 => GridView::F_SUM,
 
                         ],
                         'contentFormats' => [      // content reformatting for each summary cell
-                            4 => ['format' => 'number', 'decimals' => 2],
+                            5 => ['format' => 'number', 'decimals' => 2],
 
                         ],
                         'contentOptions' => [      // content html attributes for each summary cell
                             1 => ['style' => 'font-variant:small-caps'],
-                            4 => ['style' => 'text-align:right'],
+                            5 => ['style' => 'text-align:right'],
 
                         ],
                         // html attributes for group summary row
@@ -83,9 +83,17 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'prod_rec_no',
                 'label' => 'เลขที่ใบขาย',
-                'width' => '250px',
+                'width' => '200px',
                 'value' => function ($model, $key, $index, $widget) {
                     return \backend\models\Orders::getNumber($model->order_id);
+                },
+            ],
+            [
+                'attribute' => '',
+                'label' => 'ลูกค้า',
+                'width' => '200px',
+                'value' => function ($model, $key, $index, $widget) {
+                    return getCustomerorder($model->order_id);
                 },
             ],
 
@@ -180,5 +188,21 @@ function getQty($model, $product_id)
     }
     return $qty;
 }
+function getCustomerorder($id)
+    {
+        $cus_name = '';
+        $model = Orders::find()->where(['id' => $id])->one();
+        if($model){
+            $cus_name = \backend\models\Customer::findName($model->customer_id);
+
+        }else{
+            $model = \common\models\OrderLine::find()->where(['order_id' => $id])->one();
+            if($model){
+                $cus_name = \backend\models\Customer::findName($model->customer_id);
+
+            }
+        }
+        return $cus_name;
+    }
 
 ?>
