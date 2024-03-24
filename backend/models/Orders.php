@@ -507,6 +507,15 @@ class Orders extends \common\models\Orders
         $model = Orders::find()->where(['id' => $id])->one();
         return $model != null ? $model->order_no : '';
     }
+//    public static function getCustomerorder($id)
+//    {
+//        $cus_name = '';
+//        $model = Orders::find()->where(['id' => $id])->one();
+//        if($model){
+//            $cus_name = \backend\models\Customer::findName($model->customer_id);
+//        }
+//        return $cus_name;
+//    }
 
     public static function getCustomerrefno($id)
     {

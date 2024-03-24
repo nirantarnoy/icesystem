@@ -662,15 +662,15 @@ class CustomertaxinvoiceController extends Controller
         }
        // echo $f_date.' and '. $t_date; return;
 
-        $model = \common\models\CustomerTaxInvoice::find()->where(['>=', 'date(invoice_date)', date('Y-m-d',strtotime($f_date))])->andFilterWhere(['<=', 'date(invoice_date)', date('Y-m-d',strtotime($t_date))])->orderBy(['id' => SORT_ASC])->all();
+        $model = \common\models\CustomerTaxInvoice::find()->where(['>=', 'date(invoice_date)', date('Y-m-d',strtotime($f_date))])->andFilterWhere(['<=', 'date(invoice_date)', date('Y-m-d',strtotime($t_date))])->orderBy(['invoice_date' => SORT_ASC])->all();
         if ($model) {
             $first_no = '';
             $last_day = 0;
             foreach ($model as $value) {
                 $cnum = 0;
                 $cal_year = substr(date("Y",strtotime($value->invoice_date)),2,4);
-                    $cal_month = date('m', strtotime($value->invoice_date)) ;
-                    $cal_day = date('d', strtotime($value->invoice_date));
+                $cal_month = date('m', strtotime($value->invoice_date)) ;
+                $cal_day = date('d', strtotime($value->invoice_date));
 
                 if ($first_no != '') {
 

@@ -10,12 +10,12 @@ use yii\data\ActiveDataProvider;
 
 class ProdrecSearch extends Stocktrans
 {
-    public $from_date,$to_date;
+    public $from_date,$to_date,$prodrec_type;
     public function rules()
     {
         return [
             [['id', 'company_id', 'branch_id', 'product_id', 'warehouse_id', 'location_id', 'qty', 'created_at'], 'integer'],
-            [['journal_no', 'trans_date', 'lot_no','activity_type_id', 'created_by','from_date','to_date'], 'safe'],
+            [['journal_no', 'trans_date', 'lot_no','activity_type_id', 'created_by','from_date','to_date','prodrec_type'], 'safe'],
         ];
     }
 
@@ -123,6 +123,10 @@ class ProdrecSearch extends Stocktrans
         }else{
             $query->andFilterWhere(['>=','date(trans_date)', date('Y-m-d')]);
             $query->andFilterWhere(['<=','date(trans_date)',date('Y-m-d')]);
+        }
+
+        if($this->prodrec_type!=''){
+            $query->andFilterWhere(['LIKE','journal_no',$this->prodrec_type]);
         }
 
 
