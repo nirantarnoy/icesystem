@@ -160,7 +160,7 @@ class CustomertaxinvoiceController extends Controller
                     }
                 }
             }
-         //   return $this->redirect(['view', 'id' => $model->id]);
+            //   return $this->redirect(['view', 'id' => $model->id]);
             return $this->redirect(['customertaxinvoice/index']);
         }
 
@@ -198,16 +198,19 @@ class CustomertaxinvoiceController extends Controller
             $line_discount = \Yii::$app->request->post('line_discount');
             $line_total = \Yii::$app->request->post('line_total');
 
-            if($model->save(false)){
+            if ($model->save(false)) {
                 for ($i = 0; $i <= count($line_product_group_id) - 1; $i++) {
 
-                    $model_check = \common\models\CustomerTaxInvoiceLine::find()->where(['product_group_id'=>$line_product_group_id[$i],'price'=>$line_price[$i]])->one();
-                    if($model_check){
-                        $model_check->qty = $line_qty[$i];
-                        $model_check->unit_id = $line_unit[$i];
-                        $model_check->line_total = $line_total[$i];
-                        $model_check->save(false);
-                    }else{
+                    $model_check = \common\models\CustomerTaxInvoiceLine::find()->where(['product_group_id' => $line_product_group_id[$i], 'price' => $line_price[$i]])->one();
+                    if ($model_check) {
+                        \common\models\CustomerTaxInvoiceLine::updateAll(['unit_id' => $line_unit[$i]], ['product_group_id' => $line_product_group_id[$i], 'price' => $line_price[$i]]);
+//                       // $model_check->qty = $line_qty[$i];
+//                        $model_check->unit_id = (int)$line_unit[$i];
+//                      //  $model_check->line_total = $line_total[$i];
+//                        if($model_check->save(false)){
+//                          // print_r($line_unit);return;
+//                        }
+                    } else {
                         $modelline = new \common\models\CustomerTaxInvoiceLine();
                         $modelline->tax_invoice_id = $model->id;
                         $modelline->product_group_id = $line_product_group_id[$i];
@@ -461,16 +464,16 @@ class CustomertaxinvoiceController extends Controller
                     }
 
                     $line_color = '';
-                    if($selectedorder != null || $selectedorder !=''){
-                     //   $selectedlist = explode(',',(String)$selectedorder);
+                    if ($selectedorder != null || $selectedorder != '') {
+                        //   $selectedlist = explode(',',(String)$selectedorder);
 //                        if(count($selectedlist) >0){
 //                            // if($selectedorder[$i] == $model[$i]['order_id']){
-                            for($xx=0;$xx<=count($selectedorder)-1;$xx++){
-                                if($selectedorder[$xx] == $model[$i]['order_id']){
-                                 $line_color = 'background-color: yellow;';
-                                 }
-
+                        for ($xx = 0; $xx <= count($selectedorder) - 1; $xx++) {
+                            if ($selectedorder[$xx] == $model[$i]['order_id']) {
+                                $line_color = 'background-color: yellow;';
                             }
+
+                        }
 //
 //                            //  }
 //                        }
@@ -478,8 +481,7 @@ class CustomertaxinvoiceController extends Controller
                     }
 
 
-
-                    $html .= '<tr style="'.$line_color.'">';
+                    $html .= '<tr style="' . $line_color . '">';
                     $html .= '<td style="text-align: center">
                             <div class="btn btn-outline-success btn-sm" onclick="addselecteditem($(this))" data-var="' . $model[$i]['id'] . '">เลือก</div>
                             <input type="hidden" class="line-find-order-id" value="' . $model[$i]['order_id'] . '">
@@ -660,38 +662,38 @@ class CustomertaxinvoiceController extends Controller
         if (count($xdate2) > 1) {
             $t_date = $xdate2[2] . '/' . $xdate2[1] . '/' . $xdate2[0];
         }
-       // echo $f_date.' and '. $t_date; return;
+        // echo $f_date.' and '. $t_date; return;
 
-        $model = \common\models\CustomerTaxInvoice::find()->where(['>=', 'date(invoice_date)', date('Y-m-d',strtotime($f_date))])->andFilterWhere(['<=', 'date(invoice_date)', date('Y-m-d',strtotime($t_date))])->orderBy(['invoice_date' => SORT_ASC])->all();
+        $model = \common\models\CustomerTaxInvoice::find()->where(['>=', 'date(invoice_date)', date('Y-m-d', strtotime($f_date))])->andFilterWhere(['<=', 'date(invoice_date)', date('Y-m-d', strtotime($t_date))])->orderBy(['invoice_date' => SORT_ASC])->all();
         if ($model) {
             $first_no = '';
             $last_day = 0;
             foreach ($model as $value) {
                 $cnum = 0;
-                $cal_year = substr(date("Y",strtotime($value->invoice_date)),2,4);
-                $cal_month = date('m', strtotime($value->invoice_date)) ;
+                $cal_year = substr(date("Y", strtotime($value->invoice_date)), 2, 4);
+                $cal_month = date('m', strtotime($value->invoice_date));
                 $cal_day = date('d', strtotime($value->invoice_date));
 
                 if ($first_no != '') {
 
-                    $prefix = $cal_year.$cal_month.$cal_day;
+                    $prefix = $cal_year . $cal_month . $cal_day;
 
                     $cnum = substr((string)$first_no, 6, 3);
 
                     $len = strlen($cnum);
 
-                    if($cnum == null || $cnum ==0){
+                    if ($cnum == null || $cnum == 0) {
                         $loop = 2;
                         $cnum = 0;
-                    }else{
+                    } else {
                         $clen = strlen($cnum + 1);
                         $loop = $len - $clen;
                     }
 
-                    if($cal_day != $last_day){
+                    if ($cal_day != $last_day) {
                         $loop = 2;
                         $cnum = 0;
-                    }else{
+                    } else {
                         $clen = strlen($cnum + 1);
                         $loop = $len - $clen;
                     }
@@ -705,8 +707,8 @@ class CustomertaxinvoiceController extends Controller
 
                 } else {
 
-                    $prefix = $cal_year.$cal_month.$cal_day.'001';
-                    $first_no  = $prefix;
+                    $prefix = $cal_year . $cal_month . $cal_day . '001';
+                    $first_no = $prefix;
                 }
 
                 $last_day = $cal_day;

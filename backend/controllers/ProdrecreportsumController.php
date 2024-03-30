@@ -70,9 +70,24 @@ class ProdrecreportsumController extends Controller
 
         }
 
+//        $searchModel = new ProdrecSearch();
+//        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+//        $dataProvider->query->select(['product_id','company_id','branch_id','SUM(qty) as qty']);
+//        $dataProvider->query->andFilterWhere(['activity_type_id'=>15]);
+//        $dataProvider->query->andFilterWhere(['is not','product_id', new \yii\db\Expression('null')]);
+//        $dataProvider->query->groupby(['product_id']);
+//        $dataProvider->setSort( ['defaultOrder' => ['product_id' => SORT_ASC]]);
+//        return $this->render('index_2', [
+//            'searchModel' => $searchModel,
+//            'dataProvider' => $dataProvider,
+//            'from_date'=> $from_date,
+//            'to_date'=> $to_date,
+//            'created_by'=>$created_by,
+//        ]);
+
         $searchModel = new ProdrecSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        $dataProvider->query->select(['product_id','company_id','branch_id','SUM(qty) as qty']);
+        $dataProvider->query->select(['product_id','company_id','branch_id']);
         $dataProvider->query->andFilterWhere(['activity_type_id'=>15]);
         $dataProvider->query->andFilterWhere(['is not','product_id', new \yii\db\Expression('null')]);
         $dataProvider->query->groupby(['product_id']);

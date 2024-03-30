@@ -4,8 +4,8 @@
 <!--        <img src="--><?php //echo Yii::$app->request->baseUrl; ?><!--/uploads/logo/logo_bp.jpg" alt="Mind account"-->
 <!--             class="brand-image img-circle elevation-3"-->
 <!--             style="opacity: .8">-->
-        <span class="brand-text font-weight-light">VORAPAT</span>
-<!--        <span class="brand-text font-weight-light">NPT</span>-->
+        <span class="brand-text font-weight-light">BKT ICE</span>
+<!--        <span class="brand-text font-weight-light">TARAICE</span>-->
     </a>
 
     <!-- Sidebar -->
@@ -409,7 +409,7 @@
                         <?php endif; ?>
                         <?php if (\Yii::$app->user->can('pos/index')): ?>
                             <li class="nav-item">
-                                <a href="index.php?r=pos/indextest&id=0" class="nav-link pos">
+                                <a href="index.php?r=pos/index" class="nav-link pos">
                                     <i class="far fa-circlez nav-icon"></i>
                                     <p>ขาย POS</p>
                                 </a>
@@ -704,6 +704,37 @@
 
                     </ul>
                 </li>
+                <?php if (\Yii::$app->user->can('customertaxinvoice/index')): ?>
+                    <li class="nav-item has-treeview has-sub">
+                        <a href="#" class="nav-link">
+                            <i class="nav-icon fas fa-money-bill"></i>
+                            <p>
+                                สดย่อ
+                                <i class="fas fa-angle-left right"></i>
+                                <!--                                <span class="badge badge-info right">6</span>-->
+                            </p>
+                        </a>
+                        <ul class="nav nav-treeview">
+                            <?php if (\Yii::$app->user->can('customertaxinvoice/index')): ?>
+                                <li class="nav-item">
+                                    <a href="index.php?r=customertaxinvoice" class="nav-link customertaxinvoice">
+                                        <i class="far fa-circlez nav-icon"></i>
+                                        <p>ใบกำกับสด-ย่อ</p>
+                                    </a>
+                                </li>
+                            <?php endif; ?>
+                            <?php if (\Yii::$app->user->can('customertaxinvoice/printcheck')): ?>
+                                <li class="nav-item">
+                                    <a href="index.php?r=customertaxinvoice/printcheck" class="nav-link customertaxinvoice">
+                                        <i class="far fa-circlez nav-icon"></i>
+                                        <p>รายงานสรุป</p>
+                                    </a>
+                                </li>
+                            <?php endif;?>
+
+                        </ul>
+                    </li>
+                <?php endif;?>
                 <li class="nav-item has-treeview has-sub">
                     <a href="#" class="nav-link">
                         <i class="nav-icon fas fa-chart-pie"></i>
@@ -720,6 +751,14 @@
                                 <p>รายงานค่าคอมฯ</p>
                             </a>
                         </li>
+                        <?php endif;?>
+                        <?php if (\Yii::$app->user->can('salecomreport/index')): ?>
+                            <li class="nav-item">
+                                <a href="index.php?r=salecomreport/index3" class="nav-link salecomreport">
+                                    <i class="far fa-circlez nav-icon"></i>
+                                    <p>รายงานค่าคอม(แยก)</p>
+                                </a>
+                            </li>
                         <?php endif;?>
                         <?php if (\Yii::$app->user->can('salereport/index')): ?>
                         <li class="nav-item">
@@ -782,6 +821,14 @@
                                 <a href="index.php?r=pos/printpossummary" class="nav-link pos">
                                     <i class="far fa-circlez nav-icon"></i>
                                     <p>ยอดขายหน้าบ้าน</p>
+                                </a>
+                            </li>
+                        <?php endif;?>
+                        <?php if (\Yii::$app->user->can('adminreportcarissue/index2')): ?>
+                            <li class="nav-item">
+                                <a href="index.php?r=adminreportcarissue/index2" class="nav-link adminreportcarissue">
+                                    <i class="far fa-circlez nav-icon"></i>
+                                    <p>สรุปเบิกสายส่ง</p>
                                 </a>
                             </li>
                         <?php endif;?>
@@ -865,6 +912,7 @@
                             <?php endif;?>
                         </ul>
                     </li>
+
                 <?php if (\Yii::$app->user->can('dbbackup/backuplist')): ?>
                     <li class="nav-item has-treeview has-sub">
                         <a href="#" class="nav-link">

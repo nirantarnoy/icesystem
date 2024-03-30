@@ -1299,6 +1299,7 @@ class ProductionController extends Controller
                 $model->stock_type = 2; // 2 out
                 $model->activity_type_id = 28; // 28 prod rec cancel
                 $model->production_type = 28;
+                $model->trans_ref_id = $prodrec_no;
                 $model->company_id = $company_id;
                 $model->branch_id = $branch_id;
                 $model->created_by = $user_id;

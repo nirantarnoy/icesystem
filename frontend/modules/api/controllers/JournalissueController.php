@@ -1842,7 +1842,8 @@ class JournalissueController extends Controller
                         'code' => $value->code,
                         'name' => $value->name,
                         'onhand' => $prod_stock,
-                        'sale_price' => $value->sale_price,
+                        'sale_price' => $value->std_cost,
+                       // 'sale_price' => $value->sale_price,
                     ]);
                 }
             }

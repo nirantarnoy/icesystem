@@ -34,7 +34,7 @@ class CustomerTaxInvoiceLine extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['tax_invoice_id', 'product_group_id', 'status', 'order_ref_id'], 'integer'],
+            [['tax_invoice_id', 'product_group_id', 'status', 'order_ref_id','unit_id'], 'integer'],
             [['qty', 'price', 'line_total', 'discount_amount'], 'number'],
             [['remark'], 'string', 'max' => 255],
         ];
@@ -56,6 +56,7 @@ class CustomerTaxInvoiceLine extends \yii\db\ActiveRecord
             'status' => 'Status',
             'remark' => 'Remark',
             'order_ref_id' => 'Order Ref ID',
+            'unit_id'=>'Unit ID',
         ];
     }
 }
