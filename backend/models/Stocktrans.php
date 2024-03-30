@@ -294,5 +294,55 @@ class Stocktrans extends \common\models\StockTrans
 
         return $qty;
     }
+    public static function findCancelqty2($product_id,$from_date,$to_date,$company_id,$branch_id){
+        $qty = 0;
+
+        if($from_date !=null){
+            $fx_datetime = explode(' ',$from_date);
+            $tx_datetime = explode(' ',$to_date);
+
+            $f_date = null;
+            $f_time = null;
+            $t_date = null;
+            $t_time = null;
+
+            $from_date_time = null;
+            $to_date_time = null;
+
+            if(count($fx_datetime) > 0){
+                $f_date = $fx_datetime[0];
+                $f_time = $fx_datetime[1];
+
+                $x_date = explode('-', $f_date);
+                $xx_date = date('Y-m-d');
+                if (count($x_date) > 1) {
+                    $xx_date = trim($x_date[1]) . '/' . trim($x_date[2]) . '/' . trim($x_date[0]);
+                }
+                $from_date_time = date('Y-m-d H:i:s',strtotime($xx_date.' '.$f_time));
+                //$from_date_time = date('Y-m-d',strtotime($xx_date));
+            }
+
+            if(count($tx_datetime) > 0){
+                $t_date = $tx_datetime[0];
+                $t_time = $tx_datetime[1];
+
+                $n_date = explode('-', $t_date);
+                $nn_date = date('Y-m-d');
+                if (count($n_date) > 1) {
+                    $nn_date = trim($n_date[1]) . '/' . trim($n_date[2]) . '/' . trim($n_date[0]);
+                }
+                $to_date_time = date('Y-m-d H:i:s',strtotime($nn_date.' '.$t_time));
+
+            }
+
+            $qty =\backend\models\Stocktrans::find()->where(['product_id'=>$product_id,'activity_type_id'=>28,'company_id'=>$company_id,'branch_id'=>$branch_id])
+                ->andFilterWhere(['>=','trans_date',$from_date_time])->andFilterWhere(['<=','trans_date',$to_date_time])->sum('qty');
+        }else{
+            $qty =\backend\models\Stocktrans::find()->where(['product_id'=>$product_id,'activity_type_id'=>28,'company_id'=>$company_id,'branch_id'=>$branch_id])
+                ->andFilterWhere(['>=','date(trans_date)', date('Y-m-d')])->andFilterWhere(['<=','date(trans_date)',date('Y-m-d')])->sum('qty');
+        }
+
+        return $qty;
+    }
 
 }

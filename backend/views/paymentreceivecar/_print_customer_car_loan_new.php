@@ -274,7 +274,7 @@ if ($is_start_find == 1) {
                     ]);
                     ?>
                 </td>
-                <td style="width: 25%">
+                <td style="width: 20%">
                     <label for="">สายส่ง</label>
                     <?php
                     echo \kartik\select2\Select2::widget([
@@ -291,7 +291,7 @@ if ($is_start_find == 1) {
                     ]);
                     ?>
                 </td>
-                <td style="width: 25%">
+                <td style="width: 20%">
                     <label for="">ลูกค้า</label>
                     <?php
                     echo \kartik\select2\Select2::widget([
@@ -307,6 +307,15 @@ if ($is_start_find == 1) {
                         ]
                     ]);
                     ?>
+                </td>
+                <td style="width: 20%">
+                    <label for="">มี/ไม่มีรายละเอียด</label>
+                    <select name="find_has_detail" class="form-control" id="">
+
+                        <option value="0" <?=$find_has_detail ==0?'selected':''?>>ทั้งหมด</option>
+                        <option value="1" <?=$find_has_detail ==1?'selected':''?>>มี</option>
+                        <option value="2" <?=$find_has_detail ==2?'selected':''?>>ไม่มี</option>
+                    </select>
                 </td>
                 <td>
                     <label for="" style="color: white">ค้นหา</label>
@@ -342,6 +351,7 @@ if ($is_start_find == 1) {
         <td style="border: 1px solid gray;text-align: center"><b>เลขเอกสาร</b></td>
         <td style="border: 1px solid gray;text-align: center"><b>วันที่</b></td>
         <td style="border: 1px solid gray;text-align: left"><b>ลูกค้า</b></td>
+        <td style="border: 1px solid gray;text-align: center;"><b>รายละเอียด</b></td>
         <td style="text-align: right;border: 1px solid gray"><b>จำนวนเงิน</b></td>
         <td style="text-align: right;border: 1px solid gray"><b>ชำระแล้ว</b></td>
         <td style="text-align: right;border: 1px solid gray"><b>ค้างชำระ</b></td>
@@ -367,7 +377,7 @@ if ($is_start_find == 1) {
             }
             ?>
             <?php //$find_order = getOrder($value->route_id, $value->customer_id, $from_date, $to_date, $company_id, $branch_id); ?>
-            <?php $find_order = getOrder($value->route_id, $value->customer_id, $to_date, $company_id, $branch_id, $is_find_date, $from_date); ?>
+            <?php $find_order = getOrder($value->route_id, $value->customer_id, $to_date, $company_id, $branch_id, $is_find_date, $from_date,$find_has_detail); ?>
             <?php if ($find_order != null): ?>
                 <?php
                 $loop_count = count($find_order);
@@ -408,6 +418,7 @@ if ($is_start_find == 1) {
                         <td style="font-size: 16px;border: 1px solid gray;text-align: center"><?= $find_order[$i]['order_no'] ?> </td>
                         <td style="font-size: 16px;border: 1px solid gray;text-align: center"><?= date('Y-m-d H:i:s', strtotime($find_order[$i]['order_date'])) ?></td>
                         <td style="font-size: 16px;border: 1px solid gray;text-align: left"><?= $find_order[$i]['customer_name'] ?></td>
+                        <td style="font-size: 16px;border: 1px solid gray;text-align: left"><?= $find_order[$i]['customer_detail'] ?></td>
                         <td style="font-size: 16px;text-align: right;border: 1px solid gray"><?= number_format($find_order[$i]['total_credit'], 2) ?></td>
                         <td style="font-size: 16px;text-align: right;color: green;border: 1px solid gray"><?= number_format($find_order[$i]['total_pay'], 2) ?></td>
                         <td style="font-size: 16px;text-align: right;color: red;border: 1px solid gray"><?= number_format(($find_order[$i]['total_credit'] - $find_order[$i]['total_pay']), 2) ?></td>
@@ -419,7 +430,7 @@ if ($is_start_find == 1) {
                 <?php if ($xx == count($find_order) && $sum_line_total > 0): ?>
 
                     <tr style="background-color: #1fc8e3">
-                        <td colspan="5" style="font-size: 16px;border: 1px solid grey;text-align: right"><b>รวม</b></td>
+                        <td colspan="6" style="font-size: 16px;border: 1px solid grey;text-align: right"><b>รวม</b></td>
                         <td style="font-size: 16px;text-align: right;border: 1px solid grey;">
                             <b><?= number_format($sum_line_total, 2) ?></b></td>
                         <td style="font-size: 16px;text-align: right;border: 1px solid grey;">
@@ -455,6 +466,7 @@ if ($is_start_find == 1) {
     <?php endif; ?>
     <tfoot>
     <tr>
+        <td style="font-size: 16px;border-top: 1px solid black"></td>
         <td style="font-size: 16px;border-top: 1px solid black"></td>
         <td style="font-size: 16px;border-top: 1px solid black"></td>
         <td style="font-size: 16px;border-top: 1px solid black"></td>
@@ -509,7 +521,7 @@ if ($is_start_find == 1) {
 </html>
 
 <?php
-function getOrder($route_id, $customer_id, $t_date, $company_id, $branch_id, $is_find_date, $f_date)
+function getOrder($route_id, $customer_id, $t_date, $company_id, $branch_id, $is_find_date, $f_date, $find_has_detail)
 {
 //    WHERE  t2.order_date >=" . "'" . date('Y-m-d H:i:s', strtotime($f_date)) . "'" . "
 //AND t2.order_date <=" . "'" . date('Y-m-d H:i:s', strtotime($t_date)) . "'" . "
@@ -562,6 +574,7 @@ function getOrder($route_id, $customer_id, $t_date, $company_id, $branch_id, $is
                 $sql .= " AND t1.customer_id=" . $customer_id;
             }
 
+
             $sql .= " GROUP BY t2.id,t1.customer_id, t2.order_no, t2.order_date";
             $sql .= " ORDER BY t1.customer_id, t2.order_date,t2.order_no ";
         }
@@ -569,16 +582,47 @@ function getOrder($route_id, $customer_id, $t_date, $company_id, $branch_id, $is
         $model = $query->queryAll();
         if ($model) {
             for ($i = 0; $i <= count($model) - 1; $i++) {
+                if($find_has_detail == 0){
+                    array_push($data, [
+                        'order_id' => $model[$i]['id'],
+                        'customer_id' => $model[$i]['customer_id'],
+                        'customer_name' => \backend\models\Customer::findName($model[$i]['customer_id']),
+                        'customer_detail' => \backend\models\Customer::findDescription($model[$i]['customer_id']),
+                        'order_no' => $model[$i]['order_no'],
+                        'order_date' => $model[$i]['order_date'],
+                        'total_credit' => $model[$i]['total_credit'],
+                        'total_pay' => 0,// getPaytrans($model[$i]['id'], $model[$i]['customer_id']),
+                    ]);
+                }
+                if($find_has_detail == 1){
+                    $line_detail = \backend\models\Customer::findDescription($model[$i]['customer_id']);
+                    if($line_detail == '' || $line_detail == null)continue;
+                    array_push($data, [
+                        'order_id' => $model[$i]['id'],
+                        'customer_id' => $model[$i]['customer_id'],
+                        'customer_name' => \backend\models\Customer::findName($model[$i]['customer_id']),
+                        'customer_detail' => $line_detail,
+                        'order_no' => $model[$i]['order_no'],
+                        'order_date' => $model[$i]['order_date'],
+                        'total_credit' => $model[$i]['total_credit'],
+                        'total_pay' => 0,// getPaytrans($model[$i]['id'], $model[$i]['customer_id']),
+                    ]);
+                }
+                if($find_has_detail == 2){
+                    $line_detail = \backend\models\Customer::findDescription($model[$i]['customer_id']);
+                    if($line_detail != '' || $line_detail != null)continue;
+                    array_push($data, [
+                        'order_id' => $model[$i]['id'],
+                        'customer_id' => $model[$i]['customer_id'],
+                        'customer_name' => \backend\models\Customer::findName($model[$i]['customer_id']),
+                        'customer_detail' => $line_detail,
+                        'order_no' => $model[$i]['order_no'],
+                        'order_date' => $model[$i]['order_date'],
+                        'total_credit' => $model[$i]['total_credit'],
+                        'total_pay' => 0,// getPaytrans($model[$i]['id'], $model[$i]['customer_id']),
+                    ]);
+                }
 
-                array_push($data, [
-                    'order_id' => $model[$i]['id'],
-                    'customer_id' => $model[$i]['customer_id'],
-                    'customer_name' => \backend\models\Customer::findName($model[$i]['customer_id']),
-                    'order_no' => $model[$i]['order_no'],
-                    'order_date' => $model[$i]['order_date'],
-                    'total_credit' => $model[$i]['total_credit'],
-                    'total_pay' => 0,// getPaytrans($model[$i]['id'], $model[$i]['customer_id']),
-                ]);
             }
         }
     } else {

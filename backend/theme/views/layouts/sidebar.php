@@ -745,12 +745,20 @@
                     </a>
                     <ul class="nav nav-treeview">
                         <?php if (\Yii::$app->user->can('salecomreport/index')): ?>
-                        <li class="nav-item">
-                            <a href="index.php?r=salecomreport" class="nav-link salecomreport">
-                                <i class="far fa-circlez nav-icon"></i>
-                                <p>รายงานค่าคอมฯ</p>
-                            </a>
-                        </li>
+                            <li class="nav-item">
+                                <a href="index.php?r=salecomreport" class="nav-link salecomreport">
+                                    <i class="far fa-circlez nav-icon"></i>
+                                    <p>รายงานค่าคอมฯ</p>
+                                </a>
+                            </li>
+                        <?php endif;?>
+                        <?php if (\Yii::$app->user->can('salecomreport/index')): ?>
+                            <li class="nav-item">
+                                <a href="index.php?r=salecomreport/index3" class="nav-link salecomreport">
+                                    <i class="far fa-circlez nav-icon"></i>
+                                    <p>รายงานค่าคอม(แยก)</p>
+                                </a>
+                            </li>
                         <?php endif;?>
                         <?php if (\Yii::$app->user->can('salereport/index')): ?>
                         <li class="nav-item">
