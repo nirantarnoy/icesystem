@@ -135,7 +135,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id', '
                         echo DateRangePicker::widget([
                             'name' => 'from_date',
                             // 'value'=>'2015-10-19 12:00 AM',
-                            'value' => $from_date != null ? date('Y-m-d H:i', strtotime($from_date)) : date('Y-m-d H:i'),
+                            'value' => $from_date != null ? date('Y-m-d', strtotime($from_date)) : date('Y-m-d'),
                             //    'useWithAddon'=>true,
                             'convertFormat' => true,
                             'options' => [
@@ -147,7 +147,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id', '
                             'pluginOptions' => [
                                 'timePicker' => true,
                                 'timePickerIncrement' => 1,
-                                'locale' => ['format' => 'Y-m-d H:i'],
+                                'locale' => ['format' => 'Y-m-d'],
                                 'singleDatePicker' => true,
                                 'showDropdowns' => true,
                                 'timePicker24Hour' => true
@@ -159,7 +159,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id', '
                         <?php
                         echo DateRangePicker::widget([
                             'name' => 'to_date',
-                            'value' => $to_date != null ? date('Y-m-d H:i', strtotime($to_date)) : date('Y-m-d H:i'),
+                            'value' => $to_date != null ? date('Y-m-d', strtotime($to_date)) : date('Y-m-d'),
                             //    'useWithAddon'=>true,
                             'convertFormat' => true,
                             'options' => [
@@ -171,7 +171,7 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id', '
                             'pluginOptions' => [
                                 'timePicker' => true,
                                 'timePickerIncrement' => 1,
-                                'locale' => ['format' => 'Y-m-d H:i'],
+                                'locale' => ['format' => 'Y-m-d'],
                                 'singleDatePicker' => true,
                                 'showDropdowns' => true,
                                 'timePicker24Hour' => true
@@ -246,19 +246,25 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id', '
     <table class="table-header" width="100%">
         <tr>
             <td style="text-align: center; font-size: 20px; font-weight: normal">
-                จากวันที่ <span style="color: red"><?= date('Y-m-d H:i', strtotime($from_date)) ?></span>
-                ถึง <span style="color: red"><?= date('Y-m-d H:i', strtotime($to_date)) ?></span></td>
+                จากวันที่ <span style="color: red"><?= date('Y-m-d', strtotime($from_date)) ?></span>
+                ถึง <span style="color: red"><?= date('Y-m-d', strtotime($to_date)) ?></span></td>
         </tr>
     </table>
     <br>
     <?php
     $fdate = date_create($from_date);
     $tdate = date_create($to_date);
-    $start_date = date('d-m-Y', strtotime($from_date));
-    $date_loop_cnt = date_diff($fdate, $tdate);
-    $day_qty = $date_loop_cnt->format('%d');
-    // echo $day_qty;
+//    $fdate = date_create("2024-03-01");
+//    $tdate = date_create("2024-03-31");
+    $start_date = date('Y-m-d', strtotime($from_date));
+    $date_loop_cnt = date_diff($fdate, $tdate,true);
+    $day_qty = $date_loop_cnt->format("%a");
+     // echo $tdate->format('Y-m-d');return;
+    //echo $from_date;return;
+
     $day_qty += 1;
+
+    //echo $day_qty;return;
 
     $balancein_total = 0;
     $prodrecall_total = 0;
@@ -292,9 +298,12 @@ $model_line = \common\models\TransactionPosSaleSum::find()->select(['user_id', '
             <td style="width:7%;text-align: center;">ปรับปรุง</td>
             <td style="width:7%;text-align: center;">ยกไป</td>
         </tr>
-        <?php for ($i = 0; $i <= $day_qty - 1; $i++): ?>
+        <?php for ($i = 0; $i <= $day_qty-1; $i++): ?>
             <?php
-            if ($i > 0) {
+            if($i==0){
+                $start_date = $fdate;
+            }
+            else if ($i > 0) {
                 $start_date = date_add($fdate, date_interval_create_from_date_string("1 day"));
             } else {
                 $start_date = date_add($fdate, date_interval_create_from_date_string("0 day"));

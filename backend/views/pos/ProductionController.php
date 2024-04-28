@@ -37,7 +37,7 @@ class ProductionController extends Controller
                     'reservlist' => ['POST'], // add new
                     'reservselected' => ['POST'], // add new
                     'reservconfirm' => ['POST'], // add new
-                    'machinelist' => ['POST'],
+                    'machine_list' => ['POST'],
                     'manageprod' => ['POST'],
                     'productionlist' => ['POST'],
                     'updateprodstatus' => ['POST'],
@@ -53,8 +53,6 @@ class ProductionController extends Controller
                     'addproducttransfermobile' => ['POST'],
                     'deleproducttransferline' => ['POST'],
                     'deleteproducttransform' => ['POST'],
-                    'transferlist' => ['POST'],
-                    'addprodrectransfer' => ['POST'],
 
                 ],
             ],
@@ -97,9 +95,7 @@ class ProductionController extends Controller
         if ($product_id && $warehouse_id && $qty) {
 
             //$main_warehouse = \backend\models\Warehouse::findPrimary($company_id, $branch_id);
-    //        $warehouse_id = 6; // หนองขาหยั่ง
-            $warehouse_id = 5; // บางกระทึก
-    //        $warehouse_id = 16; // อ้อมหน้อย
+            $warehouse_id = 6; // หนองขาหยั่ง
             $model_journal = new \backend\models\Stockjournal();
             if ($production_type == 1) {
                 sleep(3);
@@ -134,96 +130,6 @@ class ProductionController extends Controller
                 $model->company_id = $company_id;
                 $model->branch_id = $branch_id;
                 $model->created_by = $user_id;
-                if ($model->save(false)) {
-                    $status = 1;
-                    $this->updateSummary($product_id, $warehouse_id, $qty);
-                }
-            }
-//            $model = \backend\models\Stockjournal::find()->where(['id' => $model_journal->id])->one();
-//            $model_line = \backend\models\Stocktrans::find()->where(['journal_id' => $model_journal->id])->all();
-
-            array_push($data, ['journal_no' => $journal_no]);
-            //  $this->renderPartial('_printtoindex', ['model' => $model, 'model_line' => $model_line, 'change_amount' => 0]);
-        }
-
-        return ['status' => $status, 'data' => $data];
-    }
-
-    public function actionAddprodrectransfer()
-    {
-        $company_id = 0;
-        $branch_id = 0;
-        $product_id = 0;
-        $warehouse_id = 0;
-        $user_id = 0;
-        $qty = 0;
-        $transfer_from_branch = 0;
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $req_data = \Yii::$app->request->getBodyParams();
-        $company_id = $req_data['company_id'];
-        $branch_id = $req_data['branch_id'];
-        $product_id = $req_data['product_id'];
-        $warehouse_id = $req_data['warehouse_id'];
-        $qty = $req_data['qty'];
-        $user_id = $req_data['user_id'];
-        $production_type = $req_data['production_type'];
-        $transfer_from_branch = $req_data['transfer_branch_id'];
-
-        $data = [];
-        $status = false;
-        $journal_no = '';
-
-        $act_id = 15;
-        if ($production_type == 1) {
-            $act_id = 15; //รับผลิต
-        } else if ($production_type == 2) {
-            $act_id = 26; // reprocess รถ
-        } else if ($production_type == 3) {
-            $act_id = 27; // reprocess
-        } else if ($production_type == 5) {
-            $act_id = 15; // รับผลิต + รับโอนจากต่างสาขา
-        }
-
-        if ($product_id && $warehouse_id && $qty) {
-
-            //$main_warehouse = \backend\models\Warehouse::findPrimary($company_id, $branch_id);
-       //     $warehouse_id = 6; // หนองขาหยั่ง
-            $warehouse_id = 5; // bkt
-            $model_journal = new \backend\models\Stockjournal();
-            if ($production_type == 1) {
-                sleep(3);
-                $model_journal->journal_no = $model_journal->getLastNo($company_id, $branch_id);
-            } else if ($production_type == 5) {
-                sleep(2);
-                $model_journal->journal_no = $model_journal->getLastNoReceiveTransfer($company_id, $branch_id);
-            } else {
-                sleep(2);
-                //       $model_journal->journal_no = $model_journal->getLastNoNew($company_id, $branch_id, $act_id, $production_type);
-                $model_journal->journal_no = $model_journal->getLastNoCarreprocess($company_id, $branch_id);
-            }
-
-
-            $model_journal->trans_date = date('Y-m-d H:i:s');
-
-            $journal_no = $model_journal->journal_no;
-            $model_journal->company_id = $company_id;
-            $model_journal->branch_id = $branch_id;
-            $model_journal->production_type = $act_id; // $production_type;
-            if ($model_journal->save(false)) {
-                $model = new \backend\models\Stocktrans();
-                $model->journal_no = $model_journal->journal_no;
-                $model->journal_id = $model_journal->id;
-                $model->trans_date = date('Y-m-d H:i:s');
-                $model->product_id = $product_id;
-                $model->qty = $qty;
-                $model->warehouse_id = $warehouse_id;//$warehouse_id;
-                $model->stock_type = 1;
-                $model->activity_type_id = $act_id; // 15 prod rec
-                $model->production_type = $production_type;
-                $model->company_id = $company_id;
-                $model->branch_id = $branch_id;
-                $model->created_by = $user_id;
-                $model->transfer_branch_id = $transfer_from_branch;
                 if ($model->save(false)) {
                     $status = 1;
                     $this->updateSummary($product_id, $warehouse_id, $qty);
@@ -1777,11 +1683,9 @@ class ProductionController extends Controller
 //            }
 
             // omnoi
-            $t = 0; // nky
-          //  $t = 75; // bkt
+            $t = 0;
             if ($company_id == 1 && $branch_id == 1) {
-              //  $t = $mac_id == 1 ? 15 : 16; // nky
-                $t = $mac_id == 1 ? 1 : 2; // omnoi
+                $t = $mac_id == 1 ? 15 : 16;
                 if ($mac_id == 3) {
                     $t = 3;
                 }
@@ -1820,11 +1724,9 @@ class ProductionController extends Controller
         $update_color = "N";
 
         if ($loc_id != null) {
-
             // return $product_id;
             $model = \common\models\ProductionStatus::find()->where(['loc_id' => $loc_id, 'product_id' => $product_id, 'company_id' => $company_id, 'branch_id' => $branch_id])->one();
             if ($model) {
-               // $update_color = "NX";
                 $cal_hour = 0;
                 $color_status = "N";
                 if ($model->end_date != null) {
@@ -2707,71 +2609,6 @@ class ProductionController extends Controller
             }
         }
 
-
-        return ['status' => $status, 'data' => $data];
-    }
-
-    public function actionTransferlist()
-    {
-        $company_id = 0;
-        $branch_id = 0;
-        $trans_date = null;
-        $journal_id = null;
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $req_data = \Yii::$app->request->getBodyParams();
-        $company_id = $req_data['company_id'];
-        $branch_id = $req_data['branch_id'];
-
-        $data = [];
-        $status = false;
-
-        if ($company_id && $branch_id) {
-            $model = \common\models\TransferBranch::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id])->all();
-            if ($model) {
-                $status = true;
-                foreach ($model as $value) {
-                    array_push($data, [
-                        'id' => $value->id,
-                        'name'=> $value->name,
-                    ]);
-                }
-            }
-        }
-
-        return ['status' => $status, 'data' => $data];
-    }
-    public function actionTransferlistrec()
-    {
-        $company_id = 0;
-        $branch_id = 0;
-        $trans_date = null;
-        $journal_id = null;
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $req_data = \Yii::$app->request->getBodyParams();
-        $company_id = $req_data['company_id'];
-        $branch_id = $req_data['branch_id'];
-        $transfer_branch = $req_data['name'];
-
-        $data = [];
-        $status = false;
-        $model = null;
-
-        if ($company_id && $branch_id) {
-            if($transfer_branch != ''){
-                $model = \common\models\TransferBranch::find()->where(['name' => $transfer_branch])->all();
-            }else{
-                $model = \common\models\TransferBranch::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id])->all();
-            }
-
-            if ($model) {
-                $status = true;
-                foreach ($model as $value) {
-                    array_push($data, [
-                        'id' => $value->id
-                    ]);
-                }
-            }
-        }
 
         return ['status' => $status, 'data' => $data];
     }
