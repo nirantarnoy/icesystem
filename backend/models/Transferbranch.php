@@ -4,7 +4,7 @@ use Yii;
 use yii\db\ActiveRecord;
 date_default_timezone_set('Asia/Bangkok');
 
-class Transferbrach extends \common\models\TransferBranch
+class Transferbranch extends \common\models\TransferBranch
 {
     public function behaviors()
     {
