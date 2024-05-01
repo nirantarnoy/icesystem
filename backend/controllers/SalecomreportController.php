@@ -28,7 +28,7 @@ class SalecomreportController extends Controller
         //  $find_sale_type = \Yii::$app->request->post('find_sale_type');
         //  $find_route_id = \Yii::$app->request->post('find_route_id');
         $find_emp_id = \Yii::$app->request->post('find_emp_id');
-        return $this->render('_comsale_by_emp_daily_bt', [ //_comsale_by_emp_daily
+        return $this->render('_comsale_by_emp_daily', [ //_comsale_by_emp_daily_bt
        //return $this->render('_comsale_by_emp_daily', [ //
            'from_date' => $from_date,
             'to_date' => $to_date,
@@ -63,6 +63,7 @@ class SalecomreportController extends Controller
 //            'find_emp_id' => $find_emp_id
 //        ]);
         return $this->render('_comsale_by_emp_daily_summary_bt', [ //_comsale_by_emp_daily
+
             'from_date' => $from_date,
             'to_date' => $to_date,
             'company_id' => $company_id,
@@ -110,7 +111,7 @@ class SalecomreportController extends Controller
         //  $find_sale_type = \Yii::$app->request->post('find_sale_type');
         //  $find_route_id = \Yii::$app->request->post('find_route_id');
         $find_emp_id = \Yii::$app->request->post('find_emp_id');
-        return $this->render('_comsale_by_emp_daily_update', [ //_comsale_by_emp_daily_update_bt
+        return $this->render('_comsale_by_emp_daily_update_bt', [ //_comsale_by_emp_daily_update_bt
             'from_date' => $from_date,
             'to_date' => $to_date,
             'company_id' => $company_id,
@@ -453,12 +454,13 @@ class SalecomreportController extends Controller
             $t_date = $xdate[2] . '-' . $xdate[1] . '-' . $xdate[0];
         }
 
-        // echo date('Y-m-d',$t_date);return;
+       //  echo $t_date;return;
 
 
         $model_route_data = \common\models\Orders::find()->select(['order_channel_id'])->where(['sale_from_mobile' => 1, 'date(order_date)' => date('Y-m-d', strtotime($t_date))])->groupBy(['order_channel_id'])->all();
 
         if ($model_route_data) {
+           // echo count($model_route_data);return;
             foreach ($model_route_data as $val) {
 
                 $car_id = 0;
@@ -597,7 +599,7 @@ class SalecomreportController extends Controller
         }
 
 
-        return $this->redirect(['salecomreport/index']);
+        return $this->redirect(['salecomreport/index3']);
     }
 
     public
@@ -632,23 +634,24 @@ class SalecomreportController extends Controller
         if($model_route_all){
 
             foreach ($model_route_all as $valuexx){
-                //$model_already_cal = \common\models\ComDailyCal::find()->where(['date(trans_date)'=>date('Y-m-d',strtotime($t_date))])->andFilterWhere(['route_idx'=>$valuexx->id])->count();
-                $model_already_cal = \common\models\ComDailyCal::find()->Where(['route_id'=>$valuexx->order_channel_id,'date(trans_date)'=>date('Y-m-d',strtotime($t_date))])->count();
-                if($model_already_cal == 0){
-                    array_push($model_route_data,$valuexx->order_channel_id);
-                    $loop+=1;
-
-                }else{
-                    $counted +=1;
-                }
-
-                if($loop == 8)break;
+//                //$model_already_cal = \common\models\ComDailyCal::find()->where(['date(trans_date)'=>date('Y-m-d',strtotime($t_date))])->andFilterWhere(['route_idx'=>$valuexx->id])->count();
+//                $model_already_cal = \common\models\ComDailyCal::find()->Where(['route_id'=>$valuexx->order_channel_id,'date(trans_date)'=>date('Y-m-d',strtotime($t_date))])->count();
+//                if($model_already_cal == 0){
+//                    array_push($model_route_data,$valuexx->order_channel_id);
+//                    $loop+=1;
+//
+//                }else{
+//                    $counted +=1;
+//                }
+//
+//                if($loop == 8)break;
+                array_push($model_route_data,$valuexx->order_channel_id);
             }
-            if(count($model_route_all) == $counted){
-                $session = Yii::$app->session;
-                $session->setFlash('msg-already', 'คำนวนครบทุกสายส่งแล้ว ');
-                return $this->redirect(['salecomreport/index']);
-            }
+//            if(count($model_route_all) == $counted){
+//                $session = Yii::$app->session;
+//                $session->setFlash('msg-already', 'คำนวนครบทุกสายส่งแล้ว ');
+//                return $this->redirect(['salecomreport/index3']);
+//            }
 
         }
 
@@ -1477,7 +1480,7 @@ class SalecomreportController extends Controller
     {
         $com_amt = [];
         if ($from_date != null && $to_date != null) {
-            $model = \common\models\SaleComSummary::find()->select(['id', 'com_extra', 'sale_price'])->where(['<=', 'date(from_date)', date('Y-m-d', strtotime($from_date))])->andFilterWhere(['company_id' => 1, 'branch_id' => 2])->orderBy(['id' => SORT_DESC])->one();
+            $model = \common\models\SaleComSummary::find()->select(['id', 'com_extra', 'sale_price'])->where(['<=', 'date(from_date)', date('Y-m-d', strtotime($from_date))])->andFilterWhere(['company_id' => 1, 'branch_id' => 1])->orderBy(['id' => SORT_DESC])->one();
             // $model = \common\models\SaleComSummary::find()->select(['id', 'com_extra', 'sale_price'])->where(['<=', 'date(from_date)', date('Y-m-d', strtotime($from_date))])->andFilterWhere(['company_id' => 1, 'branch_id' => 1])->orderBy(['id' => SORT_DESC])->one();
             if ($model) {
 

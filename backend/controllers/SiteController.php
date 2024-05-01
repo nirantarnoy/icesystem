@@ -29,7 +29,7 @@ class SiteController extends Controller
 //                        'allow' => false,
 //                    ],
                     [
-                        'actions' => ['login', 'error', 'createadmin', 'changepassword', 'decodex', 'grab', 'addseconduser', 'getcominfo', 'transactionsalecar', 'transactionsalecar2', 'transactionsalecar3', 'createscreenshort', 'transactionsalepos', 'updateroute', 'calmachine', 'clearorder','testclosesum','updateorderpayment'],
+                        'actions' => ['login', 'error', 'createadmin', 'changepassword', 'decodex', 'grab', 'addseconduser', 'getcominfo', 'transactionsalecar', 'transactionsalecar2', 'transactionsalecar3', 'createscreenshort', 'transactionsalepos', 'updateroute', 'calmachine', 'clearorder','testclosesum','updateorderpayment','caltransactionsaledistributor','startcaldailymanagerauto','summarybystdgroup'],
                         'allow' => true,
                     ],
                     [
@@ -1126,6 +1126,265 @@ class SiteController extends Controller
         $this->notifymessageorderclose(1, 2, number_format($total_time_use, 4));
     }
 
+
+    function actionCaltransactionsaledistributor($caldate)
+    {
+
+        $company_id = 1;
+        $branch_id = 2;
+        $cal_date = date('Y-m-d');
+        $xdate = explode('-',$caldate);
+
+        // $create_date = date_create('2024-02-20');
+
+        $from_date = date('Y-m-d');
+        $to_date = date('Y-m-d');
+
+        $findcaldate = date('Y-m-d');
+        if(count($xdate) >1){
+            $findcaldate = $xdate[0].'/'.$xdate[1].'/'.$xdate[2].' '.'00:01:01';
+            $cal_date = date('Y-m-d',strtotime($findcaldate));
+        }
+       // print_r($xdate);return;
+        $started = microtime(true);
+
+        //\common\models\TransactionCarSale::deleteAll(['date(trans_date)'=>date('Y-m-d')]);
+        \common\models\TransactionDistributorSale::deleteAll(['date(trans_date)' => $cal_date, 'company_id' => $company_id, 'branch_id' => $branch_id]);
+        \common\models\TransactionDistributorSalePay::deleteAll(['date(trans_date)' => $cal_date, 'company_id' => $company_id, 'branch_id' => $branch_id]);
+
+        $model = \common\models\QuerySaleDistributorData::find()->select([
+            'customer_id',
+            'product_id',
+            'SUM(line_qty_cash) as line_qty_cash',
+            'SUM(line_qty_credit) as line_qty_credit',
+            'SUM(line_total_cash) as line_total_cash',
+            'SUM(line_total_credit) as line_total_credit',
+            'SUM(line_qty_free) as line_qty_free'
+        ])->where(['date(order_date)' => $cal_date, 'company_id' => $company_id, 'branch_id' => $branch_id])->groupBy(['customer_id', 'product_id'])->all();
+        if ($model) {
+            foreach ($model as $value) {
+                $model_trans = new \common\models\TransactionDistributorSale();
+                $model_trans->trans_date = date('Y-m-d H:i:s',strtotime($findcaldate));
+                $model_trans->customer_id = $value->customer_id;
+                $model_trans->product_id = $value->product_id;
+                $model_trans->cash_qty = $value->line_qty_cash;
+                $model_trans->credit_qty = $value->line_qty_credit;
+                $model_trans->cash_amount = $value->line_total_cash;
+                $model_trans->credit_amount = $value->line_total_credit;
+                $model_trans->free_qty = $value->line_qty_free;
+//                $model_trans->receive_cash = 0;
+//                $model_trans->receive_transter = 0;
+//                $model_trans->return_qty = 0;
+                $model_trans->company_id = $company_id;
+                $model_trans->branch_id = $branch_id;
+                $model_trans->save(false);
+            }
+        }
+
+        $model2 = \common\models\QuerySaleByDistributor::find()->select(['customer_id'])->where(['date(order_date)' => $cal_date, 'company_id' => $company_id, 'branch_id' => $branch_id])->groupBy(['customer_id'])->all();
+        if ($model2) {
+            foreach ($model2 as $value) {
+                $model_pay = new \common\models\TransactionDistributorSalePay();
+                $model_pay->customer_id = $value->customer_id;
+                $model_pay->trans_date = $cal_date;
+                $model_pay->cash_amount = $this->getPaymentDistributorCash($value->customer_id, $company_id, $branch_id, $cal_date);
+                $model_pay->transfer_amount = $this->getPaymentDistributorTransfer($value->customer_id, $company_id, $branch_id, $cal_date);
+                $model_pay->return_car_qty = 0; //$this->getReturnCar($value->customer_id, $cal_date);
+                $model_pay->company_id = $company_id;
+                $model_pay->branch_id = $branch_id;
+                $model_pay->save(false);
+            }
+        }
+        $end = microtime(true);
+        $total_time_use = $end - $started;
+        $this->notifymessageorderclose(1, 2, number_format($total_time_use, 4));
+    }
+    function actionCaltransactionsaledistributorauto()
+    {
+
+        $company_id = 1;
+        $branch_id = 2;
+
+        $t_date = date('Y-m-d',strtotime('-1 day'));
+
+        $cal_date = date('Y-m-d');
+        $xdate = explode('-',$t_date);
+
+        // $create_date = date_create('2024-02-20');
+
+        $from_date = date('Y-m-d');
+        $to_date = date('Y-m-d');
+
+        $findcaldate = date('Y-m-d');
+        if(count($xdate) >1){
+            $findcaldate = $xdate[0].'/'.$xdate[1].'/'.$xdate[2].' '.'00:01:01';
+            $cal_date = date('Y-m-d',strtotime($findcaldate));
+        }
+        // print_r($xdate);return;
+        $started = microtime(true);
+
+        //\common\models\TransactionCarSale::deleteAll(['date(trans_date)'=>date('Y-m-d')]);
+        \common\models\TransactionDistributorSale::deleteAll(['date(trans_date)' => $cal_date, 'company_id' => $company_id, 'branch_id' => $branch_id]);
+        \common\models\TransactionDistributorSalePay::deleteAll(['date(trans_date)' => $cal_date, 'company_id' => $company_id, 'branch_id' => $branch_id]);
+
+        $model = \common\models\QuerySaleDistributorData::find()->select([
+            'customer_id',
+            'product_id',
+            'SUM(line_qty_cash) as line_qty_cash',
+            'SUM(line_qty_credit) as line_qty_credit',
+            'SUM(line_total_cash) as line_total_cash',
+            'SUM(line_total_credit) as line_total_credit',
+            'SUM(line_qty_free) as line_qty_free'
+        ])->where(['date(order_date)' => $cal_date, 'company_id' => $company_id, 'branch_id' => $branch_id])->groupBy(['customer_id', 'product_id'])->all();
+        if ($model) {
+            foreach ($model as $value) {
+                $model_trans = new \common\models\TransactionDistributorSale();
+                $model_trans->trans_date = date('Y-m-d H:i:s',strtotime($findcaldate));
+                $model_trans->customer_id = $value->customer_id;
+                $model_trans->product_id = $value->product_id;
+                $model_trans->cash_qty = $value->line_qty_cash;
+                $model_trans->credit_qty = $value->line_qty_credit;
+                $model_trans->cash_amount = $value->line_total_cash;
+                $model_trans->credit_amount = $value->line_total_credit;
+                $model_trans->free_qty = $value->line_qty_free;
+//                $model_trans->receive_cash = 0;
+//                $model_trans->receive_transter = 0;
+//                $model_trans->return_qty = 0;
+                $model_trans->company_id = $company_id;
+                $model_trans->branch_id = $branch_id;
+                $model_trans->save(false);
+            }
+        }
+
+        $model2 = \common\models\QuerySaleByDistributor::find()->select(['customer_id'])->where(['date(order_date)' => $cal_date, 'company_id' => $company_id, 'branch_id' => $branch_id])->groupBy(['customer_id'])->all();
+        if ($model2) {
+            foreach ($model2 as $value) {
+                $model_pay = new \common\models\TransactionDistributorSalePay();
+                $model_pay->customer_id = $value->customer_id;
+                $model_pay->trans_date = $cal_date;
+                $model_pay->cash_amount = $this->getPaymentDistributorCash($value->customer_id, $company_id, $branch_id, $cal_date);
+                $model_pay->transfer_amount = $this->getPaymentDistributorTransfer($value->customer_id, $company_id, $branch_id, $cal_date);
+                $model_pay->return_car_qty = 0; //$this->getReturnCar($value->customer_id, $cal_date);
+                $model_pay->company_id = $company_id;
+                $model_pay->branch_id = $branch_id;
+                $model_pay->save(false);
+            }
+        }
+        $end = microtime(true);
+        $total_time_use = $end - $started;
+        $this->notifymessageorderclose(1, 2, number_format($total_time_use, 4));
+    }
+
+    public function actionStartcaldailymanagerauto()
+    {
+        $company_id = 1;
+        $branch_id = 1;
+        $caldate = date('Y-m-d',strtotime('-1 day'));
+        $xdate = explode('-',$caldate);
+
+        // $create_date = date_create('2024-02-20');
+
+        $from_date = date('Y-m-d');
+        $to_date = date('Y-m-d');
+
+        $findcaldate = date('Y-m-d');
+        if(count($xdate) >1){
+            $findcaldate = $xdate[0].'/'.$xdate[1].'/'.$xdate[2].' '.'00:01:01';
+            $from_date = $findcaldate;
+            $to_date = $findcaldate;
+        }
+
+        $find_sale_type = 0;
+        $sum_qty_all = 0;
+        $sum_total_all = 0;
+
+        $total_qty = 0;
+        $total_qty2 = 0;
+        $total_qty3 = 0;
+        $total_qty4 = 0;
+        $total_qty5 = 0;
+        $total_qty_all = 0;
+
+        $total_amount = 0;
+        $total_amount2 = 0;
+        $total_amount3 = 0;
+        $total_amount4 = 0;
+        $total_amount5 = 0;
+        $total_amount_all = 0;
+        $find_user_id = null;
+        $is_invoice_req = null;
+        $btn_order_type = null;
+
+        $model_product_daily = \backend\models\Product::find()->where(['status' => 1, 'company_id' => $company_id, 'branch_id' => $branch_id])->orderBy(['item_pos_seq' => SORT_ASC])->all();
+        \common\models\TransactionManagerDaily::deleteAll(['date(trans_date)'=>date('Y-m-d',strtotime($findcaldate))]);
+        foreach ($model_product_daily as $value) {
+            $line_product_price_list = $this->getProductpricelist($value->id, $from_date, $to_date, $company_id, $branch_id);
+            if ($line_product_price_list != null) {
+
+
+
+                for ($x = 0; $x <= count($line_product_price_list) - 1; $x++) {
+
+                    $find_order = $this->getOrdercash($value->id, $from_date, $to_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_product_price_list[$x]['line_price']);
+                    $find_order2 = $this->getOrderCredit($value->id, $from_date, $to_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_product_price_list[$x]['line_price']);
+                    $find_order4 = $this->getOrderCarOtherCredit($value->id, $from_date, $to_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_product_price_list[$x]['line_price']);
+                    $find_order5 = $this->getOrderRoute($value->id, $from_date, $to_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_product_price_list[$x]['line_price']);
+
+                    $line_qty = $find_order != null ? $find_order[0]['qty'] : 0;
+                    $line_qty2 = $find_order2 != null ? $find_order2[0]['qty'] : 0;
+//                        $line_qty3 = $find_order3 != null ? $find_order3[0]['qty'] : 0;
+                    $line_qty4 = $find_order4 != null ? $find_order4[0]['qty'] : 0;
+                    $line_qty5 = $find_order5 != null ? $find_order5[0]['qty'] : 0;
+
+                    $line_total_qty = ($line_qty + $line_qty2 + $line_qty4 + $line_qty5);
+                    $total_qty_all = ($total_qty_all + $line_total_qty);
+
+                    $line_amount = $find_order != null ? $find_order[0]['line_total'] : 0;
+                    $line_amount2 = $find_order2 != null ? $find_order2[0]['line_total'] : 0;
+                    // $line_amount3 = $find_order3 != null ? $find_order3[0]['line_total']:0;
+                    $line_amount4 = $find_order4 != null ? $find_order4[0]['line_total'] : 0;
+                    $line_amount5 = $find_order5 != null ? $find_order5[0]['line_total'] : 0;
+
+                    $line_total_amt = ($line_amount + $line_amount2 + $line_amount4 + $line_amount5);
+                    $total_amount_all = ($total_amount_all + $line_total_amt);
+
+                    $total_qty = ($total_qty + $line_qty);
+                    $total_qty2 = ($total_qty2 + $line_qty2);
+                    //  $total_qty3 = ($total_qty3 + $line_qty3);
+                    $total_qty4 = ($total_qty4 + $line_qty4);
+                    $total_qty5 = ($total_qty5 + $line_qty5);
+
+                    $total_amount = ($total_amount + $line_amount);
+                    $total_amount2 = ($total_amount2 + $line_amount2);
+                    //  $total_amount3 = ($total_amount3 + $line_amount3);
+                    $total_amount4 = ($total_amount4 + $line_amount4);
+                    $total_amount5 = ($total_amount5 + $line_amount5);
+
+
+                    $model_add = new \common\models\TransactionManagerDaily();
+                    $model_add->trans_date = date('Y-m-d H:i:s',strtotime($findcaldate));
+                    $model_add->product_id = $value->id;
+                    $model_add->price = $line_product_price_list[$x]['line_price'];
+                    $model_add->cash_qty = $line_qty;
+                    $model_add->credit_pos_qty = $line_qty2;
+                    $model_add->car_qty = $line_qty5;
+                    $model_add->other_branch_qty = $line_qty4;
+                    $model_add->qty_total = $line_total_qty;
+                    $model_add->cash_amount = $line_amount;
+                    $model_add->credit_pos_amount = $line_amount2;
+                    $model_add->car_amount = $line_amount5;
+                    $model_add->other_branch_amount = $line_amount4;
+                    $model_add->amount_total = $line_total_amt;
+                    $model_add->save(false);
+
+
+                }
+            }else{
+                echo "no data";
+            }
+        }
+    }
+
     public function notifymessageorderclose($company_id, $branch_id, $timeuse)
     {
         //$message = "This is test send request from camel paperless";
@@ -1214,6 +1473,52 @@ class SiteController extends Controller
         return $amount;
     }
 
+
+    function getPaymentDistributorCash($customer_id, $company_id, $branch_id, $cal_date)
+    {
+        $amount = 0;
+
+//        $sql = "SELECT SUM(payment_amount) as amount  from query_payment_receive
+//              WHERE date(trans_datex) = " . "'" . $cal_date . "'" . "
+//              AND status = 1
+//              AND payment_channel_id=1 AND payment_method_id = 2 AND  route_id =" . $route_id . "
+//              AND company_id=" . $company_id . " AND branch_id=" . $branch_id;
+//        $sql .= " GROUP BY route_id";
+//
+//        $query = \Yii::$app->db->createCommand($sql);
+//        $model = $query->queryAll();
+
+        $model = \common\models\QueryPaymentReceive::find()->where(['date(trans_date)' => $cal_date, 'status' => 1, 'payment_channel_id' => 1, 'payment_method_id' => 2, 'customer_id' => $customer_id, 'company_id' => $company_id, 'branch_id' => $branch_id])->sum('payment_amount');
+        if ($model) {
+//            for ($i = 0; $i <= count($model) - 1; $i++) {
+//                $amount = $model[$i]['amount'];
+//            }
+            $amount = $model;
+
+        }
+        return $amount;
+    }
+
+    function getPaymentDistributorTransfer($customer_id, $company_id, $branch_id, $cal_date)
+    {
+        $amount = 0;
+
+        $sql = "SELECT SUM(t1.payment_amount) as amount  from query_payment_receive as t1 INNER JOIN customer as t2 on t2.id = t1.customer_id 
+              WHERE date(t1.trans_date) = " . "'" . $cal_date . "'" . " 
+              AND t1.status <> 100 
+              AND t1.payment_channel_id=2 AND t1.payment_method_id = 2 AND  t1.customer_id =" . $customer_id . "
+              AND t1.company_id=" . $company_id . " AND t1.branch_id=" . $branch_id;
+        $sql .= " GROUP BY t2.id";
+
+        $query = \Yii::$app->db->createCommand($sql);
+        $model = $query->queryAll();
+        if ($model) {
+            for ($i = 0; $i <= count($model) - 1; $i++) {
+                $amount = $model[$i]['amount'];
+            }
+        }
+        return $amount;
+    }
 
 //    function actionTransactionsalepos(){
 //        $company_id = 0;
@@ -1671,6 +1976,234 @@ class SiteController extends Controller
         $result = file_get_contents($line_api, FALSE, $context);
         $res = json_decode($result);
         return $res;
+    }
+
+
+
+
+    function getProductpricelist($product_id, $f_date, $t_date, $company_id, $branch_id)
+    {
+        $data = [];
+        $sql = "SELECT t1.price
+              FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id
+             WHERE  date(t2.order_date) >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
+             AND date(t2.order_date) <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
+             AND t1.product_id=" . $product_id . " 
+             AND t2.status <> 3
+             AND t1.qty > 0
+             AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
+        $sql .= " GROUP BY t1.price";
+        $sql .= " ORDER BY t1.price asc";
+        $query = \Yii::$app->db->createCommand($sql);
+        $model = $query->queryAll();
+        if ($model) {
+            for ($i = 0; $i <= count($model) - 1; $i++) {
+                array_push($data, [
+                    'line_price' => $model[$i]['price'],
+                ]);
+            }
+        }
+        return $data;
+    }
+
+    function getOrderRoute($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_price)
+    {
+        $data = [];
+        $sql = "SELECT sum(qty) as qty, sum(line_total) as line_total
+              FROM query_sale_mobile_data_new
+             WHERE  date(order_date) >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . "
+             AND date(order_date) <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . "
+             AND product_id=" . $product_id . "
+             AND price=" . $line_price . "
+             AND company_id=" . $company_id . " AND branch_id=" . $branch_id;
+
+
+        if ($find_user_id != null) {
+            $sql .= " AND created_by=" . $find_user_id;
+        }
+//    if ($is_invoice_req != null) {
+//        $sql .= " AND t3.is_invoice_req =" . $is_invoice_req;
+//    }
+        $sql .= " GROUP BY product_id";
+
+        $query = \Yii::$app->db->createCommand($sql);
+        $model = $query->queryAll();
+        if ($model) {
+            for ($i = 0; $i <= count($model) - 1; $i++) {
+
+
+                array_push($data, [
+                    'qty' => $model[$i]['qty'],
+                    'line_total' => $model[$i]['line_total'],
+                ]);
+            }
+        }
+//                array_push($data, [
+//                'qty' => 0,
+//                'line_total' =>0,
+//            ]);
+        return $data;
+    }
+
+    function getOrdercash($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_price)
+    {
+        $data = [];
+        $sql = "SELECT sum(t1.qty) as qty, sum(t1.line_total) as line_total
+              FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id 
+             WHERE  date(t2.order_date) >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
+             AND date(t2.order_date) <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
+             AND t1.product_id=" . $product_id . " 
+             AND t2.status <> 3
+             AND t2.sale_channel_id = 2
+             AND t1.price=" . $line_price . "
+             AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
+
+        $sql .= " AND t2.payment_method_id=1";
+
+
+        if ($find_user_id != null) {
+            $sql .= " AND t2.created_by=" . $find_user_id;
+        }
+        if ($is_invoice_req != null) {
+            $sql .= " AND t3.is_invoice_req =" . $is_invoice_req;
+        }
+        $sql .= " GROUP BY t1.product_id";
+
+        $query = \Yii::$app->db->createCommand($sql);
+        $model = $query->queryAll();
+        if ($model) {
+            for ($i = 0; $i <= count($model) - 1; $i++) {
+
+
+                array_push($data, [
+                    'qty' => $model[$i]['qty'],
+                    'line_total' => $model[$i]['line_total'],
+                ]);
+            }
+        }
+        return $data;
+    }
+
+    function getOrderCredit($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_price)
+    {
+        $data = [];
+        $sql = "SELECT sum(t1.qty) as qty, sum(t1.line_total) as line_total
+              FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id 
+             WHERE  date(t2.order_date) >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
+             AND date(t2.order_date) <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
+             AND t1.product_id=" . $product_id . " 
+             AND t2.status <> 3
+             AND t2.sale_channel_id = 2
+              AND t1.price=" . $line_price . "
+             AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
+
+        $sql .= " AND (t2.order_channel_id = 0 OR t2.order_channel_id is null) AND t2.payment_method_id= 2";
+
+
+        if ($find_user_id != null) {
+            $sql .= " AND t2.created_by=" . $find_user_id;
+        }
+        if ($is_invoice_req != null) {
+            $sql .= " AND t3.is_invoice_req =" . $is_invoice_req;
+        }
+        $sql .= " GROUP BY t1.product_id";
+
+        $query = \Yii::$app->db->createCommand($sql);
+        $model = $query->queryAll();
+        if ($model) {
+            for ($i = 0; $i <= count($model) - 1; $i++) {
+
+
+                array_push($data, [
+                    'qty' => $model[$i]['qty'],
+                    'line_total' => $model[$i]['line_total'],
+                ]);
+            }
+        }
+        return $data;
+    }
+
+    function getOrderCarCredit($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_price)
+    {
+        $data = [];
+        $sql = "SELECT sum(t1.qty) as qty, sum(t1.line_total) as line_total
+              FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id INNER JOIN delivery_route as t4 on t2.order_channel_id = t4.id
+             WHERE  date(t2.order_date) >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
+             AND date(t2.order_date) <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
+             AND t1.product_id=" . $product_id . " 
+             AND t2.status <> 3
+             AND t2.sale_channel_id = 2
+              AND t1.price=" . $line_price . "
+             AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
+
+        $sql .= " AND t2.order_channel_id > 0";
+        $sql .= " AND t4.is_other_branch = 0";
+
+        if ($find_user_id != null) {
+            $sql .= " AND t2.created_by=" . $find_user_id;
+        }
+        if ($is_invoice_req != null) {
+            $sql .= " AND t3.is_invoice_req =" . $is_invoice_req;
+        }
+        $sql .= " GROUP BY t1.product_id";
+
+        $query = \Yii::$app->db->createCommand($sql);
+        $model = $query->queryAll();
+        if ($model) {
+            for ($i = 0; $i <= count($model) - 1; $i++) {
+
+
+                array_push($data, [
+                    'qty' => $model[$i]['qty'],
+                    'line_total' => $model[$i]['line_total'],
+                ]);
+            }
+        }
+        return $data;
+    }
+
+    function getOrderCarOtherCredit($product_id, $f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_price)
+    {
+        $data = [];
+        $sql = "SELECT sum(t1.qty) as qty, sum(t1.line_total) as line_total
+              FROM order_line as t1 INNER JOIN orders as t2 ON t1.order_id = t2.id LEFT  JOIN customer as t3 ON t2.customer_id=t3.id INNER JOIN delivery_route as t4 on t2.order_channel_id = t4.id
+             WHERE  date(t2.order_date) >=" . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
+             AND date(t2.order_date) <=" . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " 
+             AND t1.product_id=" . $product_id . " 
+             AND t2.status <> 3
+             AND t2.sale_channel_id = 2
+              AND t1.price=" . $line_price . "
+             AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
+
+        $sql .= " AND t2.order_channel_id > 0";
+        $sql .= " AND t4.is_other_branch = 1";
+
+        if ($find_user_id != null) {
+            $sql .= " AND t2.created_by=" . $find_user_id;
+        }
+        if ($is_invoice_req != null) {
+            $sql .= " AND t3.is_invoice_req =" . $is_invoice_req;
+        }
+        $sql .= " GROUP BY t1.product_id";
+
+        $query = \Yii::$app->db->createCommand($sql);
+        $model = $query->queryAll();
+        if ($model) {
+            for ($i = 0; $i <= count($model) - 1; $i++) {
+
+
+                array_push($data, [
+                    'qty' => $model[$i]['qty'],
+                    'line_total' => $model[$i]['line_total'],
+                ]);
+            }
+        }
+        return $data;
+    }
+
+    public function actionSummarybystdgroup()
+    {
+        return $this->render('_summarybystdpricegroup');
     }
 }
 

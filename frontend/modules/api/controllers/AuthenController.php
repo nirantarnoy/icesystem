@@ -191,6 +191,8 @@ class AuthenController extends Controller
                                 $model_login_log->status = 1;
                                 $model_login_log->save(false);
 
+                                $daily_login_count = \common\models\LoginRouteLog::find()->where(['emp_1' => $model->employee_ref_id, 'date(login_date)' => date('Y-m-d')])->count();
+
                                 // end add login route log
 
 
@@ -212,7 +214,8 @@ class AuthenController extends Controller
                                         'branch_name' => \backend\models\Branch::findName($model->branch_id),
                                         'route_type' => $car_info == null ? 1 : \backend\models\Deliveryroute::findRouteType($car_info[0]['route_id']),
                                         'route_code' => $car_info == null ? "" : \backend\models\Deliveryroute::findRoutecode($car_info[0]['route_id']),
-                                        'emp_name2' => $model_info_2 !=null ? $model_info_2->fname . ' ' . $model_info_2->lname:'',
+                                        'emp_name2' => $model_info_2 != null ? $model_info_2->fname . ' ' . $model_info_2->lname : '',
+                                        'login_shift' => $daily_login_count,
                                     ]
                                 );
                             } else {
@@ -361,7 +364,6 @@ class AuthenController extends Controller
                     // save login history
 
 
-
                 }
                 // }
 
@@ -495,18 +497,18 @@ class AuthenController extends Controller
 //            }
 
             if (\common\models\LoginLog::updateAll(['logout_date' => date('Y-m-d H:i:s'), 'status' => 2], ['user_id' => $user_id, 'status' => 1])) {
-               // $status = $ip;
+                // $status = $ip;
                 $check_is_has_login = \common\models\LoginLogCal::find()->where(['user_id' => $user_id])->limit(1)->orderBy(['id' => SORT_DESC])->one();
                 if ($check_is_has_login) {
                     $check_is_has_login->logout_date = date('Y-m-d H:i:s');
                     $check_is_has_login->status = 2;
-                    if($check_is_has_login->save(false)){
+                    if ($check_is_has_login->save(false)) {
                         $status = 1;
-                        array_push($data,['logout_success'=>1]);
+                        array_push($data, ['logout_success' => 1]);
                     }
                 }
-            }else{
-                array_push($data,['logout_success'=>1]);
+            } else {
+                array_push($data, ['logout_success' => 1]);
             }
         }
 

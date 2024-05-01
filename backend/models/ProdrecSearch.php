@@ -14,7 +14,7 @@ class ProdrecSearch extends Stocktrans
     public function rules()
     {
         return [
-            [['id', 'company_id', 'branch_id', 'product_id', 'warehouse_id', 'location_id', 'qty', 'created_at'], 'integer'],
+            [['id', 'company_id', 'branch_id', 'product_id', 'warehouse_id', 'location_id', 'qty', 'created_at','transfer_branch_id'], 'integer'],
             [['journal_no', 'trans_date', 'lot_no','activity_type_id', 'created_by','from_date','to_date','prodrec_type'], 'safe'],
         ];
     }
@@ -62,6 +62,7 @@ class ProdrecSearch extends Stocktrans
             'product_id' => $this->product_id,
             'warehouse_id' => $this->warehouse_id,
             'location_id' => $this->location_id,
+            'transfer_branch_id' => $this->transfer_branch_id,
             'qty' => $this->qty,
            // 'created_at' => $this->created_at,
           //  'created_by' => $this->created_by,

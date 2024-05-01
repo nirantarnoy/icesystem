@@ -159,3 +159,8 @@ $this->params['breadcrumbs'][] = $this->title;
     <input type="file" name="file_asset_customer">
     <button class="btn btn-info">import asset customer</button>
 </form>
+
+<form action="<?= Url::to(['assetsitem/importsummarypricegroup']) ?>" method="post" enctype="multipart/form-data">
+    <input type="file" name="file_price_group">
+    <button class="btn btn-info">import summary price group</button>
+</form>

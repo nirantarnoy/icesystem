@@ -118,10 +118,12 @@ $modelx = $dataProvider->getModels();
                         <?= \backend\models\Product::findName($value->product_id) . ' ' . substr($value->journal_no, 1, 3) ?>
                     </td>
                     <td style="text-align: right">
-                        <?= number_format(($line_qty - $cancel_qty), 2) ?>
+                        <?php //echo number_format(($line_qty - $cancel_qty), 2) ?>
+                        <?= number_format(($line_qty), 2) ?>
                     </td>
                     <td style="text-align: right">
-                        <?= number_format(($line_transfer_qty - $cancel_qty2), 2) ?>
+                        <?php //echo number_format(($line_transfer_qty - $cancel_qty2), 2) ?>
+                        <?= number_format(($line_transfer_qty), 2) ?>
                     </td>
                     <td style="text-align: right">
                         <?= number_format(($cancel_qty), 2) ?>
@@ -142,7 +144,7 @@ $modelx = $dataProvider->getModels();
                 <td style="text-align: right">  <?= number_format($total_rec_transfer, 2) ?></td>
                 <td style="text-align: right">  <?= number_format($total_cancel, 2) ?></td>
                 <td style="text-align: right">  <?= number_format($total_cancel_transfer, 2) ?></td>
-                <td style="text-align: right"> <?= number_format($total_qty, 2) ?></td>
+                <td style="text-align: right"> <?= number_format(($total_rec + $total_rec_transfer - $total_cancel - $total_cancel_transfer), 2) ?></td>
             </tr>
             </tfoot>
 
@@ -263,11 +265,21 @@ function getCancelRtfQty($product_id, $from_date, $to_date, $company_id, $branch
 {
     $data = 0;
     $sql = "SELECT t2.journal_no, t2.qty  from stock_trans as t1 inner join stock_trans as t2 on t1.trans_ref_id = t2.id
-              WHERE (date(t2.trans_date)>= " . "'" . date('Y-m-d', strtotime($from_date)) . "'" . " 
+              WHERE (date(t2.trans_date)>= " . "'" . date('Y-m-d', strtotime($from_date)) . "'" . "
               AND date(t2.trans_date)<= " . "'" . date('Y-m-d', strtotime($to_date)) . "'" . " )
-              AND t1.activity_type_id = 28 
+              AND t1.activity_type_id = 28
               AND t2.product_id =" . $product_id . "
               AND t1.company_id=" . $company_id . " AND t1.branch_id=" . $branch_id;
+
+
+    // omnoi
+
+//    $sql = "SELECT t2.journal_no, t2.qty  from stock_trans as t1 inner join stock_trans as t2 on t2.trans_ref_id = t1.id
+//              WHERE (date(t2.trans_date)>= " . "'" . date('Y-m-d', strtotime($from_date)) . "'" . "
+//              AND date(t2.trans_date)<= " . "'" . date('Y-m-d', strtotime($to_date)) . "'" . " )
+//              AND t2.activity_type_id = 28
+//              AND t2.product_id =" . $product_id . "
+//              AND t1.company_id=" . $company_id . " AND t1.branch_id=" . $branch_id;
 
     //$sql .= " GROUP BY t1.route_id";
     $query = \Yii::$app->db->createCommand($sql);

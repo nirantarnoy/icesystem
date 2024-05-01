@@ -36,7 +36,7 @@ class StockTrans extends \yii\db\ActiveRecord
     public function rules()
     {
         return [
-            [['company_id', 'branch_id', 'product_id', 'warehouse_id', 'location_id', 'qty', 'created_at', 'created_by','stock_type','activity_type_id','production_type'], 'integer'],
+            [['company_id', 'branch_id', 'product_id', 'warehouse_id', 'location_id', 'qty', 'created_at', 'created_by','stock_type','activity_type_id','production_type','transfer_branch_id'], 'integer'],
             [['trans_date'], 'safe'],
             [['journal_no', 'lot_no'], 'string', 'max' => 255],
         ];

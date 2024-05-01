@@ -43,20 +43,20 @@ $this->params['breadcrumbs'][] = $this->title;
                         'mergeColumns' => [[0, 1]], // columns to merge in summary
                         'content' => [             // content to show in each summary cell
                             1 => backend\models\Product::findName($model->product_id),
-                            5 => GridView::F_SUM,
+                            6 => GridView::F_SUM,
                             // 8 => GridView::F_SUM,
 //                        7 => GridView::F_SUM,
                         ],
                         'contentFormats' => [      // content reformatting for each summary cell
                             //4 => ['format' => 'number', 'decimals' => 0],
-                            5 => ['format' => 'number', 'decimals' => 2],
+                            6 => ['format' => 'number', 'decimals' => 2],
                             //8 => ['format' => 'number', 'decimals' => 0],
 //                        7 => ['format' => 'number', 'decimals' => 0],
                         ],
                         'contentOptions' => [      // content html attributes for each summary cell
                             1 => ['style' => 'font-variant:small-caps'],
                             //4 => ['style' => 'text-align:right'],
-                            5 => ['style' => 'text-align:right'],
+                            6 => ['style' => 'text-align:right'],
                             // 8 => ['style' => 'text-align:right'],
 //                        7 => ['style' => 'text-align:right'],
                         ],
@@ -79,6 +79,12 @@ $this->params['breadcrumbs'][] = $this->title;
                 'attribute' => 'production_loc_id',
                 'value' => function ($data) {
                     return \backend\models\Machine::findLocname($data->production_loc_id);
+                }
+            ],
+            [
+                'attribute' => 'transfer_branch_id',
+                'value' => function ($data) {
+                    return \backend\models\Transferbrach::findName($data->transfer_branch_id);
                 }
             ],
             [

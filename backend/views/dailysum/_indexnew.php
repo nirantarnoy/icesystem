@@ -126,7 +126,7 @@ $model_line = $dataProvider->getModels();
                     <?php if (1 == 1): ?>
                         <?php
 
-                        $product_trans = getProductdaily2($company_id, $branch_id, $route_id, $show_pos_date);
+                        $product_trans = getProductdaily5($company_id, $branch_id, $route_id, $show_pos_date);
                         //  $product_trans = getProductdaily4($company_id, $branch_id, $route_id, $show_pos_date);
                         $nums = 0;
 
@@ -176,7 +176,7 @@ $model_line = $dataProvider->getModels();
                             $total_transfer_in_qty_sum = $total_transfer_in_qty_sum + $total_transfer_in_qty;
 
 
-                            if ($issue_qty <= 0) continue;
+                            if ($issue_qty <= 0 && $total_transfer_in_qty <=0) continue;
 
                             ?>
 
@@ -522,6 +522,54 @@ function getProductdaily2($company_id, $branch_id, $route_id, $order_date)
     return $data;
 }
 
+function getProductdaily3($company_id, $branch_id, $route_id, $order_date)
+{
+    $data = [];
+    $data2 = [];
+    $sql = "SELECT t1.product_id
+              FROM order_stock as t1
+            WHERE  date(t1.trans_date) =" . "'" . date('Y-m-d', strtotime($order_date)) . "'";
+    if ($route_id != null) {
+        $sql .= " AND t1.route_id = " . $route_id;
+    }
+    $sql .= " GROUP BY t1.product_id ORDER BY t1.product_id";
+    $query = \Yii::$app->db->createCommand($sql);
+    $model = $query->queryAll();
+    if ($model) {
+        for ($i = 0; $i <= count($model) - 1; $i++) {
+            $product_code = \backend\models\Product::findCode($model[$i]['product_id']);
+            $product_name = \backend\models\Product::findName($model[$i]['product_id']);
+            array_push($data, [
+                'product_id' => $model[$i]['product_id'],
+                'product_code' => $product_code,
+                'product_name' => $product_name,
+            ]);
+
+        }
+//        if ($data != null) {
+//            // $data2 = $data;
+//            for ($x = 0; $x <= count($data) - 1; $x++) {
+//                $model_check = \backend\models\Stocktrans::find()->select('product_id')->where(['trans_ref_id' => $route_id, 'date(trans_date)' => date('Y-m-d', strtotime($order_date))])->andFilterWhere(['activity_type_id' => 7])->andFilterWhere(['!=', 'product_id', $data[$x]['product_id']])->groupBy(['product_id'])->one();
+//                if ($model_check) {
+//                    if (in_array($model_check->product_id, $data2)) {
+//                        continue;
+//                    }
+//                    $product_code = \backend\models\Product::findCode($model_check->product_id);
+//                    $product_name = \backend\models\Product::findName($model_check->product_id);
+//
+//                    array_push($data2, $model_check->product_id);
+//                    array_push($data, [
+//                        'product_id' => $model_check->product_id,
+//                        'product_code' => $product_code,
+//                        'product_name' => $product_name,
+//                    ]);
+//                }
+//            }
+//        }
+    }
+    return $data;
+}
+
 function getProductdaily4($company_id, $branch_id, $route_id, $order_date)
 {
     $data = [];
@@ -548,12 +596,12 @@ function getProductdaily4($company_id, $branch_id, $route_id, $order_date)
     return $data;
 }
 
-function getProductdaily3($company_id, $branch_id, $route_id, $order_date)
+function getProductdaily5($company_id, $branch_id, $route_id, $order_date)
 {
     $data = [];
     $sql = "SELECT t1.product_id
               FROM order_stock as t1
-            WHERE  date(t1.trans_date) =" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " 
+            WHERE  date(t1.trans_date) >=" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " 
              AND t1.company_id=" . $company_id . " AND t1.branch_id=" . $branch_id;
     if ($route_id != null) {
         $sql .= " AND t1.route_id = " . $route_id;

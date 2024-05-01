@@ -65,6 +65,10 @@ class Product extends \common\models\Product
         $model = Product::find()->select('id')->where(['code'=>trim($code),'company_id'=>$company_id,'branch_id'=>$branch_id])->one();
         return $model != null?$model->id:0;
     }
+    public static function findProductIdByName($name){
+        $model = Product::find()->select('id')->where(['name'=>trim($name)])->one();
+        return $model != null?$model->id:0;
+    }
 
     public static function findCode($id){
         $model = Product::find()->select('code')->where(['id'=>$id])->one();

@@ -58,7 +58,7 @@ if ($f_date != null && $t_date != null) {
                      ],
                      'pluginOptions' => [
                          'allowClear' => true,
-                         'width'=> '300px',
+                         'width'=> '150px',
                      ]
                  ])->label(false) ?>
                  <span style="margin-left: 2px;"></span>
@@ -72,7 +72,7 @@ if ($f_date != null && $t_date != null) {
                      ],
                      'pluginOptions' => [
                          'allowClear' => true,
-                         'width'=> '300px',
+                         'width'=> '150px',
                      ]
                  ])->label(false) ?>
                  <span style="margin-left: 2px;"></span>
@@ -84,7 +84,19 @@ if ($f_date != null && $t_date != null) {
                      ],
                      'pluginOptions' => [
                          'allowClear' => true,
-                         'width'=> '300px',
+                         'width'=> '150px',
+                     ]
+                 ])->label(false) ?>
+                 <span style="margin-left: 2px;"></span>
+                 <?= $form->field($model, 'transfer_branch_id')->widget(\kartik\select2\Select2::className(), [
+                     'data' => \yii\helpers\ArrayHelper::map(\common\models\TransferBranch::find()->all(), 'id','name'),
+                     'options' => [
+                         'placeholder' => '--สาขา--',
+                         'onchange' => 'this.form.submit();'
+                     ],
+                     'pluginOptions' => [
+                         'allowClear' => true,
+                         'width'=> '200px',
                      ]
                  ])->label(false) ?>
                  <span style="margin-left: 2px;"></span>

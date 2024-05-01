@@ -500,7 +500,7 @@ class AssetsitemController extends Controller
 
                         }
                     }
-                    $this->createAssetCheckTrans($customer_id,$model_has->id,$company_id,$branch_id,$route_id,$user_id,$location);
+                    $this->createAssetCheckTrans($customer_id, $model_has->id, $company_id, $branch_id, $route_id, $user_id, $location);
                 }
             } else {// not has already asset code
                 $model_new_asset = new \backend\models\Assetsitem();
@@ -535,7 +535,7 @@ class AssetsitemController extends Controller
                     }
 
                 }
-                $this->createAssetCheckTrans($customer_id,$model_new_asset->id,$company_id,$branch_id,$route_id,$user_id,$location);
+                $this->createAssetCheckTrans($customer_id, $model_new_asset->id, $company_id, $branch_id, $route_id, $user_id, $location);
             }
 
 
@@ -562,12 +562,13 @@ class AssetsitemController extends Controller
         return $html;
     }
 
-    public function createAssetCheckTrans($customer_id, $product_id, $company_id, $branch_id, $route_id, $user_id, $location){
+    public function createAssetCheckTrans($customer_id, $product_id, $company_id, $branch_id, $route_id, $user_id, $location)
+    {
         $newfilesave = '';
         $model = \common\models\AssetsPhoto::find()->where(['asset_id' => $product_id])->all();
         if ($model) {
             foreach ($model as $value) {
-               $newfilesave.=$value->photo.",";
+                $newfilesave .= $value->photo . ",";
             }
 
         }
@@ -597,30 +598,33 @@ class AssetsitemController extends Controller
         }
     }
 
-    public function updateCustomerlocation($location, $customer_id){
-        if($customer_id){
-            $model = \backend\models\Customer::find()->where(['id'=>$customer_id])->one();
-            if($model){
+    public function updateCustomerlocation($location, $customer_id)
+    {
+        if ($customer_id) {
+            $model = \backend\models\Customer::find()->where(['id' => $customer_id])->one();
+            if ($model) {
                 $model->location_info = $location;
                 $model->save(false);
             }
         }
     }
 
-    public function actionDeleteRequest(){
+    public function actionDeleteRequest()
+    {
         $id = \Yii::$app->request->post('delete_id');
-        if($id){
-            if(\common\models\AssetsPhoto::deleteAll(['request_id'=>$id])){
-                \common\models\CustomerAssetRequest::deleteAll(['id'=>$id]);
-            }else{
-                \common\models\CustomerAssetRequest::deleteAll(['id'=>$id]);
+        if ($id) {
+            if (\common\models\AssetsPhoto::deleteAll(['request_id' => $id])) {
+                \common\models\CustomerAssetRequest::deleteAll(['id' => $id]);
+            } else {
+                \common\models\CustomerAssetRequest::deleteAll(['id' => $id]);
             }
         }
 
         return $this->redirect(['assetsitem/asset-request']);
     }
 
-    public function actionCheckinprint(){
+    public function actionCheckinprint()
+    {
         $from_date = \Yii::$app->request->post('from_date');
         $to_date = \Yii::$app->request->post('to_date');
         $find_customer_id = \Yii::$app->request->post('find_customer_id');
@@ -629,5 +633,81 @@ class AssetsitemController extends Controller
             'to_date' => $to_date,
             'find_customer_id' => $find_customer_id,
         ]);
+    }
+
+    public function actionImportsummarypricegroup()
+    {
+        $uploaded = UploadedFile::getInstanceByName('file_price_group');
+        if (!empty($uploaded)) {
+            //echo "ok";return;
+            $upfiles = time() . "." . $uploaded->getExtension();
+            // if ($uploaded->saveAs(Yii::$app->request->baseUrl . '/uploads/files/' . $upfiles)) {
+            if ($uploaded->saveAs('../web/uploads/files/customers/' . $upfiles)) {
+                //  echo "okk";return;
+                // $myfile = Yii::$app->request->baseUrl . '/uploads/files/' . $upfiles;
+                $myfile = '../web/uploads/files/customers/' . $upfiles;
+                $file = fopen($myfile, "r+");
+                fwrite($file, "\xEF\xBB\xBF");
+
+                setlocale(LC_ALL, 'th_TH.TIS-620');
+                $i = -1;
+                $res = 0;
+                $data = [];
+                while (($rowData = fgetcsv($file, 10000, ",")) !== FALSE) {
+                    $i += 1;
+                    $catid = 0;
+                    $qty = 0;
+                    $price = 0;
+                    $cost = 0;
+                    if ($rowData[1] == '' || $i == 0) {
+                        continue;
+                    }
+
+//                    $model_dup = \backend\models\Stdpricegroup::find()->where(['asset_no' => trim($rowData[1]), 'company_id' => 1, 'branch_id' => 1])->one();
+//                    if ($model_dup != null) {
+//                        continue;
+//                    }
+
+                    $product_id = \backend\models\Product::findProductIdByName(trim($rowData[3]));
+                    $type_id = 0;
+                    if(trim($rowData[6]) == 'ขายสด'){
+                        $type_id = 1;
+                    }
+                    if(trim($rowData[6]) == 'ขายเชื่อ'){
+                        $type_id = 2;
+                    }
+                    if(trim($rowData[6]) == 'ฟรี'){
+                        $type_id = 3;
+                    }
+
+                    $modelx = new \backend\models\Stdpricegroup();
+                    // $modelx->code = $rowData[0];
+                    $modelx->name = $rowData[1];
+                    $modelx->product_id = $product_id;
+                    $modelx->price = $rowData[4];
+                    $modelx->type_id = $type_id;
+                    $modelx->seq_no = $rowData[5];
+
+                    if ($modelx->save(false)) {
+                        $res += 1;
+                    }
+                }
+                //    print_r($qty_text);return;
+
+                if ($res > 0) {
+                    $session = Yii::$app->session;
+                    $session->setFlash('msg', 'นำเข้าข้อมูลเรียบร้อย');
+                    return $this->redirect(['index']);
+                } else {
+                    $session = Yii::$app->session;
+                    $session->setFlash('msg-error', 'พบข้อมผิดพลาดนะ');
+                    return $this->redirect(['index']);
+                }
+                // }
+                fclose($file);
+//            }
+//        }
+            }
+        }
     }
 }
