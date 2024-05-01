@@ -74,9 +74,11 @@ class RoutesummarybystdgroupController extends Controller
     {
         $route_id = \Yii::$app->request->post('route_id');
         $search_date = \Yii::$app->request->post('search_date');
+        $search_to_date = \Yii::$app->request->post('search_to_date');
         return $this->render('_summarybystdpricegroup2', [
             'route_id' => $route_id,
             'search_date' => $search_date,
+            'search_to_date' => $search_to_date,
         ]);
     }
 

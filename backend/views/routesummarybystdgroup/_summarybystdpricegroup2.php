@@ -6,23 +6,27 @@ $product_header = [];
 $route_name = '';
 
 $find_date = date('Y-m-d');
+$find_to_date = date('Y-m-d');
 if ($route_id != null) {
     $route_name = \backend\models\Deliveryroute::findName($route_id);
 }
 if ($search_date != null) {
     $find_date = date('Y-m-d', strtotime($search_date));
 }
-$route_list =  "(";
-if($route_id !=null){
-    for($x=0;$x<=count($route_id)-1;$x++){
-        $route_list.=$route_id[$x];
-        if($x != count($route_id)-1){
-            $route_list.=",";
-        }else{
-            $route_list.=")";
+if ($search_to_date != null) {
+    $find_to_date = date('Y-m-d', strtotime($search_to_date));
+}
+$route_list = "(";
+if ($route_id != null) {
+    for ($x = 0; $x <= count($route_id) - 1; $x++) {
+        $route_list .= $route_id[$x];
+        if ($x != count($route_id) - 1) {
+            $route_list .= ",";
+        } else {
+            $route_list .= ")";
         }
     }
-}else{
+} else {
     $route_list = null;
 }
 
@@ -60,16 +64,16 @@ $model_transfer_branch = \backend\models\Transferbrach::find()->where(['status' 
                 'value' => $route_id,
                 'pluginOptions' => [
                     'allowClear' => true,
-                    'multiple'=> true,
+                    'multiple' => true,
                 ],
                 'options' => [
-                        'placeholder'=>'--เลือกทั้งหมด--',
+                    'placeholder' => '--เลือกทั้งหมด--',
                     //'onchange'=> 'form.submit()',
                 ]
             ]);
             ?>
         </div>
-        <div class="col-lg-4">
+        <div class="col-lg-3">
             <label for="">วันที่</label>
             <?php
             echo DateRangePicker::widget([
@@ -85,17 +89,43 @@ $model_transfer_branch = \backend\models\Transferbrach::find()->where(['status' 
                     'autocomplete' => 'off',
                 ],
                 'pluginOptions' => [
-                    'timePicker' => true,
+                    'timePicker' => false,
                     'timePickerIncrement' => 1,
                     'locale' => ['format' => 'Y-m-d'],
                     'singleDatePicker' => true,
                     'showDropdowns' => true,
-                    'timePicker24Hour' => true
+                    'timePicker24Hour' => false
                 ]
             ]);
             ?>
         </div>
-        <div class="col-lg-4">
+        <div class="col-lg-3">
+            <label for="">วันที่</label>
+            <?php
+            echo DateRangePicker::widget([
+                'name' => 'search_to_date',
+                // 'value'=>'2015-10-19 12:00 AM',
+                'value' => $search_to_date != null ? date('Y-m-d', strtotime($search_to_date)) : date('Y-m-d'),
+                //    'useWithAddon'=>true,
+                'convertFormat' => true,
+                'options' => [
+                    'class' => 'form-control',
+                    'placeholder' => 'ถึงวันที่',
+                    //  'onchange' => 'this.form.submit();',
+                    'autocomplete' => 'off',
+                ],
+                'pluginOptions' => [
+                    'timePicker' => false,
+                    'timePickerIncrement' => 1,
+                    'locale' => ['format' => 'Y-m-d'],
+                    'singleDatePicker' => true,
+                    'showDropdowns' => true,
+                    'timePicker24Hour' => false
+                ]
+            ]);
+            ?>
+        </div>
+        <div class="col-lg-2">
             <button class="btn btn-sm btn-info" style="margin-top:33px;">ค้นหา</button>
         </div>
     </div>
@@ -135,7 +165,7 @@ $grand_total_all = [];
             ?>
             <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                 <?php
-                $product_issue_qty = getIssuecar($route_list, $find_date, $product_header[$y]);
+                $product_issue_qty = getIssuecar($route_list, $find_date, $find_to_date, $product_header[$y]);
                 $line_car_issue_qty += $product_issue_qty;
                 array_push($product_header_sum1, ['product' => $product_header[$y], 'qty' => $product_issue_qty]);
                 ?>
@@ -155,16 +185,16 @@ $grand_total_all = [];
                 ?>
                 <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                     <?php
-                    $product_transfer_qty = getReceiveTransfer($route_list, $find_date, $product_header[$y], $value_branch->id);
+                    $product_transfer_qty = getReceiveTransfer($route_list, $find_date, $find_to_date, $product_header[$y], $value_branch->id);
                     //  $line_car_issue_qty+=$product_issue_qty;
                     array_push($product_header_sum1, ['product' => $product_header[$y], 'qty' => $product_transfer_qty]);
                     ?>
                     <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $product_transfer_qty == 0 ? '-' : number_format($product_transfer_qty, 2) ?></td>
                 <?php endfor; ?>
                 <?php
-                  $line_total_branch_price = getReceiveTransferTotalamount($route_list, $find_date, $value_branch->id);
+                $line_total_branch_price = getReceiveTransferTotalamount($route_list, $find_date, $find_to_date, $value_branch->id);
                 ?>
-                <td style="text-align: right;padding: 8px;border: 1px solid grey;background-color: skyblue;"><?=$line_total_branch_price==0?'-':number_format($line_total_branch_price,2)?></td>
+                <td style="text-align: right;padding: 8px;border: 1px solid grey;background-color: skyblue;"><?= $line_total_branch_price == 0 ? '-' : number_format($line_total_branch_price, 2) ?></td>
             </tr>
         <?php endforeach; ?>
         <tr style="background-color: lightgreen">
@@ -188,7 +218,7 @@ $grand_total_all = [];
             <!--            <td style="text-align: center;padding: 0px;border: 1px solid grey">จำนวน</td>-->
             <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                 <?php
-                $product_return_qty = getReturnCar($route_list, $product_header[$y], $find_date);
+                $product_return_qty = getReturnCar($route_list, $product_header[$y], $find_date, $find_to_date);
                 ?>
                 <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $product_return_qty == 0 ? '-' : number_format($product_return_qty, 2) ?></td>
             <?php endfor; ?>
@@ -205,7 +235,7 @@ $grand_total_all = [];
                 <?php $price_group_line_qty = 0; ?>
                 <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                     <?php
-                    $line_product_price_qty = getQtyByPrice($route_list, $value_group->price, $value_group->type_id, $find_date, $product_header[$y]);
+                    $line_product_price_qty = getQtyByPrice($route_list, $value_group->price, $value_group->type_id, $find_date, $find_to_date, $product_header[$y]);
                     $price_group_line_qty += $line_product_price_qty;
                     array_push($product_header_sum, ['product' => $product_header[$y], 'qty' => $line_product_price_qty]);
                     array_push($grand_total_all, ['product' => $product_header[$y], 'qty' => $line_product_price_qty]);
@@ -246,7 +276,7 @@ $grand_total_all = [];
                 <?php $price_group_line_qty = 0; ?>
                 <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                     <?php
-                    $line_product_price_qty = getQtyByPrice($route_list, $value_group->price, $value_group->type_id, $find_date, $product_header[$y]);
+                    $line_product_price_qty = getQtyByPrice($route_list, $value_group->price, $value_group->type_id, $find_date, $find_to_date, $product_header[$y]);
                     $price_group_line_qty += $line_product_price_qty;
                     array_push($product_header_sum2, ['product' => $product_header[$y], 'qty' => $line_product_price_qty]);
                     array_push($grand_total_all, ['product' => $product_header[$y], 'qty' => $line_product_price_qty]);
@@ -287,7 +317,7 @@ $grand_total_all = [];
                 <?php $price_group_line_qty = 0; ?>
                 <?php for ($y = 0; $y <= count($product_header) - 1; $y++): ?>
                     <?php
-                    $line_product_price_qty = getQtyByPrice($route_list, $value_group->price, $value_group->type_id, $find_date, $product_header[$y]);
+                    $line_product_price_qty = getQtyByPrice($route_list, $value_group->price, $value_group->type_id, $find_date, $find_to_date, $product_header[$y]);
                     $price_group_line_qty += $line_product_price_qty;
                     ?>
                     <td style="text-align: center;padding: 8px;border: 1px solid grey;"><?= $line_product_price_qty == 0 ? '-' : number_format($line_product_price_qty, 2) ?></td>
@@ -324,65 +354,67 @@ $grand_total_all = [];
 </table>
 <?php
 
-function getQtyByPrice($route_list, $price, $sale_type, $order_date, $product_id)
+function getQtyByPrice($route_list, $price, $sale_type, $order_date,$find_to_date, $product_id)
 {
     $sale_qty = 0;
 
     //if ($route_id > 0) {
-        $sql = "SELECT SUM(qty) as qty";
-        $sql .= " FROM route_trans_price_cal";
-        $sql .= " WHERE product_id =" . $product_id;
-        $sql .= " AND price = " . $price;
-        $sql .= " AND std_price_type = " . $sale_type;
-        $sql .= " AND date(trans_date) =" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " ";
-        if ($route_list != null) {
-            $sql .= " AND route_id in " . $route_list;
+    $sql = "SELECT SUM(qty) as qty";
+    $sql .= " FROM route_trans_price_cal";
+    $sql .= " WHERE product_id =" . $product_id;
+    $sql .= " AND price = " . $price;
+    $sql .= " AND std_price_type = " . $sale_type;
+    $sql .= " AND date(trans_date) >=" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " ";
+    $sql .= " AND date(trans_date) <=" . "'" . date('Y-m-d', strtotime($find_to_date)) . "'" . " ";
+    if ($route_list != null) {
+        $sql .= " AND route_id in " . $route_list;
+    }
+    $sql .= " GROUP BY price";
+    $query = \Yii::$app->db->createCommand($sql);
+    $model = $query->queryAll();
+    if ($model) {
+        for ($i = 0; $i <= count($model) - 1; $i++) {
+            $sale_qty = $model[$i]['qty'];
         }
-        $sql .= " GROUP BY price";
-        $query = \Yii::$app->db->createCommand($sql);
-        $model = $query->queryAll();
-        if ($model) {
-            for ($i = 0; $i <= count($model) - 1; $i++) {
-                $sale_qty = $model[$i]['qty'];
-            }
-        }
-   // }
+    }
+    // }
 
 
     return $sale_qty;
 }
 
 
-function getReceiveTransfer($route_list, $order_date, $product_id, $transfer_from_id)
+function getReceiveTransfer($route_list, $order_date,$find_to_date, $product_id, $transfer_from_id)
 {
     $sale_qty = 0;
 
     //if ($route_id > 0) {
-        $sql = "SELECT SUM(qty) as qty";
-        $sql .= " FROM route_issue_daily_cal";
-        $sql .= " WHERE product_id =" . $product_id;
-        $sql .= " AND issue_trans_type=2";
-        $sql .= " AND transfer_branch_id=" . $transfer_from_id;
-        $sql .= " AND date(trans_date) =" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " ";
-        if ($route_list != null) {
-            $sql .= " AND route_id in " . $route_list;
-        }
+    $sql = "SELECT SUM(qty) as qty";
+    $sql .= " FROM route_issue_daily_cal";
+    $sql .= " WHERE product_id =" . $product_id;
+    $sql .= " AND issue_trans_type=2";
+    $sql .= " AND transfer_branch_id=" . $transfer_from_id;
+    $sql .= " AND date(trans_date) >=" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " ";
+    $sql .= " AND date(trans_date) <=" . "'" . date('Y-m-d', strtotime($find_to_date)) . "'" . " ";
+    if ($route_list != null) {
+        $sql .= " AND route_id in " . $route_list;
+    }
 
-        $sql .= " GROUP BY product_id";
-        $query = \Yii::$app->db->createCommand($sql);
-        $model = $query->queryAll();
-        if ($model) {
-            for ($i = 0; $i <= count($model) - 1; $i++) {
-                $sale_qty = $model[$i]['qty'];
-            }
+    $sql .= " GROUP BY product_id";
+    $query = \Yii::$app->db->createCommand($sql);
+    $model = $query->queryAll();
+    if ($model) {
+        for ($i = 0; $i <= count($model) - 1; $i++) {
+            $sale_qty = $model[$i]['qty'];
         }
+    }
     //}
 
 
     return $sale_qty;
 }
 
-function getReceiveTransferTotalamount($route_list, $order_date, $transfer_from_id)
+function getReceiveTransferTotalamount($route_list, $order_date,$find_to_date, $transfer_from_id)
 {
     $total_amount = 0;
 
@@ -391,7 +423,8 @@ function getReceiveTransferTotalamount($route_list, $order_date, $transfer_from_
     $sql .= " FROM route_issue_daily_cal";
     $sql .= " WHERE issue_trans_type=2";
     $sql .= " AND transfer_branch_id=" . $transfer_from_id;
-    $sql .= " AND date(trans_date) =" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " ";
+    $sql .= " AND date(trans_date) >=" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " ";
+    $sql .= " AND date(trans_date) <=" . "'" . date('Y-m-d', strtotime($find_to_date)) . "'" . " ";
     if ($route_list != null) {
         $sql .= " AND route_id in " . $route_list;
     }
@@ -410,44 +443,46 @@ function getReceiveTransferTotalamount($route_list, $order_date, $transfer_from_
     return $total_amount;
 }
 
-function getIssuecar($route_list, $order_date, $product_id)
+function getIssuecar($route_list, $order_date, $find_to_date, $product_id)
 {
     $sale_qty = 0;
 
-   // print_r($route_id);return;
+    // print_r($route_id);return;
 
     //if ($route_id > 0) {
-        $sql = "SELECT SUM(qty) as qty";
-        $sql .= " FROM route_issue_daily_cal";
-        $sql .= " WHERE product_id =" . $product_id;
-        $sql .= " AND issue_trans_type=1";
-        $sql .= " AND date(trans_date) =" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " ";
-        if ($route_list != null) {
-            $sql .= " AND route_id in " . $route_list;
-        }
+    $sql = "SELECT SUM(qty) as qty";
+    $sql .= " FROM route_issue_daily_cal";
+    $sql .= " WHERE product_id =" . $product_id;
+    $sql .= " AND issue_trans_type=1";
+    $sql .= " AND date(trans_date) >=" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " ";
+    $sql .= " AND date(trans_date) <=" . "'" . date('Y-m-d', strtotime($find_to_date)) . "'" . " ";
+    if ($route_list != null) {
+        $sql .= " AND route_id in " . $route_list;
+    }
 
-        $sql .= " GROUP BY product_id";
-        $query = \Yii::$app->db->createCommand($sql);
-        $model = $query->queryAll();
-        if ($model) {
-            for ($i = 0; $i <= count($model) - 1; $i++) {
-                $sale_qty = $model[$i]['qty'];
-            }
+    $sql .= " GROUP BY product_id";
+    $query = \Yii::$app->db->createCommand($sql);
+    $model = $query->queryAll();
+    if ($model) {
+        for ($i = 0; $i <= count($model) - 1; $i++) {
+            $sale_qty = $model[$i]['qty'];
         }
-   // }
+    }
+    // }
 
 
     return $sale_qty;
 }
 
-function getReturnCar($route_list, $product_id, $order_date)
+function getReturnCar($route_list, $product_id, $order_date,$find_to_date)
 {
     $issue_qty = 0;
     $sql = "SELECT SUM(qty) as qty";
     $sql .= " FROM route_issue_daily_cal";
     $sql .= " WHERE product_id =" . $product_id;
     $sql .= " AND issue_trans_type=3";
-    $sql .= " AND date(trans_date) =" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " ";
+    $sql .= " AND date(trans_date) >=" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " ";
+    $sql .= " AND date(trans_date) <=" . "'" . date('Y-m-d', strtotime($find_to_date)) . "'" . " ";
     if ($route_list != null) {
         $sql .= " AND route_id in " . $route_list;
     }
