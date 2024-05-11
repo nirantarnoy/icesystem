@@ -848,6 +848,22 @@
 <!--                            </a>-->
 <!--                        </li>-->
                         <?php endif;?>
+                        <?php if (\Yii::$app->user->can('routesummarybystdgroup/index2')): ?>
+                            <li class="nav-item">
+                                <a href="index.php?r=routesummarybystdgroup/index2" class="nav-link routesummarybystdgroup">
+                                    <i class="far fa-circlez nav-icon"></i>
+                                    <p>รวมยอดประจำวัน</p>
+                                </a>
+                            </li>
+                        <?php endif;?>
+                        <?php if (\Yii::$app->user->can('salereportdistributor/index')): ?>
+                            <li class="nav-item">
+                                <a href="index.php?r=salereportdistributor/index" class="nav-link salereportdistributor">
+                                    <i class="far fa-circlez nav-icon"></i>
+                                    <p>รายงานสรุปขายยี่ปั๊วะ</p>
+                                </a>
+                            </li>
+                        <?php endif;?>
                         <!--                        <li class="nav-item">-->
                         <!--                            <a href="index.php?r=report" class="nav-link report">-->
                         <!--                                <i class="far fa-circlez nav-icon"></i>-->

@@ -1278,7 +1278,7 @@ class SiteController extends Controller
     public function actionStartcaldailymanagerauto()
     {
         $company_id = 1;
-        $branch_id = 1;
+        $branch_id = 2;
         $caldate = date('Y-m-d',strtotime('-1 day'));
         $xdate = explode('-',$caldate);
 
