@@ -346,6 +346,40 @@ $grand_total_all = [];
     </table>
 </div>
 <br/>
+  <?php
+  $model_expend = getRoutededuct($route_list,$find_date,$find_to_date);
+  ?>
+<table style="width: 30%;border: 1px solid grey;">
+    <tr>
+        <td style="border: 1px solid grey;padding: 5px;">หักค่าน้ำมัน</td>
+        <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=$model_expend!=null?number_format($model_expend[0]['oil_amount'],2):0?></b></td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid grey;;padding: 5px;">หักค่าเบี้ยเลี้ยง</td>
+        <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=$model_expend!=null?number_format($model_expend[0]['extra_amount'],2):0?></b></td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid grey;;padding: 5px;">หักค่าน้ำ</td>
+        <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=$model_expend!=null?number_format($model_expend[0]['water_amount'],2):0?></b></td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid grey;;padding: 5px;">หักค่าเก็บเงิน</td>
+        <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=$model_expend!=null?number_format($model_expend[0]['money_amount'],2):0?></b></td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid grey;;padding: 5px;">หัก</td>
+        <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=$model_expend!=null?number_format($model_expend[0]['deduct_amount'],2):0?></b></td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid grey;;padding: 5px;">ขายสด(โอน)</td>
+        <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=$model_expend!=null?number_format($model_expend[0]['cash_transfer_amount'],2):0?></b></td>
+    </tr>
+    <tr>
+        <td style="border: 1px solid grey;;padding: 5px;">ชำระหนี้โอน</td>
+        <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=$model_expend!=null?number_format($model_expend[0]['payment_transfer_amount'],2):0?></b></td>
+    </tr>
+</table>
+<br />
 <table width="100%" class="table-title">
     <td style="text-align: right">
         <button id="btn-export-excel" class="btn btn-secondary">Export Excel</button>
@@ -496,6 +530,28 @@ function getReturnCar($route_list, $product_id, $order_date,$find_to_date)
         }
     }
     return $issue_qty;
+}
+
+function getRoutededuct($route_list, $order_date,$find_to_date)
+{
+    $data = [];
+    $sql = "SELECT SUM(oil_amount) as oil_amount,SUM(wator_amount) as water_amount,SUM(extra_amount) as extra_amount,SUM(money_amount) as money_amount,SUM(deduct_amount) as deduct_amount,SUM(cash_transfer_amount) as cash_transfer_amount,SUM(payment_transfer_amount) as payment_transfer_amount";
+    $sql .= " FROM route_trans_expend_daily";
+    $sql .= " WHERE date(trans_date) >=" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " ";
+    $sql .= " AND date(trans_date) <=" . "'" . date('Y-m-d', strtotime($find_to_date)) . "'" . " ";
+    if ($route_list != null) {
+        $sql .= " AND route_id in " . $route_list;
+    }
+
+    //$sql .= " GROUP BY route_id";
+    $query = \Yii::$app->db->createCommand($sql);
+    $model = $query->queryAll();
+    if ($model) {
+        for ($i = 0; $i <= count($model) - 1; $i++) {
+            array_push($data, ['oil_amount'=>$model[$i]['oil_amount'],'water_amount'=>$model[$i]['water_amount'],'extra_amount'=>$model[$i]['extra_amount'],'money_amount'=>$model[$i]['money_amount'],'deduct_amount'=>$model[$i]['deduct_amount'],'cash_transfer_amount'=>$model[$i]['cash_transfer_amount'],'payment_transfer_amount'=>$model[$i]['payment_transfer_amount']]);
+        }
+    }
+    return $data;
 }
 
 

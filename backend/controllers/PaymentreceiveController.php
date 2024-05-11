@@ -395,7 +395,7 @@ class PaymentreceiveController extends Controller
             $sql .= " FROM query_sale_by_customer_pos as t1 LEFT JOIN query_sale_customer_pay_summary as t2 ON t2.order_ref_id=t1.order_id and t2.customer_id=t1.customer_id";
             $sql .= " WHERE t1.customer_id=" . $cus_id;
             $sql .= " AND t1.payment_method_id=2";
-            $sql .= " AND t1.payment_status=0";
+           // $sql .= " AND t1.payment_status=0";
             $sql .= " GROUP BY t1.customer_id,t1.order_id";
             $sql .= " ORDER BY t1.order_id";
             //$sql.=" AND t1.payment"
