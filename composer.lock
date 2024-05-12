@@ -403,6 +403,18 @@
         },
         {
             "name": "doctrine/deprecations",
+<<<<<<< HEAD
+            "version": "v1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/doctrine/deprecations.git",
+                "reference": "8cffffb2218e01f3b370bf763e00e81697725259"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/doctrine/deprecations/zipball/8cffffb2218e01f3b370bf763e00e81697725259",
+                "reference": "8cffffb2218e01f3b370bf763e00e81697725259",
+=======
             "version": "1.1.x-dev",
             "source": {
                 "type": "git",
@@ -413,6 +425,7 @@
                 "type": "zip",
                 "url": "https://api.github.com/repos/doctrine/deprecations/zipball/eac01fbdf4e4a3635169b056608730ec0930e188",
                 "reference": "eac01fbdf4e4a3635169b056608730ec0930e188",
+>>>>>>> c930cda9b2d2e3202a2c1b2b7262922c69c07d49
                 "shasum": ""
             },
             "require": {
@@ -445,9 +458,15 @@
             "homepage": "https://www.doctrine-project.org/",
             "support": {
                 "issues": "https://github.com/doctrine/deprecations/issues",
+<<<<<<< HEAD
+                "source": "https://github.com/doctrine/deprecations/tree/v1.1.0"
+            },
+            "time": "2023-05-29T18:55:17+00:00"
+=======
                 "source": "https://github.com/doctrine/deprecations/tree/1.1.x"
             },
             "time": "2023-06-07T19:57:14+00:00"
+>>>>>>> c930cda9b2d2e3202a2c1b2b7262922c69c07d49
         },
         {
             "name": "doctrine/lexer",

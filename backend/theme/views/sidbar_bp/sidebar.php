@@ -4,7 +4,7 @@
 <!--        <img src="--><?php //echo Yii::$app->request->baseUrl; ?><!--/uploads/logo/logo_bp.jpg" alt="Mind account"-->
 <!--             class="brand-image img-circle elevation-3"-->
 <!--             style="opacity: .8">-->
-        <span class="brand-text font-weight-light">BP ICE</span>
+        <span class="brand-text font-weight-light">DD ICE</span>
 <!--        <span class="brand-text font-weight-light">TARAICE</span>-->
     </a>
 
@@ -547,14 +547,6 @@
                                 </a>
                             </li>
                         <?php endif;?>
-                        <?php //if (\Yii::$app->user->can('adminreport/cardailyamount')): ?>
-                            <li class="nav-item">
-                                <a href="index.php?r=pos/printsummarydindang" class="nav-link pos">
-                                    <i class="far fa-circlez nav-icon"></i>
-                                    <p>รายงานแยกตามประเภทสินค้า</p>
-                                </a>
-                            </li>
-                        <?php //endif;?>
                     </ul>
                 </li>
                 <li class="nav-item has-treeview has-sub">

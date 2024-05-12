@@ -63,7 +63,9 @@ if ($model_product != null) {
 }
 
 if ($from_date != null && $to_date != null) {
-    $model_line = \common\models\QueryOrderCustomerProduct::find()->select(['id', 'order_no','name'])
+
+    $model_line = \common\models\QueryOrderCustomerProduct::find()->select(['id', 'order_no','order_date','customer_id','order_channel_id'])
+
         ->where(['BETWEEN', 'order_date', $from_date, $to_date])
         ->andFilterWhere(['status' => [1, 100]])
         ->andFilterWhere(['>', 'qty', 0]);
@@ -323,7 +325,11 @@ if ($from_date != null && $to_date != null) {
                 <td style="border: 1px solid grey;text-align: center;"><b>ลำดับ</b></td>
                 <td style="text-align: center;border: 1px solid grey">
                     <b>เลขที่ขาย</b></td>
-                <td style="border: 1px solid grey;text-align: center;"><b>ลูกค้า</b></td>
+
+                <td style="text-align: center;border: 1px solid grey">
+                    <b>วันที่</b></td>
+                <td style="text-align: center;border: 1px solid grey">
+                    <b>ลูกค้า</b></td>
                 <?php for ($y = 0; $y <= count($product_header_2) - 1; $y++): ?>
                     <td style="text-align: center;border: 1px solid grey"><?= \backend\models\Product::findName($product_header_2[$y]) ?></td>
                 <?php endfor; ?>
@@ -361,6 +367,14 @@ if ($from_date != null && $to_date != null) {
 //                    print_r($product_header_2);
 //                    echo '</pre>'    ;
 
+                $customer_name = '';
+                if($value->customer_id != null){
+                    $customer_name = \backend\models\Customer::findName($value->customer_id);
+                }else{
+                    $customer_name = \backend\models\Deliveryroute::findName($value->order_channel_id);
+                }
+
+
                     $main_order_new = getOrderMain($value->id, $product_list_text);
                     ?>
                     <tr>
@@ -368,7 +382,16 @@ if ($from_date != null && $to_date != null) {
                         <td style="text-align: center;border: 1px solid grey">
                             <?= $value->order_no; ?>
                         </td>
+<<<<<<< HEAD
                         <td style="text-align: center;border: 1px solid grey"><?= $value->name; ?></td>
+=======
+                        <td style="text-align: center;border: 1px solid grey">
+                            <?= date('d-m-Y H:i:s', strtotime($value->order_date)); ?>
+                        </td>
+                        <td style="text-align: center;border: 1px solid grey">
+                            <?= $customer_name; ?>
+                        </td>
+>>>>>>> f70eadc9231dd4b061446a19f05151bdff36870c
                         <?php for ($k = 0; $k <= count($product_header_3) - 1; $k++): ?>
                             <?php
 
@@ -420,8 +443,13 @@ if ($from_date != null && $to_date != null) {
             <?php endif; ?>
             <tfoot>
             <tr>
+<<<<<<< HEAD
                 <td style="font-size: 16px;border: 1px solid grey"></td>
                 <td colspan="2" style="font-size: 16px;border: 1px solid grey;text-align: center;"><b>รวมทั้งสิ้น</b></td>
+=======
+                <td colspan="3" style="font-size: 16px;border: 1px solid grey"></td>
+                <td style="font-size: 16px;border: 1px solid grey;text-align: center;"><b>รวมทั้งสิ้น</b></td>
+>>>>>>> f70eadc9231dd4b061446a19f05151bdff36870c
                 <?php for ($z = 0; $z <= count($total_all_line_qty_data) - 1; $z++): ?>
                     <td style="text-align: center;padding: 0px;padding-right: 5px;border: 1px solid grey">
                         <b><?= $total_all_line_qty_data[$z]['qty'] > 0 ? number_format($total_all_line_qty_data[$z]['qty'], 1) : '-' ?></b>

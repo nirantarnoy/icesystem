@@ -347,38 +347,101 @@ $grand_total_all = [];
 </div>
 <br/>
   <?php
+
+  $cash_pay = 0;
+  $transfer_pay = 0;
+
+  $oil_amount = 0;
+  $extra_amount = 0;
+  $water_amount = 0;
+  $money_amount = 0;
+
+  $deduct_amount = 0;
+  $cash_transfer_amount = 0;
+  $payment_transfer_amount = 0;
+
   $model_expend = getRoutededuct($route_list,$find_date,$find_to_date);
+  $payment_data = getPayment($find_date,$find_to_date,$route_list);
+
+
+  $send_money_amount = 0;
+
+  if($model_expend!=null) {
+      for ($x = 0; $x <= count($model_expend) - 1; $x++) {
+          $oil_amount += $model_expend[$x]['oil_amount'];
+          $extra_amount += $model_expend[$x]['extra_amount'];
+          $water_amount += $model_expend[$x]['water_amount'];
+          $money_amount += $model_expend[$x]['money_amount'];
+          $deduct_amount += $model_expend[$x]['deduct_amount'];
+          $cash_transfer_amount += $model_expend[$x]['cash_transfer_amount'];
+          $payment_transfer_amount += $model_expend[$x]['payment_transfer_amount'];
+      }
+  }
+
+  if($payment_data!=null){
+      for($y=0;$y<=count($payment_data)-1;$y++){
+          if($payment_data[$y]['status']=='เงินสด'){
+              $cash_pay = $payment_data[$y]['pay'];
+              $send_money_amount = ($total_all_cash + $payment_data[$y]['pay']) - ($oil_amount + $extra_amount + $water_amount + $money_amount + $deduct_amount + $cash_transfer_amount + $payment_transfer_amount);
+          }else if($payment_data[$y]['status']=='เงินโอน'){
+              $transfer_pay = $payment_data[$y]['pay'];
+          }
+      }
+
+
+  }
   ?>
-<table style="width: 30%;border: 1px solid grey;">
-    <tr>
-        <td style="border: 1px solid grey;padding: 5px;">หักค่าน้ำมัน</td>
-        <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=$model_expend!=null?number_format($model_expend[0]['oil_amount'],2):0?></b></td>
-    </tr>
-    <tr>
-        <td style="border: 1px solid grey;;padding: 5px;">หักค่าเบี้ยเลี้ยง</td>
-        <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=$model_expend!=null?number_format($model_expend[0]['extra_amount'],2):0?></b></td>
-    </tr>
-    <tr>
-        <td style="border: 1px solid grey;;padding: 5px;">หักค่าน้ำ</td>
-        <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=$model_expend!=null?number_format($model_expend[0]['water_amount'],2):0?></b></td>
-    </tr>
-    <tr>
-        <td style="border: 1px solid grey;;padding: 5px;">หักค่าเก็บเงิน</td>
-        <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=$model_expend!=null?number_format($model_expend[0]['money_amount'],2):0?></b></td>
-    </tr>
-    <tr>
-        <td style="border: 1px solid grey;;padding: 5px;">หัก</td>
-        <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=$model_expend!=null?number_format($model_expend[0]['deduct_amount'],2):0?></b></td>
-    </tr>
-    <tr>
-        <td style="border: 1px solid grey;;padding: 5px;">ขายสด(โอน)</td>
-        <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=$model_expend!=null?number_format($model_expend[0]['cash_transfer_amount'],2):0?></b></td>
-    </tr>
-    <tr>
-        <td style="border: 1px solid grey;;padding: 5px;">ชำระหนี้โอน</td>
-        <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=$model_expend!=null?number_format($model_expend[0]['payment_transfer_amount'],2):0?></b></td>
-    </tr>
-</table>
+<div class="row">
+    <div class="col-lg-6">
+        <table style="width: 50%;border: 1px solid grey;">
+            <tr>
+                <td style="border: 1px solid grey;padding: 5px;">หักค่าน้ำมัน</td>
+                <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=number_format($oil_amount,2)?></b></td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid grey;;padding: 5px;">หักค่าเบี้ยเลี้ยง</td>
+                <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=number_format($extra_amount,2)?></b></td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid grey;;padding: 5px;">หักค่าน้ำ</td>
+                <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=number_format($water_amount,2)?></b></td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid grey;;padding: 5px;">หักค่าเก็บเงิน</td>
+                <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=number_format($money_amount,2)?></b></td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid grey;;padding: 5px;">หัก</td>
+                <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=number_format($deduct_amount,2)?></b></td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid grey;;padding: 5px;">ขายสด(โอน)</td>
+                <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=number_format($cash_transfer_amount,2)?></b></td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid grey;;padding: 5px;">ชำระหนี้โอน</td>
+                <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=number_format($payment_transfer_amount,2)?></b></td>
+            </tr>
+        </table>
+    </div>
+    <div class="col-lg-6">
+        <table style="width: 70%">
+            <tr>
+                <td style="width: 30%;border: 1px solid lightgrey;padding: 5px;">ชำระหนี้เงินโอน</td>
+                <td style="text-align: right;border: 1px solid lightgrey;"><b><?=number_format($transfer_pay,2)?></b></td>
+            </tr>
+            <tr>
+                <td style="width: 30%;border: 1px solid lightgrey;padding: 5px;">ชำระหนี้เงินสด</td>
+                <td style="text-align: right;border: 1px solid lightgrey;"><b><?=number_format($cash_pay,2)?></b></td>
+            </tr>
+            <tr>
+                <td style="width: 30%;border: 1px solid lightgrey;padding: 5px;">รวมส่งเงิน</td>
+                <td style="text-align: right;border: 1px solid lightgrey;font-size: 25px;background-color: #00b44e;"><b><?=number_format($send_money_amount,2)?></b></td>
+            </tr>
+        </table>
+    </div>
+</div>
+
 <br />
 <table width="100%" class="table-title">
     <td style="text-align: right">
@@ -554,6 +617,61 @@ function getRoutededuct($route_list, $order_date,$find_to_date)
     return $data;
 }
 
+
+
+function getPayment($f_date, $t_date, $find_route_list)
+{
+
+    $data = [];
+
+            $sql2 = "SELECT t1.payment_channel_id,sum(t1.payment_amount) as payment_amount
+              FROM payment_receive_line as t1 INNER join payment_receive as t2 ON t1.payment_receive_id = t2.id inner join orders as t3 ON t1.order_id = t3.id
+             WHERE date(t2.trans_date)>= " . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
+             AND date(t2.trans_date)<= " . "'" . date('Y-m-d', strtotime($t_date)) . "'" . "
+             AND t1.payment_amount >0 
+             AND t1.payment_method_id =2 
+             AND t2.status <> 100";
+            if($find_route_list != null){
+                $sql2 .= " AND t3.order_channel_id in " . $find_route_list;
+            }
+            $sql2 .= " GROUP BY t1.payment_channel_id";
+            $query2 = \Yii::$app->db->createCommand($sql2);
+            $model2 = $query2->queryAll();
+            if ($model2) {
+                for ($x = 0; $x <= count($model2) - 1; $x++) {
+                    array_push($data, [
+                        'pay' => $model2[$x]['payment_amount'],
+                        'status'=> $model2[$x]['payment_channel_id'] == 1 ?'เงินสด':'เงินโอน',
+                    ]);
+                }
+            }
+
+    return $data;
+}
+function getPaymentLine($payment_id, $company_id, $branch_id)
+{
+
+    $data = [];
+    $sql = "SELECT t1.order_id,t1.payment_amount,t1.status,t2.crated_by,t1.payment_channel_id
+              FROM payment_receive_line as t1 INNER join payment_receive as t2 ON t1.payment_receive_id = t2.id
+             WHERE  t1.payment_receive_id = " . $payment_id . "
+             AND t1.payment_amount >0 
+             AND t1.payment_method_id =2 
+             AND t2.status <> 100
+             AND t2.company_id=" . $company_id . " AND t2.branch_id=" . $branch_id;
+    $sql .= " GROUP BY t1.order_id";
+    $query = \Yii::$app->db->createCommand($sql);
+    $model = $query->queryAll();
+    if ($model) {
+        for ($i = 0; $i <= count($model) - 1; $i++) {
+            array_push($data, [
+                'pay' => $model[$i]['payment_amount'],
+                'status'=> $model[$i]['payment_channel_id'] == 1 ?'เงินสด':'เงินโอน',
+            ]);
+        }
+    }
+    return $data;
+}
 
 ?>
 
