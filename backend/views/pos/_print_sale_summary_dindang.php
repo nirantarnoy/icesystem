@@ -63,7 +63,7 @@ if ($model_product != null) {
 }
 
 if ($from_date != null && $to_date != null) {
-    $model_line = \common\models\QueryOrderCustomerProduct::find()->select(['id', 'order_no'])
+    $model_line = \common\models\QueryOrderCustomerProduct::find()->select(['id', 'order_no','name'])
         ->where(['BETWEEN', 'order_date', $from_date, $to_date])
         ->andFilterWhere(['status' => [1, 100]])
         ->andFilterWhere(['>', 'qty', 0]);
@@ -323,9 +323,11 @@ if ($from_date != null && $to_date != null) {
                 <td style="border: 1px solid grey;text-align: center;"><b>ลำดับ</b></td>
                 <td style="text-align: center;border: 1px solid grey">
                     <b>เลขที่ขาย</b></td>
+                <td style="border: 1px solid grey;text-align: center;"><b>ลูกค้า</b></td>
                 <?php for ($y = 0; $y <= count($product_header_2) - 1; $y++): ?>
                     <td style="text-align: center;border: 1px solid grey"><?= \backend\models\Product::findName($product_header_2[$y]) ?></td>
                 <?php endfor; ?>
+
                 <td style="text-align: right;border: 1px solid grey"><b>จำนวน</b>
                 </td>
                 <td style="text-align: right;border: 1px solid grey"><b>จำนวนเงิน</b></td>
@@ -366,6 +368,7 @@ if ($from_date != null && $to_date != null) {
                         <td style="text-align: center;border: 1px solid grey">
                             <?= $value->order_no; ?>
                         </td>
+                        <td style="text-align: center;border: 1px solid grey"><?= $value->name; ?></td>
                         <?php for ($k = 0; $k <= count($product_header_3) - 1; $k++): ?>
                             <?php
 
@@ -418,7 +421,7 @@ if ($from_date != null && $to_date != null) {
             <tfoot>
             <tr>
                 <td style="font-size: 16px;border: 1px solid grey"></td>
-                <td style="font-size: 16px;border: 1px solid grey;text-align: center;"><b>รวมทั้งสิ้น</b></td>
+                <td colspan="2" style="font-size: 16px;border: 1px solid grey;text-align: center;"><b>รวมทั้งสิ้น</b></td>
                 <?php for ($z = 0; $z <= count($total_all_line_qty_data) - 1; $z++): ?>
                     <td style="text-align: center;padding: 0px;padding-right: 5px;border: 1px solid grey">
                         <b><?= $total_all_line_qty_data[$z]['qty'] > 0 ? number_format($total_all_line_qty_data[$z]['qty'], 1) : '-' ?></b>
