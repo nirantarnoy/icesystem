@@ -4,7 +4,7 @@
 <!--        <img src="--><?php //echo Yii::$app->request->baseUrl; ?><!--/uploads/logo/logo_bp.jpg" alt="Mind account"-->
 <!--             class="brand-image img-circle elevation-3"-->
 <!--             style="opacity: .8">-->
-        <span class="brand-text font-weight-light">BP ICE</span>
+        <span class="brand-text font-weight-light">DD ICE</span>
 <!--        <span class="brand-text font-weight-light">TARAICE</span>-->
     </a>
 

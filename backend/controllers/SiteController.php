@@ -29,7 +29,7 @@ class SiteController extends Controller
 //                        'allow' => false,
 //                    ],
                     [
-                        'actions' => ['login', 'error', 'createadmin', 'changepassword', 'decodex', 'grab', 'addseconduser', 'getcominfo', 'transactionsalecar', 'transactionsalecar2', 'transactionsalecar3', 'createscreenshort', 'transactionsalepos', 'updateroute', 'calmachine', 'clearorder','testclosesum','updateorderpayment','caltransactionsaledistributor','startcaldailymanagerauto','summarybystdgroup'],
+                        'actions' => ['login', 'error', 'createadmin', 'changepassword', 'decodex', 'grab', 'addseconduser', 'getcominfo', 'transactionsalecar', 'transactionsalecar2', 'transactionsalecar3', 'createscreenshort', 'transactionsalepos', 'updateroute', 'calmachine', 'clearorder','testclosesum','updateorderpayment','caltransactionsaledistributor','caltransactionsaledistributorauto','startcaldailymanagerauto','summarybystdgroup'],
                         'allow' => true,
                     ],
                     [
@@ -1147,6 +1147,8 @@ class SiteController extends Controller
         }
        // print_r($xdate);return;
         $started = microtime(true);
+
+//        echo $cal_date;return;
 
         //\common\models\TransactionCarSale::deleteAll(['date(trans_date)'=>date('Y-m-d')]);
         \common\models\TransactionDistributorSale::deleteAll(['date(trans_date)' => $cal_date, 'company_id' => $company_id, 'branch_id' => $branch_id]);

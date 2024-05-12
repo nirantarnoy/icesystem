@@ -21,7 +21,7 @@ $this->title = 'สินค้าคงเหลือสายส่ง :'. \b
                 <td><?=\backend\models\Product::findName($value->product_id)?></td>
                 <td>
                     <input type="hidden" name="line_id[]" value="<?=$value->id;?>">
-                    <input type="number" class="form-control" name="line_qty[]" min="0" value="<?=$value->avl_qty?>">
+                    <input type="number" class="form-control" name="line_qty[]" min="0" step="any" value="<?=$value->avl_qty?>">
                 </td>
             </tr>
             <?php endforeach;?>
