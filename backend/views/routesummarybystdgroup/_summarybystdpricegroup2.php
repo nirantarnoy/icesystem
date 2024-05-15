@@ -381,14 +381,18 @@ $grand_total_all = [];
   if($payment_data!=null){
       for($y=0;$y<=count($payment_data)-1;$y++){
           if($payment_data[$y]['status']=='เงินสด'){
+
               $cash_pay = $payment_data[$y]['pay'];
-              $send_money_amount = ($total_all_cash + $payment_data[$y]['pay']) - ($oil_amount + $extra_amount + $water_amount + $money_amount + $deduct_amount + $cash_transfer_amount + $payment_transfer_amount);
+//              $send_money_amount = ($total_all_cash + $cash_pay) - ($oil_amount + $extra_amount + $water_amount + $money_amount + $deduct_amount + $cash_transfer_amount + $payment_transfer_amount);
           }else if($payment_data[$y]['status']=='เงินโอน'){
+
               $transfer_pay = $payment_data[$y]['pay'];
+//              $send_money_amount = $total_all_cash  - ($oil_amount + $extra_amount + $water_amount + $money_amount + $deduct_amount + $cash_transfer_amount + $payment_transfer_amount);
           }
       }
-
-
+      $send_money_amount = ($total_all_cash + $cash_pay) - ($oil_amount + $extra_amount + $water_amount + $money_amount + $deduct_amount + $cash_transfer_amount + $payment_transfer_amount);
+  }else{
+      $send_money_amount = ($total_all_cash + $cash_pay)  - ($oil_amount + $extra_amount + $water_amount + $money_amount + $deduct_amount + $cash_transfer_amount + $payment_transfer_amount);
   }
   ?>
 <div class="row">

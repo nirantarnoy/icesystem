@@ -23,6 +23,7 @@ class TransferController extends Controller
                     'findtransfer' => ['POST'],
                     'accepttransfer' => ['POST'],
                     'canceltransfer' => ['POST'],
+                    'gettransferbranch' => ['POST'],
                 ],
             ],
         ];
@@ -330,4 +331,34 @@ class TransferController extends Controller
 
         return ['status' => $status, 'data' => $data];
     }
+
+    public function actionGettransferbranch()
+    {
+        $status = 0;
+        $data = [];
+
+        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
+        $req_data = \Yii::$app->request->getBodyParams();
+
+        $company_id = $req_data['company_id'];
+        $branch_id = $req_data['branch_id'];
+
+        if ($company_id != null && $branch_id != null) {
+            $model = \backend\models\Transferbranch::find()->select(['id','name'])->where(['status'=>1])->all();
+            if ($model) {
+                $status = 1;
+                foreach ($model as $value) {
+                    array_push($data, [
+                        'id' => $value->id,
+                        'name' => $value->name,
+
+                    ]);
+                }
+            }
+        }
+
+
+        return ['status' => $status, 'data' => $data];
+    }
+
 }

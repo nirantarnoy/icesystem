@@ -547,14 +547,14 @@
                                 </a>
                             </li>
                         <?php endif;?>
-                        <?php //if (\Yii::$app->user->can('adminreport/cardailyamount')): ?>
+                        <?php  if(\Yii::$app->user->can('pos/printsummarydindang')): ?>
                             <li class="nav-item">
                                 <a href="index.php?r=pos/printsummarydindang" class="nav-link pos">
                                     <i class="far fa-circlez nav-icon"></i>
                                     <p>รายงานแยกตามประเภทสินค้า</p>
                                 </a>
                             </li>
-                        <?php //endif;?>
+                        <?php endif;?>
                     </ul>
                 </li>
                 <li class="nav-item has-treeview has-sub">
