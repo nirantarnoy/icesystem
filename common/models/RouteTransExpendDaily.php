@@ -36,7 +36,7 @@ class RouteTransExpendDaily extends \yii\db\ActiveRecord
             [['trans_date'], 'safe'],
             [['route_id', 'route_trans_expend_id'], 'integer'],
             [['oil_amount', 'wator_amount', 'extra_amount', 'money_amount', 'deduct_amount'], 'number'],
-            [['cash_transfer_amount','payment_transfer_amount'], 'number'],
+            [['cash_transfer_amount','payment_transfer_amount','plus_amount'], 'number'],
         ];
     }
 

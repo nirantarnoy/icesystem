@@ -88,6 +88,7 @@ class RoutetransexpendController extends Controller
                 $line_deduct_5 = \Yii::$app->request->post('line_deduct5');
                 $line_deduct_6 = \Yii::$app->request->post('line_deduct6');
                 $line_deduct_7 = \Yii::$app->request->post('line_deduct7');
+                $line_deduct_8 = \Yii::$app->request->post('line_deduct8');
 
                 $model->trans_date = date('Y-m-d H:i:s', strtotime($trans_date));
                 if ($model->save(false)) {
@@ -104,6 +105,7 @@ class RoutetransexpendController extends Controller
                             $model_line->deduct_amount = $line_deduct_5[$key] == null ? 0 : $line_deduct_5[$key];
                             $model_line->cash_transfer_amount = $line_deduct_6[$key] == null ? 0 : $line_deduct_6[$key];
                             $model_line->payment_transfer_amount = $line_deduct_7[$key] == null ? 0 : $line_deduct_7[$key];
+                            $model_line->plus_amount = $line_deduct_8[$key] == null ? 0 : $line_deduct_8[$key];
                             $model_line->save(false);
                         }
                     }

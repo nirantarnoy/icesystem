@@ -355,6 +355,7 @@ $grand_total_all = [];
   $extra_amount = 0;
   $water_amount = 0;
   $money_amount = 0;
+  $plus_amount = 0;
 
   $deduct_amount = 0;
   $cash_transfer_amount = 0;
@@ -375,6 +376,7 @@ $grand_total_all = [];
           $deduct_amount += $model_expend[$x]['deduct_amount'];
           $cash_transfer_amount += $model_expend[$x]['cash_transfer_amount'];
           $payment_transfer_amount += $model_expend[$x]['payment_transfer_amount'];
+          $plus_amount += $model_expend[$x]['plus_amount'];
       }
   }
 
@@ -390,9 +392,9 @@ $grand_total_all = [];
 //              $send_money_amount = $total_all_cash  - ($oil_amount + $extra_amount + $water_amount + $money_amount + $deduct_amount + $cash_transfer_amount + $payment_transfer_amount);
           }
       }
-      $send_money_amount = ($total_all_cash + $cash_pay) - ($oil_amount + $extra_amount + $water_amount + $money_amount + $deduct_amount + $cash_transfer_amount + $payment_transfer_amount);
+      $send_money_amount = ($total_all_cash + $cash_pay + $plus_amount) - ($oil_amount + $extra_amount + $water_amount + $money_amount + $deduct_amount + $cash_transfer_amount + $payment_transfer_amount);
   }else{
-      $send_money_amount = ($total_all_cash + $cash_pay)  - ($oil_amount + $extra_amount + $water_amount + $money_amount + $deduct_amount + $cash_transfer_amount + $payment_transfer_amount);
+      $send_money_amount = ($total_all_cash + $cash_pay + $plus_amount)  - ($oil_amount + $extra_amount + $water_amount + $money_amount + $deduct_amount + $cash_transfer_amount + $payment_transfer_amount);
   }
   ?>
 <div class="row">
@@ -425,6 +427,10 @@ $grand_total_all = [];
             <tr>
                 <td style="border: 1px solid grey;;padding: 5px;">ชำระหนี้โอน</td>
                 <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=number_format($payment_transfer_amount,2)?></b></td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid grey;;padding: 5px;text-align: left;"><b>+</b></td>
+                <td style="text-align: right;border: 1px solid grey;padding: 5px;"><b><?=number_format($plus_amount,2)?></b></td>
             </tr>
         </table>
     </div>
@@ -463,7 +469,7 @@ function getQtyByPrice($route_list, $price, $sale_type, $order_date,$find_to_dat
     $sql = "SELECT SUM(qty) as qty";
     $sql .= " FROM route_trans_price_cal";
     $sql .= " WHERE product_id =" . $product_id;
-    $sql .= " AND price = " . $price;
+    $sql .= " AND CAST(price as DECIMAL) = CAST(" . $price." as DECIMAL)";
     $sql .= " AND std_price_type = " . $sale_type;
     $sql .= " AND date(trans_date) >=" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " ";
     $sql .= " AND date(trans_date) <=" . "'" . date('Y-m-d', strtotime($find_to_date)) . "'" . " ";
@@ -602,7 +608,7 @@ function getReturnCar($route_list, $product_id, $order_date,$find_to_date)
 function getRoutededuct($route_list, $order_date,$find_to_date)
 {
     $data = [];
-    $sql = "SELECT SUM(oil_amount) as oil_amount,SUM(wator_amount) as water_amount,SUM(extra_amount) as extra_amount,SUM(money_amount) as money_amount,SUM(deduct_amount) as deduct_amount,SUM(cash_transfer_amount) as cash_transfer_amount,SUM(payment_transfer_amount) as payment_transfer_amount";
+    $sql = "SELECT SUM(oil_amount) as oil_amount,SUM(wator_amount) as water_amount,SUM(extra_amount) as extra_amount,SUM(money_amount) as money_amount,SUM(deduct_amount) as deduct_amount,SUM(cash_transfer_amount) as cash_transfer_amount,SUM(payment_transfer_amount) as payment_transfer_amount,SUM(plus_amount) as plus_amount";
     $sql .= " FROM route_trans_expend_daily";
     $sql .= " WHERE date(trans_date) >=" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " ";
     $sql .= " AND date(trans_date) <=" . "'" . date('Y-m-d', strtotime($find_to_date)) . "'" . " ";
@@ -615,7 +621,7 @@ function getRoutededuct($route_list, $order_date,$find_to_date)
     $model = $query->queryAll();
     if ($model) {
         for ($i = 0; $i <= count($model) - 1; $i++) {
-            array_push($data, ['oil_amount'=>$model[$i]['oil_amount'],'water_amount'=>$model[$i]['water_amount'],'extra_amount'=>$model[$i]['extra_amount'],'money_amount'=>$model[$i]['money_amount'],'deduct_amount'=>$model[$i]['deduct_amount'],'cash_transfer_amount'=>$model[$i]['cash_transfer_amount'],'payment_transfer_amount'=>$model[$i]['payment_transfer_amount']]);
+            array_push($data, ['oil_amount'=>$model[$i]['oil_amount'],'water_amount'=>$model[$i]['water_amount'],'extra_amount'=>$model[$i]['extra_amount'],'money_amount'=>$model[$i]['money_amount'],'deduct_amount'=>$model[$i]['deduct_amount'],'cash_transfer_amount'=>$model[$i]['cash_transfer_amount'],'payment_transfer_amount'=>$model[$i]['payment_transfer_amount'],'plus_amount'=>$model[$i]['plus_amount']]);
         }
     }
     return $data;

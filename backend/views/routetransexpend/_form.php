@@ -45,6 +45,7 @@ $model_route = \backend\models\Deliveryroute::find()->where(['>=','id',949])->an
                     <th>หัก</th>
                     <th>ขายสด(โอน)</th>
                     <th>ชำระหนี้(โอน)</th>
+                    <th>บวก</th>
                     <!--                    <th>รวม</th>-->
                 </tr>
                 </thead>
@@ -58,6 +59,7 @@ $model_route = \backend\models\Deliveryroute::find()->where(['>=','id',949])->an
                       $deduct_5 = 0;
                       $deduct_6 = 0;
                       $deduct_7 = 0;
+                      $deduct_8 = 0;
                       $total = 0;
                        if($model_line != null) {
                            foreach ($model_line as $valuex) {
@@ -69,6 +71,7 @@ $model_route = \backend\models\Deliveryroute::find()->where(['>=','id',949])->an
                                    $deduct_5 = $valuex->deduct_amount;
                                    $deduct_6 = $valuex->cash_transfer_amount;
                                    $deduct_7 = $valuex->payment_transfer_amount;
+                                   $deduct_8 = $valuex->plus_amount;
                                    //   $total = $valuex->total;
                                } else {
 
@@ -100,6 +103,9 @@ $model_route = \backend\models\Deliveryroute::find()->where(['>=','id',949])->an
                       </td>
                       <td>
                           <input type="number" min="0" class="form-control" name="line_deduct7[]" value="<?=$deduct_7?>">
+                      </td>
+                      <td>
+                          <input type="number" min="0" class="form-control" name="line_deduct8[]" value="<?=$deduct_8?>">
                       </td>
                       <!--                      <td>-->
 <!--                          <input type="number" min="0" class="form-control" name="line_total[]" value="" readonly>-->

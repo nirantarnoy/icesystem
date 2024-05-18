@@ -481,8 +481,8 @@ class PaymentreceiveController extends Controller
             // $model = \common\models\QuerySalePaySummary::find()->where(['customer_id' => $cus_id])->andFilterWhere(['>', 'remain_amount', 0])->all();
             //  $model = \common\models\QuerySalePosPaySummary::find()->where(['customer_id' => $cus_id])->andfilterWhere(['OR',['is','payment_amount',new \yii\db\Expression('null')],['>', 'remain_amount', 0]])->all();
 
-            $sql = "SELECT t1.customer_id,t1.order_id,t1.order_date,t1.line_total,SUM(t2.payment_amount)as payment_amount, t1.line_total - SUM(t2.payment_amount) as remain_amount";
-            $sql .= " FROM query_sale_by_customer_car as t1 INNER JOIN query_sale_customer_pay_summary as t2 ON t2.order_ref_id=t1.order_id and t2.customer_id=t1.customer_id";
+            $sql = "SELECT t1.customer_id,t1.order_id,t1.order_date,t1.line_total,CASE  WHEN SUM(t2.payment_amount) is null THEN 0 ELSE  SUM(t2.payment_amount) END  as payment_amount, t1.line_total - CASE  WHEN SUM(t2.payment_amount) is null THEN 0 ELSE  SUM(t2.payment_amount) END as remain_amount";
+            $sql .= " FROM query_sale_by_customer_car as t1 LEFT JOIN query_sale_customer_pay_summary as t2 ON t2.order_ref_id=t1.order_id and t2.customer_id=t1.customer_id";
             $sql .= " WHERE t1.customer_id=" . $cus_id;
             $sql .= " AND t1.payment_method_id=2";
             $sql .= " GROUP BY t1.customer_id,t1.order_id";
