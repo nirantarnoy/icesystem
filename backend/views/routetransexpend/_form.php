@@ -84,28 +84,28 @@ $model_route = \backend\models\Deliveryroute::find()->where(['>=','id',949])->an
                           <input type="hidden" name="line_route_id[]" value="<?=$value->id;?>">
                           <?= $value->name; ?></td>
                       <td>
-                          <input type="number" min="0" class="form-control" name="line_deduct1[]" value="<?=$deduct_1?>">
+                          <input type="number" min="0" class="form-control" name="line_deduct1[]" step="0.1" value="<?=$deduct_1?>">
                       </td>
                       <td>
-                          <input type="number" min="0" class="form-control" name="line_deduct2[]" value="<?=$deduct_2?>">
+                          <input type="number" min="0" class="form-control" name="line_deduct2[]" step="0.1" value="<?=$deduct_2?>">
                       </td>
                       <td>
-                          <input type="number" min="0" class="form-control" name="line_deduct3[]" value="<?=$deduct_3?>">
+                          <input type="number" min="0" class="form-control" name="line_deduct3[]" step="0.1" value="<?=$deduct_3?>">
                       </td>
                       <td>
-                          <input type="number" min="0" class="form-control" name="line_deduct4[]" value="<?=$deduct_4?>">
+                          <input type="number" min="0" class="form-control" name="line_deduct4[]" step="0.1" value="<?=$deduct_4?>">
                       </td>
                       <td>
-                          <input type="number" min="0" class="form-control" name="line_deduct5[]" value="<?=$deduct_5?>">
+                          <input type="number" min="0" class="form-control" name="line_deduct5[]" step="0.1" value="<?=$deduct_5?>">
                       </td>
                       <td>
-                          <input type="number" min="0" class="form-control" name="line_deduct6[]" value="<?=$deduct_6?>">
+                          <input type="number" min="0" class="form-control" name="line_deduct6[]" step="0.1" value="<?=$deduct_6?>">
                       </td>
                       <td>
-                          <input type="number" min="0" class="form-control" name="line_deduct7[]" value="<?=$deduct_7?>">
+                          <input type="number" min="0" class="form-control" name="line_deduct7[]" step="0.1" value="<?=$deduct_7?>">
                       </td>
                       <td>
-                          <input type="number" min="0" class="form-control" name="line_deduct8[]" value="<?=$deduct_8?>">
+                          <input type="number" min="0" class="form-control" name="line_deduct8[]" step="0.1" value="<?=$deduct_8?>">
                       </td>
                       <!--                      <td>-->
 <!--                          <input type="number" min="0" class="form-control" name="line_total[]" value="" readonly>-->

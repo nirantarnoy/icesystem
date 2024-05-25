@@ -49,7 +49,7 @@ class Transferbranch extends \common\models\TransferBranch
 
 
     public static function findName($id){
-        $model = Transferbrach::find()->where(['id'=>$id])->one();
+        $model = Transferbranch::find()->where(['id'=>$id])->one();
         return $model != null?$model->name:'';
     }
 

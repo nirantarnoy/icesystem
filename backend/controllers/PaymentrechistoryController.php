@@ -104,11 +104,13 @@ class PaymentrechistoryController extends Controller
         $to_date = \Yii::$app->request->post('to_date');
         //  $find_sale_type = \Yii::$app->request->post('find_sale_type');
         $find_user_id = \Yii::$app->request->post('find_user_id');
+        $find_customer_id = \Yii::$app->request->post('find_customer_id');
         return $this->render('_print_car_payment', [
             'from_date' => $from_date,
             'to_date' => $to_date,
             //    'find_sale_type'=>$find_sale_type,
             'find_user_id' => $find_user_id,
+            'find_customer_id' => $find_customer_id,
             'company_id' => $company_id,
             'branch_id' => $branch_id,
         ]);

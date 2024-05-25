@@ -1727,8 +1727,7 @@ class PosController extends Controller
 
 
                     $model_trans = new \common\models\TransactionPosSaleSum();
-                 //   $model_trans->trans_date = $cal_date;
-                    $model_trans->trans_date = date('Y-m-d H:i:s', strtotime($login_date));
+                    $model_trans->trans_date = $cal_date;
                     $model_trans->product_id = $line_prod_id[$i];
                     $model_trans->cash_qty = $line_cash_qty[$i];
                     $model_trans->credit_qty = $line_credit_qty[$i];//$new_line_credit_qty;
@@ -2733,6 +2732,11 @@ class PosController extends Controller
         $to_date = date('Y-m-d');
 
         $findcaldate = date('Y-m-d');
+//        if(count($caldate) >1){
+//            $findcaldate = $xdate[2].'/'.$xdate[1].'/'.$xdate[0].' '.'00:01:01';
+//            $from_date = $findcaldate;
+//            $to_date = $findcaldate;
+//        }
         if($xdate!=null){
             if(count($xdate) >1){
                 $findcaldate = $xdate[2].'/'.$xdate[1].'/'.$xdate[0].' '.'00:01:01';
@@ -2740,7 +2744,6 @@ class PosController extends Controller
                 $to_date = $findcaldate;
             }
         }
-
 
         $find_sale_type = 0;
         $sum_qty_all = 0;

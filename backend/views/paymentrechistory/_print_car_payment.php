@@ -11,6 +11,12 @@ use yii\web\Response;
 // เพิ่ม Font ให้กับ mPDF
 
 $user_id = \Yii::$app->user->id;
+$user_name = \Yii::$app->user->identity->username;
+
+$has_allow = 0;
+if ($user_name == 'adpang') {
+    $has_allow = 1;
+}
 
 $defaultFontConfig = (new Mpdf\Config\FontVariables())->getDefaults();
 $fontData = $defaultFontConfig['fontdata'];
@@ -178,7 +184,7 @@ $mpdf->AddPageByArray([
                         <?php
                         echo \kartik\select2\Select2::widget([
                             'name' => 'find_user_id',
-                            'data' => \yii\helpers\ArrayHelper::map(\backend\models\Deliveryroute::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id,'status'=>1])->all(), 'id', 'name'),
+                            'data' => \yii\helpers\ArrayHelper::map(\backend\models\Deliveryroute::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'status' => 1])->all(), 'id', 'name'),
                             'value' => $find_user_id,
                             'options' => [
                                 'placeholder' => '--สายส่ง--'
@@ -190,6 +196,24 @@ $mpdf->AddPageByArray([
                         ]);
                         ?>
                     </td>
+                    <?php if ($has_allow == 1): ?>
+                        <td>
+                            <?php
+                            echo \kartik\select2\Select2::widget([
+                                'name' => 'find_customer_id',
+                                'data' => \yii\helpers\ArrayHelper::map(\backend\models\Customer::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'status' => 1, 'is_show_pos' => 0])->all(), 'id', 'name'),
+                                'value' => $find_customer_id,
+                                'options' => [
+                                    'placeholder' => '--ลูกค้า--'
+                                ],
+                                'pluginOptions' => [
+                                    'allowClear' => true,
+                                    'multiple' => true,
+                                ]
+                            ]);
+                            ?>
+                        </td>
+                    <?php endif; ?>
                     <td>
                         <input type="submit" class="btn btn-primary" value="ค้นหา">
                     </td>
@@ -247,9 +271,20 @@ $mpdf->AddPageByArray([
                 <?php for ($k = 0; $k <= count($find_user_id) - 1; $k++): ?>
                     <?php
                     $line_route_code = \backend\models\Deliveryroute::findName($find_user_id[$k]);
+                    $customer_id = '';
+                    if ($find_customer_id != null) {
+                        for($z=0;$z<=count($find_customer_id)-1;$z++){
+                            if($z==0){
+                                $customer_id = $find_customer_id[$z];
+                            }else{
+                                $customer_id = $customer_id.','.$find_customer_id[$z];
+                            }
+                        }
+                     //   $customer_id = $find_customer_id[$k];
+                    }
                     ?>
 
-                    <?php $find_order = getPayment($from_date, $to_date, 0, $find_user_id[$k], $company_id, $branch_id); ?>
+                    <?php $find_order = getPayment($from_date, $to_date, 0, $find_user_id[$k], $company_id, $branch_id, $customer_id, $has_allow); ?>
                     <?php if ($find_order != null): ?>
                         <?php
                         $loop_count = count($find_order);
@@ -292,22 +327,22 @@ $mpdf->AddPageByArray([
                                                 <td>รับชำระโดย</td>
                                             </tr>
                                             <?php for ($k = 0; $k <= count($payline) - 1; $k++): ?>
-                                            <?php
-                                               $order_credit = \backend\models\Orders::getlinesumcredit($payline[$k]['order_id']);
-                                                if($payline[$k]['status'] == 'เงินสด'){
+                                                <?php
+                                                $order_credit = \backend\models\Orders::getlinesumcredit($payline[$k]['order_id']);
+                                                if ($payline[$k]['status'] == 'เงินสด') {
                                                     $payment_cash = ($payment_cash + $payline[$k]['pay']);
-                                                }else  if($payline[$k]['status'] == 'เงินโอน'){
+                                                } else if ($payline[$k]['status'] == 'เงินโอน') {
                                                     $payment_transfer = ($payment_transfer + $payline[$k]['pay']);
                                                 }
-                                            ?>
+                                                ?>
                                                 <tr>
-                                                    <td><?=\backend\models\Orders::getOrderdate($payline[$k]['order_id'])?></td>
-                                                    <td><?=\backend\models\Orders::getNumber($payline[$k]['order_id'])?></td>
-                                                    <td><?=number_format($order_credit,2)?></td>
-                                                    <td><?=number_format($payline[$k]['pay'],2)?></td>
-                                                    <td><?=number_format($order_credit - $payline[$k]['pay'],2)?></td>
-                                                    <td style="color: red"><?=$payline[$k]['status']?></td>
-                                                    <td style="color: red"><?= $payline[$k]['user']?></td>
+                                                    <td><?= \backend\models\Orders::getOrderdate($payline[$k]['order_id']) ?></td>
+                                                    <td><?= \backend\models\Orders::getNumber($payline[$k]['order_id']) ?></td>
+                                                    <td><?= number_format($order_credit, 2) ?></td>
+                                                    <td><?= number_format($payline[$k]['pay'], 2) ?></td>
+                                                    <td><?= number_format($order_credit - $payline[$k]['pay'], 2) ?></td>
+                                                    <td style="color: red"><?= $payline[$k]['status'] ?></td>
+                                                    <td style="color: red"><?= $payline[$k]['user'] ?></td>
                                                 </tr>
                                             <?php endfor; ?>
                                         </table>
@@ -360,11 +395,11 @@ $mpdf->AddPageByArray([
             <table style="border: 1px solid grey;">
                 <tr>
                     <td style="width: 20%">เงินสด</td>
-                    <td><?=number_format($payment_cash,2)?></td>
+                    <td><?= number_format($payment_cash, 2) ?></td>
                 </tr>
                 <tr>
                     <td>เงินโอน</td>
-                    <td><?=number_format($payment_transfer, 2)?></td>
+                    <td><?= number_format($payment_transfer, 2) ?></td>
                 </tr>
             </table>
         </div>
@@ -384,7 +419,7 @@ $mpdf->AddPageByArray([
     </html>
 
 <?php
-function getPayment($f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id)
+function getPayment($f_date, $t_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $find_customer_id, $has_allow)
 {
     $list_route_id = null;
 
@@ -402,10 +437,17 @@ function getPayment($f_date, $t_date, $find_sale_type, $find_user_id, $company_i
               WHERE (date(t1.trans_date)>= " . "'" . date('Y-m-d', strtotime($f_date)) . "'" . " 
               AND date(t1.trans_date)<= " . "'" . date('Y-m-d', strtotime($t_date)) . "'" . " )
               AND t1.status <> 100 
-              AND t1.payment_method_id=2 AND  t2.delivery_route_id =".$find_user_id."
+              AND t1.payment_method_id=2
               AND t1.company_id=" . $company_id . " AND t1.branch_id=" . $branch_id;
 
-
+    if ($find_user_id > 0) {
+        $sql .= " AND t2.delivery_route_id =" . $find_user_id;
+    }
+    if ($has_allow == 1) {
+        if ($find_customer_id > 0) {
+            $sql .= " AND t1.customer_id in (" . $find_customer_id . ")" ;
+        }
+    }
 
     $sql .= " GROUP BY t1.id,t1.journal_no";
     $query = \Yii::$app->db->createCommand($sql);
@@ -455,7 +497,7 @@ function getPaymentLine($payment_id, $company_id, $branch_id)
                 'order_id' => $model[$i]['order_id'],
                 'pay' => $model[$i]['payment_amount'],
 //                'status'=> $model[$i]['status'] == 3 ?'ยกเลิก':'ชำระแล้ว',
-                'status'=> $model[$i]['payment_channel_id'] == 1 ?'เงินสด':'เงินโอน',
+                'status' => $model[$i]['payment_channel_id'] == 1 ? 'เงินสด' : 'เงินโอน',
                 'user' => \backend\models\User::findName($model[$i]['crated_by']),
             ]);
         }

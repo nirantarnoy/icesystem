@@ -310,6 +310,7 @@ class ProductionController extends Controller
                     $model->company_id = $company_id;
                     $model->branch_id = $branch_id;
                     $model->created_by = $user_id;
+                    $model->transfer_branch_id = $datalist[$i]['transfer_branch_id'];
                     if ($model->save(false)) {
                         $status = 1;
                         $this->updateSummary($datalist[$i]['product_id'], $warehouse_id, $datalist[$i]['qty']);
@@ -2116,6 +2117,7 @@ class ProductionController extends Controller
                         $model->company_id = $company_id;
                         $model->branch_id = $branch_id;
                         $model->created_by = $user_id;
+                        $model->lot_no =  $datalist[$i]['taypay_no']; // for mobile prodrec specific taypay_no
                         $model->status = 0;
                         if ($model->save(false)) {
                             $status = 1;

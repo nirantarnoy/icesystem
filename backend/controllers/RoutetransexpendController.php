@@ -41,6 +41,7 @@ class RoutetransexpendController extends Controller
         $pageSize = \Yii::$app->request->post("perpage");
         $searchModel = new RoutetransexpendSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+        $dataProvider->query->orderBy(['id' => SORT_DESC]);
         $dataProvider->pagination->pageSize = $pageSize;
 
         return $this->render('index', [
@@ -150,7 +151,7 @@ class RoutetransexpendController extends Controller
                 $line_deduct_5 = \Yii::$app->request->post('line_deduct5');
                 $line_deduct_6 = \Yii::$app->request->post('line_deduct6');
                 $line_deduct_7 = \Yii::$app->request->post('line_deduct7');
-
+                $line_deduct_8 = \Yii::$app->request->post('line_deduct8');
 
             }
             $model->trans_date = date('Y-m-d H:i:s', strtotime($trans_date));
@@ -166,6 +167,7 @@ class RoutetransexpendController extends Controller
                         $model_update->deduct_amount = $line_deduct_5[$key] == null ? 0 : $line_deduct_5[$key];
                         $model_update->cash_transfer_amount = $line_deduct_6[$key] == null ? 0 : $line_deduct_6[$key];
                         $model_update->payment_transfer_amount = $line_deduct_7[$key] == null ? 0 : $line_deduct_7[$key];
+                        $model_update->plus_amount = $line_deduct_8[$key] == null ? 0 : $line_deduct_8[$key];
                         $model_update->save(false);
                     }
                 }

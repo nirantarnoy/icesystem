@@ -82,7 +82,7 @@ class RoutesummarybystdgroupController extends Controller
         ]);
     }
 
-    public function actionDailycal()
+    public function actionDailycal($route_id)
     {
 
 //        $date=date_create("2013-03-15");
@@ -95,75 +95,205 @@ class RoutesummarybystdgroupController extends Controller
         $model_stdgroup = \backend\models\Stdpricegroup::find()->select(['price', 'type_id'])->groupBy('seq_no')->orderBy(['type_id' => SORT_ASC, 'seq_no' => SORT_ASC])->all();
 
 
-        $route_id = 949;
-        $model_route_data = \backend\models\Deliveryroute::find()->select(['id'])->where(['status' => 1, 'branch_id' => 2,'id'=>956])->all();
-        if ($model_route_data) {
-            foreach ($model_route_data as $value_route) {
-                \common\models\RouteIssueDailyCal::deleteAll(['route_id' => $value_route->id, 'date(trans_date)' => date('Y-m-d', strtotime($cal_date))]);
-                \common\models\RouteTransPriceCal::deleteAll(['route_id' => $value_route->id, 'date(trans_date)' => date('Y-m-d', strtotime($cal_date))]);
+        // $route_id = 949;
+        //   $model_route_data = \backend\models\Deliveryroute::find()->select(['id'])->where(['status' => 1, 'branch_id' => 2, 'id' => 956])->all();
+        if ($route_id) {
+            //foreach ($model_route_data as $value_route) {
+            \common\models\RouteIssueDailyCal::deleteAll(['route_id' => $route_id, 'date(trans_date)' => date('Y-m-d', strtotime($cal_date))]);
+            \common\models\RouteTransPriceCal::deleteAll(['route_id' => $route_id, 'date(trans_date)' => date('Y-m-d', strtotime($cal_date))]);
 
-                foreach ($model_product as $value) {
-                    // save normal issue
-                    $issue_normal_qty = $this->getIssuecar($value_route->id, $cal_date, $value->id);
-                    $model_insert = new \common\models\RouteIssueDailyCal();
-                    $model_insert->trans_date = date('Y-m-d H:i:s', strtotime($cal_date));
-                    $model_insert->issue_trans_type = 1; // normal issue type
-                    $model_insert->transfer_branch_id = 8888; // normal branch car issue
-                    $model_insert->route_id = $value_route->id;
-                    $model_insert->product_id = $value->id;
-                    $model_insert->qty = $issue_normal_qty;
-                    $model_insert->total_amount = 0;
-                    $model_insert->save(false);
-                    // end save normal issue
+            foreach ($model_product as $value) {
+                // save normal issue
+                $issue_normal_qty = $this->getIssuecar($route_id, $cal_date, $value->id);
+                $model_insert = new \common\models\RouteIssueDailyCal();
+                $model_insert->trans_date = date('Y-m-d H:i:s', strtotime($cal_date));
+                $model_insert->issue_trans_type = 1; // normal issue type
+                $model_insert->transfer_branch_id = 8888; // normal branch car issue
+                $model_insert->route_id = $route_id;
+                $model_insert->product_id = $value->id;
+                $model_insert->qty = $issue_normal_qty;
+                $model_insert->total_amount = 0;
+                $model_insert->save(false);
+                // end save normal issue
 
-                    // save transfer from other branch
-                    foreach ($model_transfer_branch as $value_transfer) {
-                        $transfer_qty = $this->getReceiveTransfer($value_route->id, $cal_date, $value->id, $value_transfer->id);
-                        $product_branch_price = $this->caltransferbrachtotalprice($value->id, $value_transfer->id);
+                // save transfer from other branch
+                foreach ($model_transfer_branch as $value_transfer) {
+                    $transfer_qty = $this->getReceiveTransfer($route_id, $cal_date, $value->id, $value_transfer->id);
+                    $product_branch_price = $this->caltransferbrachtotalprice($value->id, $value_transfer->id);
 
-                        $model_insert2 = new \common\models\RouteIssueDailyCal();
-                        $model_insert2->trans_date = date('Y-m-d H:i:s', strtotime($cal_date));
-                        $model_insert2->issue_trans_type = 2; // normal issue type
-                        $model_insert2->transfer_branch_id = $value_transfer->id; // transfer branch id
-                        $model_insert2->route_id = $value_route->id;
-                        $model_insert2->product_id = $value->id;
-                        $model_insert2->qty = $transfer_qty;
-                        $model_insert2->total_amount = ($transfer_qty * $product_branch_price);
-                        $model_insert2->save(false);
-                    }
-                    // end transfer from other branch
-
-                    // save return car
-                    $return_qty = $this->getReturnCar($value_route->id, $value->id, $cal_date);
-                    $model_insert3 = new \common\models\RouteIssueDailyCal();
-                    $model_insert3->trans_date = date('Y-m-d H:i:s', strtotime($cal_date));
-                    $model_insert3->issue_trans_type = 3; // normal issue type
-                    $model_insert3->transfer_branch_id = 9999; // normal branch car issue
-                    $model_insert3->route_id = $value_route->id;
-                    $model_insert3->product_id = $value->id;
-                    $model_insert3->qty = $return_qty;
-                    $model_insert3->total_amount = 0;
-                    $model_insert3->save(false);
-                    // end save return car
-
-                    foreach ($model_stdgroup as $value_std) {
-                        $line_product_price_qty = $this->getQtyByPrice($value_route->id, $value_std->price, $value_std->type_id, $cal_date, $value->id);
-                        $model_insert4 = new \common\models\RouteTransPriceCal();
-                        $model_insert4->trans_date = date('Y-m-d H:i:s', strtotime($cal_date));
-                        $model_insert4->std_price_type = $value_std->type_id;
-                        $model_insert4->route_id = $value_route->id;
-                        $model_insert4->product_id = $value->id;
-                        $model_insert4->qty = $line_product_price_qty;
-                        $model_insert4->price = $value_std->price;
-                        $model_insert4->line_total = ($value_std->price * $line_product_price_qty);
-                        $model_insert4->save(false);
-                    }
-
+                    $model_insert2 = new \common\models\RouteIssueDailyCal();
+                    $model_insert2->trans_date = date('Y-m-d H:i:s', strtotime($cal_date));
+                    $model_insert2->issue_trans_type = 2; // normal issue type
+                    $model_insert2->transfer_branch_id = $value_transfer->id; // transfer branch id
+                    $model_insert2->route_id = $route_id;
+                    $model_insert2->product_id = $value->id;
+                    $model_insert2->qty = $transfer_qty;
+                    $model_insert2->total_amount = ($transfer_qty * $product_branch_price);
+                    $model_insert2->save(false);
                 }
+                // end transfer from other branch
+
+                // save return car
+                $return_qty = $this->getReturnCar($route_id, $value->id, $cal_date);
+                $model_insert3 = new \common\models\RouteIssueDailyCal();
+                $model_insert3->trans_date = date('Y-m-d H:i:s', strtotime($cal_date));
+                $model_insert3->issue_trans_type = 3; // normal issue type
+                $model_insert3->transfer_branch_id = 9999; // normal branch car issue
+                $model_insert3->route_id = $route_id;
+                $model_insert3->product_id = $value->id;
+                $model_insert3->qty = $return_qty;
+                $model_insert3->total_amount = 0;
+                $model_insert3->save(false);
+                // end save return car
+
+                foreach ($model_stdgroup as $value_std) {
+                    $line_product_price_qty = $this->getQtyByPrice($route_id, $value_std->price, $value_std->type_id, $cal_date, $value->id);
+                    $model_insert4 = new \common\models\RouteTransPriceCal();
+                    $model_insert4->trans_date = date('Y-m-d H:i:s', strtotime($cal_date));
+                    $model_insert4->std_price_type = $value_std->type_id;
+                    $model_insert4->route_id = $route_id;
+                    $model_insert4->product_id = $value->id;
+                    $model_insert4->qty = $line_product_price_qty;
+                    $model_insert4->price = $value_std->price;
+                    $model_insert4->line_total = ($value_std->price * $line_product_price_qty);
+                    $model_insert4->save(false);
+                }
+
+                //     }
             }
         }
 
         return $this->redirect(['routesummarybystdgroup/index2']);
+    }
+
+    public function actionDailycalauto()
+    {
+
+//        $date=date_create("2013-03-15");
+//        echo date_format($date,"Y/m/d");
+
+        $cal_date = date('Y-m-d', strtotime("-1 day"));
+        //$cal_date = date('Y-m-d');
+        //$loop_action = 0;
+        $model_route = \common\models\DeliveryDailyCalStatus::find()->select(['route_id'])->where(['<', 'date(cal_date)', date('Y-m-d', strtotime($cal_date))])->orderBy(['route_id' => SORT_ASC])->one();
+        if ($model_route) {
+
+            $model_product = \backend\models\Product::find()->select(['id'])->where(['status' => 1, 'branch_id' => 2])->all();
+            $model_transfer_branch = \backend\models\Transferbrach::find()->select(['id'])->where(['status' => 1])->all();
+            $model_stdgroup = \backend\models\Stdpricegroup::find()->select(['price', 'type_id'])->groupBy('seq_no')->orderBy(['type_id' => SORT_ASC, 'seq_no' => SORT_ASC])->all();
+
+
+            \common\models\RouteIssueDailyCal::deleteAll(['route_id' => $model_route->route_id, 'date(trans_date)' => date('Y-m-d', strtotime($cal_date))]);
+            \common\models\RouteTransPriceCal::deleteAll(['route_id' => $model_route->route_id, 'date(trans_date)' => date('Y-m-d', strtotime($cal_date))]);
+
+            foreach ($model_product as $value) {
+                // save normal issue
+                $issue_normal_qty = $this->getIssuecar($model_route->route_id, $cal_date, $value->id);
+                $model_insert = new \common\models\RouteIssueDailyCal();
+                $model_insert->trans_date = date('Y-m-d H:i:s', strtotime($cal_date));
+                $model_insert->issue_trans_type = 1; // normal issue type
+                $model_insert->transfer_branch_id = 8888; // normal branch car issue
+                $model_insert->route_id = $model_route->route_id;
+                $model_insert->product_id = $value->id;
+                $model_insert->qty = $issue_normal_qty;
+                $model_insert->total_amount = 0;
+                $model_insert->save(false);
+                // end save normal issue
+
+                // save transfer from other branch
+                foreach ($model_transfer_branch as $value_transfer) {
+                    $transfer_qty = $this->getReceiveTransfer($model_route->route_id, $cal_date, $value->id, $value_transfer->id);
+                    $product_branch_price = $this->caltransferbrachtotalprice($value->id, $value_transfer->id);
+
+                    $model_insert2 = new \common\models\RouteIssueDailyCal();
+                    $model_insert2->trans_date = date('Y-m-d H:i:s', strtotime($cal_date));
+                    $model_insert2->issue_trans_type = 2; // normal issue type
+                    $model_insert2->transfer_branch_id = $value_transfer->id; // transfer branch id
+                    $model_insert2->route_id = $model_route->route_id;
+                    $model_insert2->product_id = $value->id;
+                    $model_insert2->qty = $transfer_qty;
+                    $model_insert2->total_amount = ($transfer_qty * $product_branch_price);
+                    $model_insert2->save(false);
+                }
+                // end transfer from other branch
+
+                // save return car
+                $return_qty = $this->getReturnCar($model_route->route_id, $value->id, $cal_date);
+                $model_insert3 = new \common\models\RouteIssueDailyCal();
+                $model_insert3->trans_date = date('Y-m-d H:i:s', strtotime($cal_date));
+                $model_insert3->issue_trans_type = 3; // normal issue type
+                $model_insert3->transfer_branch_id = 9999; // normal branch car issue
+                $model_insert3->route_id = $model_route->route_id;
+                $model_insert3->product_id = $value->id;
+                $model_insert3->qty = $return_qty;
+                $model_insert3->total_amount = 0;
+                $model_insert3->save(false);
+                // end save return car
+
+                foreach ($model_stdgroup as $value_std) {
+                    $line_product_price_qty = $this->getQtyByPrice($model_route->route_id, $value_std->price, $value_std->type_id, $cal_date, $value->id);
+                    $model_insert4 = new \common\models\RouteTransPriceCal();
+                    $model_insert4->trans_date = date('Y-m-d H:i:s', strtotime($cal_date));
+                    $model_insert4->std_price_type = $value_std->type_id;
+                    $model_insert4->route_id = $model_route->route_id;
+                    $model_insert4->product_id = $value->id;
+                    $model_insert4->qty = $line_product_price_qty;
+                    $model_insert4->price = $value_std->price;
+                    $model_insert4->line_total = ($value_std->price * $line_product_price_qty);
+                    $model_insert4->save(false);
+                }
+
+            }
+
+            \common\models\DeliveryDailyCalStatus::updateAll(['cal_date' => date('Y-m-d H:i:s', strtotime($cal_date)), 'status' => 1], ['route_id' => $model_route->route_id]);
+            $this->notifymessageroutecal(1, 2,$model_route->route_id);
+        } else {
+            // $this->notifymessageroutecal(1,2);
+        }
+
+
+        // return $this->redirect(['routesummarybystdgroup/index2']);
+        echo "success";
+    }
+
+    public function notifymessageroutecal($company_id, $branch_id,$route_id)
+    {
+        //$message = "This is test send request from camel paperless";
+        $line_api = 'https://notify-api.line.me/api/notify';
+        $line_token = '';
+
+        //   6kL3UlbKb1djsoGE7KFXSo9SQ1ikYb2MxmTHDeEy3GE   token omnoi
+        if ($company_id == 1 && $branch_id == 1) {
+            // $line_token = 'ZMqo4ZqwBGafMOXKVht2Liq9dCGswp4IRofT2EbdRNN'; // vorapat
+            $b_token = \backend\models\Branch::findLintoken($company_id, $branch_id);
+            //   $line_token = '6kL3UlbKb1djsoGE7KFXSo9SQ1ikYb2MxmTHDeEy3GE'; // omnoi
+            $line_token = trim($b_token);
+        } else if ($company_id == 1 && $branch_id == 2) {
+            $b_token = \backend\models\Branch::findLintoken($company_id, $branch_id);
+            $line_token = trim($b_token);
+            //   $line_token = 'TxAUAOScIROaBexBWXaYrVcbjBItIKUwGzFpoFy3Jrx'; // BKT
+        }
+
+
+        $message = '' . "\n";
+        $message .= 'แจ้งประมวลผลประจำวันสายส่ง 1-3 น.: '. $route_id . "\n";
+        $message .= "วันที่: " . date('Y-m-d') . "(" . date('H:i') . ")" . "\n";
+
+        $queryData = array('message' => $message);
+        $queryData = http_build_query($queryData, '', '&');
+        $headerOptions = array(
+            'http' => array(
+                'method' => 'POST',
+                'header' => "Content-Type: application/x-www-form-urlencoded\r\n"
+                    . "Authorization: Bearer " . $line_token . "\r\n"
+                    . "Content-Length: " . strlen($queryData) . "\r\n",
+                'content' => $queryData
+            )
+        );
+        $context = stream_context_create($headerOptions);
+        $result = file_get_contents($line_api, FALSE, $context);
+        $res = json_decode($result);
+        return $res;
     }
 
     function getIssuecar($route_id, $order_date, $product_id)

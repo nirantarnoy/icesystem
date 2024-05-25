@@ -75,6 +75,7 @@ $this->params['breadcrumbs'][] = $this->title;
                 //'subGroupOf' => 0
             ],
             'journal_no',
+            'lot_no',
             [
                 'attribute' => 'production_loc_id',
                 'value' => function ($data) {
@@ -84,7 +85,7 @@ $this->params['breadcrumbs'][] = $this->title;
             [
                 'attribute' => 'transfer_branch_id',
                 'value' => function ($data) {
-                    return \backend\models\Transferbrach::findName($data->transfer_branch_id);
+                    return \backend\models\Transferbranch::findName($data->transfer_branch_id);
                 }
             ],
             [

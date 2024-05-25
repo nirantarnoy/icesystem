@@ -2194,8 +2194,12 @@ class OrderController extends Controller
     {
         //$message = "This is test send request from camel paperless";
         $line_api = 'https://notify-api.line.me/api/notify';
-        $line_token = 'NY1xHWO4Qa6EWGA25AKuQVeHwSwpeTEPpCGE3pYB5qT';
+//        $line_token = 'NY1xHWO4Qa6EWGA25AKuQVeHwSwpeTEPpCGE3pYB5qT';
+        $line_token = 'QpL2ZJoZZQaKcXjlVPfBYdGWAwqPN3bVCtJv1a4OeKA'; // dindang
         // $line_token = 'N3x9CANrOE3qjoAejRBLjrJ7FhLuTBPFuC9ToXh0szh';
+
+//        $b_token = \backend\models\Branch::findLintoken($company_id, $branch_id);
+//        $line_token = trim($b_token);
 
         // $queryData = array('message' => $message);
         $queryData = array('message' => $message);
@@ -4160,7 +4164,8 @@ class OrderController extends Controller
 //            }
 //        }
         // for borplub
-        $model = \common\models\QueryCustomerPrice::find()->where(['cus_id' => 91])->all(); //91 is สดหน้าบ้าน
+        //$model = \common\models\QueryCustomerPrice::find()->where(['cus_id' => 91])->all(); //91 is สดหน้าบ้าน
+        $model = \common\models\QueryCustomerPrice::find()->where(['cus_id' => 71])->all(); //71 is สดหน้าบ้าน dindang
         if ($model) {
             foreach ($model as $value) {
                 if ($value->product_id == null) continue;
@@ -4305,34 +4310,34 @@ class OrderController extends Controller
                         if ((float)$datalist[$i]['qty'] <= 0) continue;
 
                       //  for other
-//                        $line_price = $payment_type_id == 3 ? 0 : $datalist[$i]['price'];
-//                        $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $datalist[$i]['price']);
+                        $line_price = $payment_type_id == 3 ? 0 : $datalist[$i]['price'];
+                        $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $datalist[$i]['price']);
 
 
                         // for boplub because has haft price
-                        $line_price = $payment_type_id == 3 ? 0 : $datalist[$i]['original_sale_price'];
-                        $line_total = 0;
-                        if ($datalist[$i]['haft_cal'] == 1) {
-                            $xx = explode('.', $datalist[$i]['qty']);
-                            if ($xx != null) {
-                                if (count($xx) > 1) {
-                                    if ($xx[0] > 0) {
-                                        $line_total = ($xx[0] * $datalist[$i]['original_sale_price']);
-                                        $line_total += ($datalist[$i]['price']);
-                                    } else {
-                                        $line_total += ($datalist[$i]['price']);
-                                    }
-                                } else {
-                                    $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $line_price);
-                                }
-                            } else {
-                                $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $datalist[$i]['original_sale_price']);
-                            }
-
-                        } else {
-                            //$line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $datalist[$i]['original_sale_price']);
-                            $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $line_price);
-                        }
+//                        $line_price = $payment_type_id == 3 ? 0 : $datalist[$i]['original_sale_price'];
+//                        $line_total = 0;
+//                        if ($datalist[$i]['haft_cal'] == 1) {
+//                            $xx = explode('.', $datalist[$i]['qty']);
+//                            if ($xx != null) {
+//                                if (count($xx) > 1) {
+//                                    if ($xx[0] > 0) {
+//                                        $line_total = ($xx[0] * $datalist[$i]['original_sale_price']);
+//                                        $line_total += ($datalist[$i]['price']);
+//                                    } else {
+//                                        $line_total += ($datalist[$i]['price']);
+//                                    }
+//                                } else {
+//                                    $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $line_price);
+//                                }
+//                            } else {
+//                                $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $datalist[$i]['original_sale_price']);
+//                            }
+//
+//                        } else {
+//                            //$line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $datalist[$i]['original_sale_price']);
+//                            $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $line_price);
+//                        }
                         // end boplub
 
 
