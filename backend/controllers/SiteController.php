@@ -1398,7 +1398,7 @@ class SiteController extends Controller
         // $create_date = date_create('2024-02-20');
 
 
-
+        $findcaldate = date('Y-m-d');
         $model_cal_date = \common\models\TransactionManagerDaily::find()->max('trans_date');
         if($model_cal_date){
             if($model_cal_date!=null){
