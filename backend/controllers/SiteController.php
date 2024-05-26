@@ -27,9 +27,10 @@ class SiteController extends Controller
 //                    [
 //                        'actions' => ['captcha'],
 //                        'allow' => false,
+//                        'allow' => false,
 //                    ],
                     [
-                        'actions' => ['login', 'error', 'createadmin', 'changepassword', 'decodex', 'grab', 'addseconduser', 'getcominfo', 'transactionsalecar', 'transactionsalecar2', 'transactionsalecar3', 'createscreenshort', 'transactionsalepos', 'updateroute', 'calmachine', 'clearorder','testclosesum','updateorderpayment','caltransactionsaledistributor','caltransactionsaledistributorauto','startcaldailymanagerauto','summarybystdgroup'],
+                        'actions' => ['login', 'error', 'createadmin', 'changepassword', 'decodex', 'grab', 'addseconduser', 'getcominfo', 'transactionsalecar', 'transactionsalecar2', 'transactionsalecar3', 'createscreenshort', 'transactionsalepos', 'updateroute', 'calmachine', 'clearorder','testclosesum','updateorderpayment','caltransactionsaledistributor','caltransactionsaledistributorauto','startcaldailymanagerauto','startcaldailymanagerauto2','summarybystdgroup'],
                         'allow' => true,
                     ],
                     [
@@ -1324,6 +1325,128 @@ class SiteController extends Controller
             if ($line_product_price_list != null) {
 
 
+
+                for ($x = 0; $x <= count($line_product_price_list) - 1; $x++) {
+
+                    $find_order = $this->getOrdercash($value->id, $from_date, $to_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_product_price_list[$x]['line_price']);
+                    $find_order2 = $this->getOrderCredit($value->id, $from_date, $to_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_product_price_list[$x]['line_price']);
+                    $find_order4 = $this->getOrderCarOtherCredit($value->id, $from_date, $to_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_product_price_list[$x]['line_price']);
+                    $find_order5 = $this->getOrderRoute($value->id, $from_date, $to_date, $find_sale_type, $find_user_id, $company_id, $branch_id, $is_invoice_req, $btn_order_type, $line_product_price_list[$x]['line_price']);
+
+                    $line_qty = $find_order != null ? $find_order[0]['qty'] : 0;
+                    $line_qty2 = $find_order2 != null ? $find_order2[0]['qty'] : 0;
+//                        $line_qty3 = $find_order3 != null ? $find_order3[0]['qty'] : 0;
+                    $line_qty4 = $find_order4 != null ? $find_order4[0]['qty'] : 0;
+                    $line_qty5 = $find_order5 != null ? $find_order5[0]['qty'] : 0;
+
+                    $line_total_qty = ($line_qty + $line_qty2 + $line_qty4 + $line_qty5);
+                    $total_qty_all = ($total_qty_all + $line_total_qty);
+
+                    $line_amount = $find_order != null ? $find_order[0]['line_total'] : 0;
+                    $line_amount2 = $find_order2 != null ? $find_order2[0]['line_total'] : 0;
+                    // $line_amount3 = $find_order3 != null ? $find_order3[0]['line_total']:0;
+                    $line_amount4 = $find_order4 != null ? $find_order4[0]['line_total'] : 0;
+                    $line_amount5 = $find_order5 != null ? $find_order5[0]['line_total'] : 0;
+
+                    $line_total_amt = ($line_amount + $line_amount2 + $line_amount4 + $line_amount5);
+                    $total_amount_all = ($total_amount_all + $line_total_amt);
+
+                    $total_qty = ($total_qty + $line_qty);
+                    $total_qty2 = ($total_qty2 + $line_qty2);
+                    //  $total_qty3 = ($total_qty3 + $line_qty3);
+                    $total_qty4 = ($total_qty4 + $line_qty4);
+                    $total_qty5 = ($total_qty5 + $line_qty5);
+
+                    $total_amount = ($total_amount + $line_amount);
+                    $total_amount2 = ($total_amount2 + $line_amount2);
+                    //  $total_amount3 = ($total_amount3 + $line_amount3);
+                    $total_amount4 = ($total_amount4 + $line_amount4);
+                    $total_amount5 = ($total_amount5 + $line_amount5);
+
+
+                    $model_add = new \common\models\TransactionManagerDaily();
+                    $model_add->trans_date = date('Y-m-d H:i:s',strtotime($findcaldate));
+                    $model_add->product_id = $value->id;
+                    $model_add->price = $line_product_price_list[$x]['line_price'];
+                    $model_add->cash_qty = $line_qty;
+                    $model_add->credit_pos_qty = $line_qty2;
+                    $model_add->car_qty = $line_qty5;
+                    $model_add->other_branch_qty = $line_qty4;
+                    $model_add->qty_total = $line_total_qty;
+                    $model_add->cash_amount = $line_amount;
+                    $model_add->credit_pos_amount = $line_amount2;
+                    $model_add->car_amount = $line_amount5;
+                    $model_add->other_branch_amount = $line_amount4;
+                    $model_add->amount_total = $line_total_amt;
+                    $model_add->save(false);
+
+
+                }
+            }else{
+                echo "no data";
+            }
+        }
+    }
+
+    public function actionStartcaldailymanagerauto2()
+    {
+        $company_id = 1;
+        $branch_id = 1;
+//        $caldate = date('Y-m-d',strtotime('-1 day'));
+//        $xdate = explode('-',$caldate);
+
+        // $create_date = date_create('2024-02-20');
+
+
+
+        $model_cal_date = \backend\models\TransactionManagerDaily::find()->wherer()->max('trans_date');
+        if($model_cal_date){
+            if($model_cal_date!=null){
+                $findcaldate = date('Y/m/d',strtotime($model_cal_date, strtotime('+1 day')));
+            }else{
+                $findcaldate = date_create("01/01/2023 00:01:01");
+            }
+
+        }
+
+        echo $findcaldate;return;
+
+//        $from_date = date('Y-m-d');
+//        $to_date = date('Y-m-d');
+//
+//        $findcaldate = date('Y-m-d');
+//        if(count($xdate) >1){
+//            $findcaldate = $xdate[0].'/'.$xdate[1].'/'.$xdate[2].' '.'00:01:01';
+//            $from_date = $findcaldate;
+//            $to_date = $findcaldate;
+//        }
+
+        $find_sale_type = 0;
+        $sum_qty_all = 0;
+        $sum_total_all = 0;
+
+        $total_qty = 0;
+        $total_qty2 = 0;
+        $total_qty3 = 0;
+        $total_qty4 = 0;
+        $total_qty5 = 0;
+        $total_qty_all = 0;
+
+        $total_amount = 0;
+        $total_amount2 = 0;
+        $total_amount3 = 0;
+        $total_amount4 = 0;
+        $total_amount5 = 0;
+        $total_amount_all = 0;
+        $find_user_id = null;
+        $is_invoice_req = null;
+        $btn_order_type = null;
+
+        $model_product_daily = \backend\models\Product::find()->where(['status' => 1, 'company_id' => $company_id, 'branch_id' => $branch_id])->orderBy(['item_pos_seq' => SORT_ASC])->all();
+        \common\models\TransactionManagerDaily::deleteAll(['date(trans_date)'=>date('Y-m-d',strtotime($findcaldate))]);
+        foreach ($model_product_daily as $value) {
+            $line_product_price_list = $this->getProductpricelist($value->id, $from_date, $to_date, $company_id, $branch_id);
+            if ($line_product_price_list != null) {
 
                 for ($x = 0; $x <= count($line_product_price_list) - 1; $x++) {
 
