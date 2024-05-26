@@ -1401,15 +1401,14 @@ class SiteController extends Controller
         $findcaldate = date('Y-m-d');
         $model_cal_date = \common\models\TransactionManagerDaily::find()->max('trans_date');
         if($model_cal_date){
-            if($model_cal_date!=null){
-                $findcaldate = date('Y/m/d',strtotime($model_cal_date, strtotime('+1 day')));
-            }else{
-                $findcaldate = date_create("2023-01-01 00:01:01");
-            }
-
+           $findcaldate = date('Y/m/d',strtotime($model_cal_date, strtotime('+1 day')));
+            $from_date = $findcaldate->format('d-m-Y H:i:s');
+            $to_date = $findcaldate->format('d-m-Y H:i:s');
         }else{
             $findcaldate = date_create("01/01/2023 00:01:01");
-            echo $findcaldate->format('d-m-Y H:i:s');return;
+            $from_date = $findcaldate->format('d-m-Y H:i:s');
+            $to_date = $findcaldate->format('d-m-Y H:i:s');
+            echo date('Y-m-d H:i:s',strtotime($from_date));return;
         }
 
 echo 'ok';return;
@@ -1446,7 +1445,7 @@ echo 'ok';return;
         $btn_order_type = null;
 
         $model_product_daily = \backend\models\Product::find()->where(['status' => 1, 'company_id' => $company_id, 'branch_id' => $branch_id])->orderBy(['item_pos_seq' => SORT_ASC])->all();
-        \common\models\TransactionManagerDaily::deleteAll(['date(trans_date)'=>date('Y-m-d',strtotime($findcaldate))]);
+        \common\models\TransactionManagerDaily::deleteAll(['date(trans_date)'=>date('Y-m-d',strtotime($from_date))]);
         foreach ($model_product_daily as $value) {
             $line_product_price_list = $this->getProductpricelist($value->id, $from_date, $to_date, $company_id, $branch_id);
             if ($line_product_price_list != null) {
@@ -1490,7 +1489,7 @@ echo 'ok';return;
 
 
                     $model_add = new \common\models\TransactionManagerDaily();
-                    $model_add->trans_date = date('Y-m-d H:i:s',strtotime($findcaldate));
+                    $model_add->trans_date = date('Y-m-d H:i:s',strtotime($from_date));
                     $model_add->product_id = $value->id;
                     $model_add->price = $line_product_price_list[$x]['line_price'];
                     $model_add->cash_qty = $line_qty;
