@@ -1407,6 +1407,8 @@ class SiteController extends Controller
                 $findcaldate = date_create("01/01/2023 00:01:01");
             }
 
+        }else{
+            $findcaldate = date_create("01/01/2023 00:01:01");
         }
 
         echo $findcaldate;return;
