@@ -3,6 +3,7 @@
 namespace backend\controllers;
 
 use backend\models\Transform;
+use backend\models\TransformreservSearch;
 use backend\models\TransformSearch;
 use backend\models\WarehouseSearch;
 use common\models\JournalIssue;
@@ -56,13 +57,18 @@ class TransformController extends Controller
     public function actionIndex()
     {
         $pageSize = \Yii::$app->request->post("perpage");
-        $searchModel = new TransformSearch();
+//        $searchModel = new TransformSearch();
+//        $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
+//        $dataProvider->query->andFilterWhere(['reason_id' => 4]);
+//        $dataProvider->setSort(['defaultOrder' => ['id' => SORT_DESC]]);
+//        $dataProvider->pagination->pageSize = $pageSize;
+
+        $searchModel = new TransformreservSearch();
         $dataProvider = $searchModel->search(Yii::$app->request->queryParams);
-        $dataProvider->query->andFilterWhere(['reason_id' => 4]);
         $dataProvider->setSort(['defaultOrder' => ['id' => SORT_DESC]]);
         $dataProvider->pagination->pageSize = $pageSize;
 
-        return $this->render('index', [
+        return $this->render('index2', [
             'searchModel' => $searchModel,
             'dataProvider' => $dataProvider,
             'perpage' => $pageSize,
@@ -366,5 +372,35 @@ class TransformController extends Controller
         }
 
         return $this->render('_bootbalance');
+    }
+
+    public function actionGettransformdata()
+    {
+        $id = \Yii::$app->request->post('id');
+        $product_id = \Yii::$app->request->post('product_id');
+        $qty = \Yii::$app->request->post('qty');
+        $html = '';
+        if ($id) {
+
+                $html .= '<tr>';
+                $html .= '<td colspan="2"> แปรสภาพจากสินค้า <span style="color: red;font-weight: bold">' . \backend\models\Product::findName($product_id) . '</span> จำนวน <span style="color: red;font-weight: bold">' . number_format($qty==null?0:$qty,2) . '</span></td>';
+                $html .= '</tr>';
+                $html .= '<tr>';
+                $html .= '<td>สินค้า</td>';
+                $html .= '<td>จำนวน</td>';
+                $html .= '</tr>';
+                $model = \common\models\StockTrans::find()->select(['product_id', 'qty'])->where(['activity_type_id' => 27, 'trans_ref_id' => $id])->all();
+                if ($model) {
+                    foreach ($model as $value) {
+                        $html .= '<tr>';
+                        $html .= '<td>' . \backend\models\Product::findName($value->product_id) . '</td>';
+                        $html .= '<td>' . number_format($value->qty,2) . '</td>';
+                        $html .= '</tr>';
+                    }
+                }
+
+
+        }
+        echo $html;
     }
 }

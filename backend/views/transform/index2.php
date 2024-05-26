@@ -60,21 +60,21 @@ $this->params['breadcrumbs'][] = $this->title;
                     'attribute' => 'journal_no',
                     'format' => 'raw',
                     'value' => function ($data) {
-                         return '<a href="#" data-var="' . $data->id . '" onclick="showcust($(this))">' . $data->journal_no. '</a>';
+                         return '<a href="#" data-var="' . $data->id . '" data-var2="' . $data->product_id . '" data-var3="' . $data->qty . '" onclick="showcust($(this))">' . $data->journal_no. '</a>';
                     }
             ],
             [
                 'attribute' => 'trans_date',
                 'value' => function ($data) {
-                    return date('d/m/Y', strtotime($data->trans_date));
+                    return date('d/m/Y H:i:s', strtotime($data->trans_date));
                 }
             ],
-            [
-                'attribute' => 'delivery_route_id',
-                'value' => function ($data) {
-                    return \backend\models\Deliveryroute::findName($data->delivery_route_id);
-                }
-            ],
+//            [
+//                'attribute' => 'delivery_route_id',
+//                'value' => function ($data) {
+//                    return \backend\models\Deliveryroute::findName($data->delivery_route_id);
+//                }
+//            ],
             [
                 'attribute' => 'status',
                 'value' => function ($data) {
@@ -83,9 +83,9 @@ $this->params['breadcrumbs'][] = $this->title;
             ],
 
             [
-                    'attribute' => 'created_by',
+                    'attribute' => 'user_id',
                     'value' => function ($data) {
-                        return \backend\models\User::findName($data->created_by);
+                        return \backend\models\User::findName($data->user_id);
                     }
             ],
             //'updated_at',
@@ -190,14 +190,16 @@ $(function(){
 });
 function showcust(e){
     var ids = e.attr("data-var");
-    if(ids >0 ){
-         alert(ids);
+    var product_id = e.attr("data-var2");
+    var qty = e.attr("data-var3");
+    if(ids >0 && product_id >0 ){
+         //alert(ids);
      $.ajax({
               'type':'post',
               'dataType': 'html',
               'async': false,
               'url': "$url_to_find_detail",
-              'data': {'id': ids},
+              'data': {'id': ids,'product_id': product_id,'qty': qty},
               'success': function(data) {
                   //  alert(data);
                    $(".table-find-list tbody").html(data);

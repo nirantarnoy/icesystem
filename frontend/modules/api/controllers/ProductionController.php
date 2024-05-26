@@ -2769,7 +2769,8 @@ class ProductionController extends Controller
                 $status = true;
                 foreach ($model as $value) {
                     array_push($data, [
-                        'id' => $value->id
+                        'id' => $value->id,
+                        'desc'=> $value->description,
                     ]);
                 }
             }

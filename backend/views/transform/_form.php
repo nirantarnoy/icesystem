@@ -58,7 +58,7 @@ function getStock($prod_id, $warehouse)
     </div>
     <div class="row">
         <div class="col-lg-3">
-            <select name="line_from_product" class="form-control line-from-product" id="">
+            <select name="line_from_product" class="form-control line-from-product" id="" required>
                 <?php foreach ($prod_data as $val): ?>
                     <option value="<?= $val->id ?>"><?= $val->code . ' ' . $val->name ?></option>
                 <?php endforeach; ?>
@@ -66,7 +66,7 @@ function getStock($prod_id, $warehouse)
         </div>
         <div class="col-lg-3">
             <input type="number" class="form-control line-from-qty" name="line_from_qty" step=".01"
-                   novalidate="novalidate" min="-1">
+                   novalidate="novalidate" min="1" required>
         </div>
     </div>
     <br>
@@ -105,8 +105,7 @@ function getStock($prod_id, $warehouse)
                                 </select>
                             </td>
                             <td style="text-align: right">
-                                <input type="number" class="form-control line-to-qty" name="line_to_qty[]" step=".01"
-                                       novalidate="novalidate" min="-1" value="<?=$value->qty?>">
+                                <input type="number" class="form-control line-to-qty" name="line_to_qty[]" step=".01" min="1" value="<?=$value->qty?>" required>
                             </td>
                             <td>
                                 <div class="btn btn-danger btn-sm" onclick="removeline($(this))"><i
@@ -126,8 +125,7 @@ function getStock($prod_id, $warehouse)
                             </select>
                         </td>
                         <td style="text-align: right">
-                            <input type="number" class="form-control line-to-qty" name="line_to_qty[]" step=".01"
-                                   novalidate="novalidate" min="-1">
+                            <input type="number" class="form-control line-to-qty" name="line_to_qty[]" step=".01" min="1" required>
                         </td>
                         <td>
                             <div class="btn btn-danger btn-sm" onclick="removeline($(this))"><i

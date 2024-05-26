@@ -261,6 +261,8 @@ $mpdf->AddPageByArray([
                 </td>
                 <td style="border-top: 1px solid gray;border-bottom: 1px solid gray;text-align: center"><b>เลขที่ขาย</b>
                 </td>
+                <td style="border-top: 1px solid gray;border-bottom: 1px solid gray;text-align: center"><b>วันที่</b>
+                </td>
                 <td style="border-top: 1px solid gray;border-bottom: 1px solid gray;text-align: center"><b>สินค้า</b>
                 </td>
                 <td style="border-top: 1px solid gray;border-bottom: 1px solid gray;text-align: center"><b>จำนวนขาย</b>
@@ -269,6 +271,7 @@ $mpdf->AddPageByArray([
                 </td>
                 <td style="border-top: 1px solid gray;border-bottom: 1px solid gray;text-align: center"><b>สถานะจ่าย</b>
                 </td>
+                <td style="border-top: 1px solid gray;border-bottom: 1px solid gray;text-align: center"><b>วันที่</b>
                 <td style="border-top: 1px solid gray;border-bottom: 1px solid gray;text-align: center"><b>ผู้จ่าย</b>
                 </td>
             </tr>
@@ -326,12 +329,14 @@ $mpdf->AddPageByArray([
                             <?= $cust_name ?>
                         </td>
                         <td style="text-align: center"><?= $model_order[$x]['order_no'] ?></td>
+                        <td style="text-align: center"><?= date('d-m-Y H:i:s',strtotime($model_order[$x]['order_date'])) ?></td>
                         <td style="text-align: center"><?= $model_order[$x]['product_name'] ?></td>
                         <td style="text-align: center"><?= number_format($model_order[$x]['qty'], 2) ?></td>
                         <td style="text-align: center"><?= number_format($issue_qty, 2) ?></td>
                         <td style="text-align: center">
                             <?= $status_show ?>
                         </td>
+                        <td style="text-align: center"><?= $issue_user == ''?'':date('d-m-Y H:i:s' ,$issue_qry[0]['trans_date']) ?></td>
                         <td style="text-align: center"><?= $issue_user ?></td>
                     </tr>
                 <?php endfor; ?>
@@ -359,11 +364,11 @@ function getOrder($company_id, $branch_id, $from_date, $to_date, $find_user_id)
     if ($company_id != null && $branch_id != null && $from_date != null && $to_date != null) {
         if ($find_user_id <= 0 || $find_user_id == null) {
             try {
-                $model = \backend\models\Orders::find()->select(['id', 'order_no', 'customer_id', 'order_channel_id', 'status'])->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'sale_channel_id' => 2])->andFilterWhere(['AND', ['>=', 'date(order_date)', date('Y-m-d', strtotime($from_date))], ['<=', 'date(order_date)', date('Y-m-d', strtotime($to_date))]])->orderBy(['customer_id' => SORT_ASC])->all();
+                $model = \backend\models\Orders::find()->select(['id', 'order_no', 'customer_id', 'order_channel_id', 'status','order_date'])->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'sale_channel_id' => 2])->andFilterWhere(['AND', ['>=', 'date(order_date)', date('Y-m-d', strtotime($from_date))], ['<=', 'date(order_date)', date('Y-m-d', strtotime($to_date))]])->orderBy(['customer_id' => SORT_ASC])->all();
                 foreach ($model as $value) {
                     $modelline = \backend\models\Orderline::find()->select(['order_id', 'product_id', 'qty'])->where(['order_id' => $value->id])->all();
                     foreach ($modelline as $value2) {
-                        array_push($data, ['id' => $value->id, 'customer_id' => $value->customer_id, 'order_channel_id' => $value->order_channel_id, 'order_no' => $value->order_no, 'product_id' => $value2->product_id, 'product_name' => \backend\models\Product::findName($value2->product_id), 'qty' => $value2->qty, 'status' => $value->status]);
+                        array_push($data, ['id' => $value->id, 'customer_id' => $value->customer_id, 'order_channel_id' => $value->order_channel_id, 'order_no' => $value->order_no, 'product_id' => $value2->product_id, 'product_name' => \backend\models\Product::findName($value2->product_id), 'qty' => $value2->qty, 'status' => $value->status,'order_date'=>$value->order_date]);
                     }
                 }
             } catch (\Exception $exception) {
@@ -372,11 +377,11 @@ function getOrder($company_id, $branch_id, $from_date, $to_date, $find_user_id)
         } else {
             try {
 
-                $model = \backend\models\Orders::find()->select(['id', 'order_no', 'customer_id', 'order_channel_id', 'status'])->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'created_by' => $find_user_id, 'sale_channel_id' => 2])->andFilterWhere(['AND', ['>=', 'date(order_date)', date('Y-m-d', strtotime($from_date))], ['<=', 'date(order_date)', date('Y-m-d', strtotime($to_date))]])->orderBy(['customer_id' => SORT_ASC])->all();
+                $model = \backend\models\Orders::find()->select(['id', 'order_no', 'customer_id', 'order_channel_id', 'status','order_date'])->where(['company_id' => $company_id, 'branch_id' => $branch_id, 'created_by' => $find_user_id, 'sale_channel_id' => 2])->andFilterWhere(['AND', ['>=', 'date(order_date)', date('Y-m-d', strtotime($from_date))], ['<=', 'date(order_date)', date('Y-m-d', strtotime($to_date))]])->orderBy(['customer_id' => SORT_ASC])->all();
                 foreach ($model as $value) {
                     $modelline = \backend\models\Orderline::find()->select(['order_id', 'product_id', 'qty'])->where(['order_id' => $value->id])->all();
                     foreach ($modelline as $value2) {
-                        array_push($data, ['id' => $value->id, 'customer_id' => $value->customer_id, 'order_channel_id' => $value->order_channel_id, 'order_no' => $value->order_no, 'product_id' => $value2->product_id, 'product_name' => \backend\models\Product::findName($value2->product_id), 'qty' => $value2->qty, 'status' => $value->status]);
+                        array_push($data, ['id' => $value->id, 'customer_id' => $value->customer_id, 'order_channel_id' => $value->order_channel_id, 'order_no' => $value->order_no, 'product_id' => $value2->product_id, 'product_name' => \backend\models\Product::findName($value2->product_id), 'qty' => $value2->qty, 'status' => $value->status,'order_date'=>$value->order_date]);
                     }
                 }
 
@@ -410,17 +415,29 @@ function getIssueqty($order_id, $product_id, $company_id, $branch_id)
 {
     $data = [];
     if ($order_id != null && $product_id != null) {
-        $model_issue = \backend\models\Journalissue::find()->select(['id', 'updated_by'])->where(['order_ref_id' => $order_id, 'company_id' => $company_id, 'branch_id' => $branch_id])->one();
+        $model_issue = \backend\models\Journalissue::find()->select(['id', 'updated_by','trans_date'])->where(['order_ref_id' => $order_id, 'company_id' => $company_id, 'branch_id' => $branch_id])->one();
         if ($model_issue) {
             $qty = \common\models\IssueStockTemp::find()->where(['issue_id' => $model_issue->id, 'product_id' => $product_id])->sum('qty');
             $x_qty = $qty != null ? $qty : 0;
-            array_push($data, ['updated_by' => $model_issue->updated_by, 'qty' => $x_qty]);
+            $line_date = getIssueTransDate($model_issue->id);
+            array_push($data, ['updated_by' => $model_issue->updated_by, 'qty' => $x_qty,'trans_date'=>$line_date]);
         } else {
 
         }
 
     }
     return $data;
+}
+
+function getIssueTransDate($issue_id){
+  $t_date = null;
+  if($issue_id){
+      $model = \common\models\IssueStockTemp::find()->select(['crated_at'])->where(['issue_id' => $issue_id])->one();
+      if($model){
+          $t_date = $model->crated_at;
+      }
+  }
+  return $t_date;
 }
 
 ?>

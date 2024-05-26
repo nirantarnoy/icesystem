@@ -398,18 +398,19 @@ class CustomerinvoiceController extends Controller
 //            $sql .= " AND t1.status != 3";
 
 
-            $sql = "select t1.id as order_id,t1.order_date,sum(t2.line_total) AS remain_amt";
+            $sql = "select t1.id as order_id,t1.order_date,t1.order_channel_id,sum(t2.line_total) AS remain_amt";
             $sql .= " FROM orders as t1 INNER JOIN order_line as t2 ON t1.id = t2.order_id ";
             $sql .= " WHERE  (t1.customer_id =" . $cus_id. " OR t2.customer_id=".$cus_id.")";
             $sql .= " AND t1.payment_method_id = 2";
             $sql .= " AND t1.status != 3";
+            $sql .= " AND (t1.payment_status !=1 OR ISNULL(t1.payment_status))";
             $sql .= " AND (t1.create_invoice != 1 OR ISNULL(t1.create_invoice))";
 
 
 //            $sql .= " AND year(t1.order_date)>=2022";
 //            $sql .= " AND month(t1.order_date)>=10";
             $sql .= " AND date(t1.order_date) >='". date('Y-m-d',strtotime($pre_date))."'";
-            $sql .= " GROUP BY t1.id";
+            $sql .= " GROUP BY t1.id,t1.order_channel_id";
 
             $sql_query = \Yii::$app->db->createCommand($sql);
             $model = $sql_query->queryAll();
@@ -418,7 +419,7 @@ class CustomerinvoiceController extends Controller
 //                $html = $cus_id;
 
                 for ($i = 0; $i <= count($model) - 1; $i++) {
-
+                    if($model[$i]['order_channel_id'] > 0)continue;
                     //   $total_amount = $total_amount + ($value->remain_amount == null ? 0 : $value->remain_amount);
 //                    $remain_amt = $value->line_total;
 //

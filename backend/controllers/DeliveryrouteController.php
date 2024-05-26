@@ -191,13 +191,16 @@ class DeliveryrouteController extends Controller
         $id = \Yii::$app->request->post('id');
         $html = '';
         if ($id) {
-            $model = \backend\models\Customer::find()->where(['delivery_route_id' => $id])->orderBy(['code' => SORT_ASC])->all();
+            $model = \backend\models\Stocktrans::find()->where(['activity_type_id' => 27,'trans_ref_id'=>$id])->all();
             if ($model) {
+                $html.= '<tr>';
+                $html.= '<th>จากสินค้า <b></b></th>';
+                $html.= '<th></th>';
+                $html.= '</tr>';
                 foreach ($model as $value) {
                     $html .= '<tr>';
-                    $html .= '<td>' . $value->code . '</td>';
-                    $html .= '<td>' . $value->name . '</td>';
-                    $html .= '<td>' . $value->status . '</td>';
+                    $html .= '<td>' . \backend\models\Product::findName($value->product_id) . '</td>';
+                    $html .= '<td>' . $value->qty . '</td>';
                     $html .= '</tr>';
                 }
             }

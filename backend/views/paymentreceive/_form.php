@@ -18,6 +18,9 @@ $date_enable = true;
 if ($is_admin == 1) {
     $date_enable = false;
 }
+if(\Yii::$app->user->identity->username == 'beau' || \Yii::$app->user->identity->username == 'dow'){
+    $date_enable = false;
+}
 
 ?>
 

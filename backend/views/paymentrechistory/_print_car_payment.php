@@ -14,7 +14,7 @@ $user_id = \Yii::$app->user->id;
 $user_name = \Yii::$app->user->identity->username;
 
 $has_allow = 0;
-if ($user_name == 'adpang') {
+if ($user_name == 'adpang' || $user_name == 'beau' || $user_name == 'dow') {
     $has_allow = 1;
 }
 
