@@ -1399,7 +1399,7 @@ class SiteController extends Controller
 
 
 
-        $model_cal_date = \common\models\TransactionManagerDaily::find()->wherer()->max('trans_date');
+        $model_cal_date = \common\models\TransactionManagerDaily::find()->max('trans_date');
         if($model_cal_date){
             if($model_cal_date!=null){
                 $findcaldate = date('Y/m/d',strtotime($model_cal_date, strtotime('+1 day')));
