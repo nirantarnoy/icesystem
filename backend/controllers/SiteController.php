@@ -1401,7 +1401,7 @@ class SiteController extends Controller
         $findcaldate = date('Y-m-d');
         $model_cal_date = \common\models\TransactionManagerDaily::find()->max('trans_date');
         if($model_cal_date){
-           $findcaldate = date('Y-m-d H:i:s',strtotime($model_cal_date.'+ 1 day').' 00:01:01');
+           $findcaldate = date('Y-m-d H:i:s',strtotime($model_cal_date.' 00:01:01'.' +1 day'));
             $from_date = $findcaldate;
             $to_date = $findcaldate;
 
