@@ -1404,7 +1404,7 @@ class SiteController extends Controller
             if($model_cal_date!=null){
                 $findcaldate = date('Y/m/d',strtotime($model_cal_date, strtotime('+1 day')));
             }else{
-                $findcaldate = date_create("01/01/2023 00:01:01");
+                $findcaldate = date_create("2023-01-01 00:01:01");
             }
 
         }else{
