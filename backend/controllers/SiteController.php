@@ -1409,9 +1409,10 @@ class SiteController extends Controller
 
         }else{
             $findcaldate = date_create("01/01/2023 00:01:01");
+            echo $findcaldate->format('d-m-Y H:i:s');return;
         }
 
-        echo $findcaldate;return;
+echo 'ok';return;
 
 //        $from_date = date('Y-m-d');
 //        $to_date = date('Y-m-d');
