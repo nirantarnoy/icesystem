@@ -1413,7 +1413,7 @@ class SiteController extends Controller
             //echo date('Y-m-d H:i:s',strtotime($from_date));return;
         }
 
-     echo date('Y-m-d H:i:s',strtotime($from_date));return;
+    // echo date('Y-m-d H:i:s',strtotime($from_date));return;
 
 //        $from_date = date('Y-m-d');
 //        $to_date = date('Y-m-d');
