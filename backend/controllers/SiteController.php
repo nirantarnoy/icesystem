@@ -2319,8 +2319,6 @@ class SiteController extends Controller
         $model = $query->queryAll();
         if ($model) {
             for ($i = 0; $i <= count($model) - 1; $i++) {
-
-
                 array_push($data, [
                     'qty' => $model[$i]['qty'],
                     'line_total' => $model[$i]['line_total'],

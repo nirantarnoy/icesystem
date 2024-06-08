@@ -68,7 +68,8 @@ if (isset($_SESSION['user_branch_id'])) {
         <span style="margin-left: 5px;"></span>
         <?php
         $check_role = \backend\models\User::checkhasrole(\Yii::$app->user->id, 'System Administrator');
-        if ($check_role) {
+        $current_username = \Yii::$app->user->identity->username;
+        if ($check_role || $current_username == 'dow') {
             echo \kartik\select2\Select2::widget([
                 'value' => $viewstatus,
                 'name' => 'viewstatus',

@@ -3,10 +3,8 @@
 namespace frontend\modules\api\controllers;
 
 use backend\models\Employee;
-use backend\models\Journalissue;
 use backend\models\Orders;
 use backend\models\Position;
-use backend\models\Stocksum;
 use backend\models\Stocktrans;
 use backend\models\User;
 use yii\db\Exception;
@@ -27,13 +25,11 @@ class OrderController extends Controller
                 'actions' => [
                     'addorder' => ['POST'],
                     'addordernew' => ['POST'],
-                    'addordernewpos' => ['POST'],
                     'addordernewvp19' => ['POST'],
                     'addordernewlast' => ['POST'],
                     'addordertransfer' => ['POST'],
                     'list' => ['POST'],
                     'listnew' => ['POST'],
-                    'listnewpos' => ['POST'],
                     'listbycustomer' => ['POST'],
                     'deleteorder' => ['POST'],
                     'deleteorderline' => ['POST'],
@@ -46,12 +42,6 @@ class OrderController extends Controller
                     'orderdiscount' => ['POST'],
                     'getlastorderno' => ['POST'],
                     'createnotifyclose' => ['POST'],
-                    'getoriginprice' => ['POST'],
-                    'getcustomerposprice' => ['POST'],
-                    'listposbycustomer' => ['POST'],
-                    'getbalancein' => ['POST'],
-                    'closeorderposmobile' => ['POST'],
-                    'testclosepos' => ['POST'],
                 ],
             ],
         ];
@@ -891,113 +881,6 @@ class OrderController extends Controller
         return ['status' => $status, 'data' => $data];
     }
 
-    public function actionListnewpos()
-    {
-        $status = false;
-        $searchcustomer = '';
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $req_data = \Yii::$app->request->getBodyParams();
-        $user_id = $req_data['user_id'];
-        $api_date = $req_data['order_date'];
-        $searchcustomer = $req_data['searchcustomer'];
-
-        $data = [];
-        if ($user_id) {
-            $check_last_login = $this->findLoginNotLogout($user_id);
-            //return $check_last_login;
-            $sale_date = date('Y-m-d');
-//            $t_date = null;
-//            $exp_order_date = explode(' ', $api_date);
-//            if ($exp_order_date != null) {
-//                if (count($exp_order_date) > 1) {
-//                    $x_date = explode('-', $exp_order_date[0]);
-//                    if (count($x_date) > 1) {
-//                        $t_date = $x_date[0] . "/" . $x_date[1] . "/" . $x_date[2];
-//                      //  $t_date = $x_date[0] . "/" . 10 . "/" . 02;
-//                    }
-//                }
-//            }
-            $t_date = null;
-            $exp_order_date = explode('-', $check_last_login);
-            if ($exp_order_date != null) {
-                if (count($exp_order_date) > 1) {
-                    $t_date = $exp_order_date[0] . "/" . $exp_order_date[1] . "/" . $exp_order_date[2];
-
-                }
-            }
-            if ($t_date != null) {
-                $sale_date = $t_date;
-                // return $t_date;
-            }
-            // $sale_date = date_create("2023-09-27");
-            $model = null;
-            if ($searchcustomer != '') {
-                $model = \common\models\QueryApiOrderDailySummaryNewPos::find()->where(['created_by' => $user_id, 'date(order_date)' => $sale_date, 'status' => 1, 'customer_id' => $searchcustomer])->all();
-            } else {
-                //  $model = \common\models\QueryApiOrderDailySummaryNewPos::find()->where(['created_by' => $user_id, 'date(order_date)' => $sale_date, 'status' => 1])->all();
-                $model = \common\models\QueryApiOrderDailySummaryNewPos::find()->where(['created_by' => $user_id, 'status' => 1])->andFilterWhere(['>=', 'date(order_date)', $sale_date])->all();
-            }
-
-            // $model = \common\models\Orders::find()->where(['id'=>131])->all();
-            //  $model = \common\models\Orders::find()->where(['car_ref_id' => $car_id])->all();
-            if ($model) {
-                $status = true;
-                foreach ($model as $value) {
-                    $customer_type_id = 0;
-                    $customer_code = $value->code;
-                    $customer_name = $value->name;
-                    if ($value->order_channel_id > 0) {
-                        $customer_name = \backend\models\Deliveryroute::findName($value->customer_id);
-                        $customer_code = \backend\models\Deliveryroute::findCode($value->customer_id);
-                    }
-                    array_push($data, [
-                        'id' => $value->id,
-                        'order_no' => $value->order_no,
-                        'order_date' => $value->order_date,
-                        'order_status' => $value->status,
-                        'customer_id' => $value->customer_id,
-                        'customer_code' => $customer_code,
-                        'customer_name' => $customer_name,
-                        'note' => '',
-                        'sale_payment_method_id' => $value->sale_payment_method_id,
-                        'line_total' => $value->line_total == null ? 0 : $value->line_total,
-                        'qty' => $value->line_qty == null ? 0 : $value->line_qty,
-                        'price' => $value->price == null ? 0 : $value->price,
-                        'order_line_id' => $value->order_line_id,
-                        'product_id' => $value->product_id,
-                        'product_code' => $value->product_code,
-                        'product_name' => $value->product_name,
-                        'order_line_date' => date('d-m-Y H:i:s', $value->created_at),
-                        'order_line_status' => $value->order_line_status,
-                        'close_daily_status' => $this->checkOrderclosed($user_id),
-                    ]);
-                }
-            }
-        }
-        return ['status' => $status, 'data' => $data];
-    }
-
-    public function findLoginNotLogout($id)
-    {
-        if ($id) {
-            $model = \common\models\LoginLog::find()->where(['user_id' => $id, 'status' => 1])->orderBy(['id' => SORT_DESC])->one();
-            return $model != null ? date('Y-m-d', strtotime($model->login_date)) : date('Y-m-d');
-        }
-
-    }
-
-    public function checkOrderclosed($user_id)
-    {
-        $res = 0;
-        if ($user_id) {
-            $model = \common\models\BalanceDaily::find()->where(['from_user_id' => $user_id])->andFilterWhere(['date(sale_close_date)' => date('Y-m-d')])->count();
-            if ($model != null) {
-                $res = $model;
-            }
-        }
-        return $res;
-    }
-
 //    public function findDiscount($order_id){
 //        $dis_amount = 0;
 //        if($order_id){
@@ -1178,47 +1061,6 @@ class OrderController extends Controller
                         'price' => $value->price,
                         'price_group_id' => '',
                         'order_line_status' => \backend\models\Orderlinetrans::findStatus($value->order_line_id),
-                        'order_discount_amt' => $value->discount_amt == null ? 0 : $value->discount_amt,
-                    ]);
-
-                }
-            }
-        }
-
-        return ['status' => $status, 'data' => $data];
-    }
-
-    public function actionListposbycustomer()
-    {
-        $status = false;
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $req_data = \Yii::$app->request->getBodyParams();
-        $customer_id = $req_data['customer_id'];
-        $order_id = $req_data['order_id'];
-
-        $data = [];
-        if ($customer_id) {
-            //$model = \common\models\QueryApiOrderDaily::find()->where(['customer_id' => $customer_id])->andFilterWhere(['id' => $order_id])->andFilterWhere(['>', 'qty', 0])->all();
-            $model = \common\models\QueryApiOrderDailySummaryNewPos::find()->where(['customer_id' => $customer_id])->andFilterWhere(['id' => $order_id])->andFilterWhere(['>', 'line_qty', 0])->all();
-            if ($model) {
-                $status = true;
-                foreach ($model as $value) {
-                    array_push($data, [
-                        'order_id' => $value->id,
-                        'order_no' => $value->order_no,
-                        'order_date' => $value->order_date,
-                        'order_status' => $value->status,
-                        'line_id' => $value->order_line_id,
-                        'customer_id' => $value->customer_id,
-                        'customer_name' => $value->name,
-                        'customer_code' => $value->code,
-                        'product_id' => $value->product_id,
-                        'product_code' => $value->product_code,
-                        'product_name' => $value->product_name,
-                        'qty' => $value->line_qty,
-                        'price' => $value->price,
-                        'price_group_id' => '',
-                        'order_line_status' => 1, // \backend\models\Orderlinetrans::findStatus($value->order_line_id),
                         'order_discount_amt' => $value->discount_amt == null ? 0 : $value->discount_amt,
                     ]);
 
@@ -1413,7 +1255,7 @@ class OrderController extends Controller
             if ($model_trans->save(false)) {
                 $model = \backend\models\Stocksum::find()->where(['warehouse_id' => $wh_id, 'product_id' => $product_id])->one();
                 if ($model) {
-                    $model->qty = (float)$model->qty - (float)$qty;
+                    $model->qty = $model->qty - (int)$qty;
                     $model->save(false);
                 }
             }
@@ -1538,7 +1380,7 @@ class OrderController extends Controller
         //  $route_id = 0;
         if ($route_id && $company_id != null && $branch_id != null) {
 
-            $reprocess_wh = 1;  // 1 is main $this->findReprocesswh($company_id, $branch_id);
+            $reprocess_wh = $this->findReprocesswh($company_id, $branch_id);
 
             $default_wh = \backend\models\Warehouse::findWarehousecar($company_id, $branch_id); // for boot sale return stock
             $check_route_type = \backend\models\Deliveryroute::find()->select('type_id')->where(['id' => $route_id])->one();
@@ -1580,17 +1422,17 @@ class OrderController extends Controller
                         $model->journal_no = $model->getReturnNo($company_id, $branch_id);
                         $model->trans_date = date('Y-m-d H:i:s');
                         $model->product_id = $stock_data[$i]['product_id'];
-                        $model->qty = (float)$stock_data[$i]['avl_qty'];
+                        $model->qty = $stock_data[$i]['avl_qty'];
                         $model->warehouse_id = $reprocess_wh;
                         $model->stock_type = 1;
-                        $model->activity_type_id = 26; // 7;//7; // 1 prod rec 2 issue car
+                        $model->activity_type_id = 7;//7; // 1 prod rec 2 issue car
                         $model->company_id = $company_id;
                         $model->branch_id = $branch_id;
                         $model->created_by = $user_id;
                         $model->trans_ref_id = $route_id;
                         if ($model->save(false)) {
                             if ($dvl_route_type == 1) { // check general route not boot
-                                $this->updateSummaryreturnbpcar($stock_data[$i]['product_id'], $reprocess_wh, $stock_data[$i]['avl_qty'], $company_id, $branch_id);
+                                $this->updateSummary($stock_data[$i]['product_id'], $reprocess_wh, $stock_data[$i]['avl_qty'], $company_id, $branch_id);
 
                             } else if ($dvl_route_type == 2) { // is boots route
                                 $this->updatebootSummary2($stock_data[$i]['product_id'], $default_wh, $route_id, $stock_data[$i]['avl_qty'], $company_id, $branch_id, $user_id);
@@ -1600,6 +1442,28 @@ class OrderController extends Controller
                         }
                     }
                     if ($res > 0 || $x == count($stock_data)) {
+
+//                        $emp_1 = 0;
+//                        $emp_2 = 0;
+//                        $car_id = null;
+//
+//                        $car_id = \common\models\QueryCarRoute::find()->where(['delivery_route_id' => $route_id])->one();
+//                        if ($car_id) {
+//                            $empdaily = $this->findCarempdaily($car_id->id);
+//                            if ($empdaily != null) {
+//                                $xx = 0;
+//                                foreach ($empdaily as $value_emp) {
+//                                    if ($xx == 0) {
+//                                        $emp_1 = $value_emp->employee_id;
+//                                    } else {
+//                                        $emp_2 = $value_emp->employee_id;
+//                                    }
+//                                    $xx += 1;
+//                                }
+//                            }
+//
+//                        }
+
 
                         if (\common\models\Orders::updateAll(
                             ['status' => 100, 'order_shift' => $order_shift],
@@ -1632,6 +1496,28 @@ class OrderController extends Controller
                     }
                     if ($res > 0 || $x == count($stock_data)) {
 
+                        $emp_1 = 0;
+                        $emp_2 = 0;
+                        $car_id = null;
+
+//                        $car_id = \common\models\QueryCarRoute::find()->select(['id'])->where(['delivery_route_id' => $route_id])->one();
+//                        if ($car_id) {
+//                            $empdaily = $this->findCarempdaily($car_id->id);
+//                            if ($empdaily != null) {
+//                                $xx = 0;
+//                                foreach ($empdaily as $value_emp) {
+//                                    if ($xx == 0) {
+//                                        $emp_1 = $value_emp->employee_id;
+//                                    } else {
+//                                        $emp_2 = $value_emp->employee_id;
+//                                    }
+//                                    $xx += 1;
+//                                }
+//                            }
+//
+//                        }
+//                            ['status' => 100, 'emp_1' => $emp_1, 'emp_2' => $emp_2, 'order_shift' => $order_shift],
+
                         if (\common\models\Orders::updateAll(
                             ['status' => 100, 'order_shift' => $order_shift],
                             ['order_channel_id' => $route_id, 'date(order_date)' => date('Y-m-d'), 'sale_from_mobile' => 1])) {
@@ -1660,7 +1546,6 @@ class OrderController extends Controller
         return ['status' => $status, 'data' => $data];
     }
 
-
     public function updateSummary($product_id, $wh_id, $qty, $company_id, $branch_id)
     {
         if ($wh_id != null && $product_id != null && $qty > 0) {
@@ -1670,7 +1555,7 @@ class OrderController extends Controller
                     $model->qty = (double)$qty;
                     $model->save(false);
                 } else {
-                    $model->qty = ((double)$model->qty - (double)$qty);
+                    $model->qty = ($model->qty + (int)$qty);
                     $model->save(false);
                 }
 
@@ -1678,47 +1563,10 @@ class OrderController extends Controller
                 $model_new = new \backend\models\Stocksum();
                 $model_new->warehouse_id = $wh_id;
                 $model_new->product_id = $product_id;
-                $model_new->qty = (double)$qty;
+                $model_new->qty = $qty;
                 $model_new->company_id = $company_id;
                 $model_new->branch_id = $branch_id;
                 $model_new->save(false);
-            }
-        }
-    }
-
-    public function updateSummaryreturnbpcar($product_id, $wh_id, $qty, $company_id, $branch_id)
-    {
-        if ($wh_id != null && $product_id != null && $qty > 0) {
-            $wh_id = 1;
-            $model = \backend\models\Stocksum::find()->where(['warehouse_id' => $wh_id, 'product_id' => $product_id, 'company_id' => $company_id, 'branch_id' => $branch_id])->one();
-            if ($model) {
-                if ($model->qty < 0) {
-                    $model->qty = (float)$qty;
-                    $model->save(false);
-                } else {
-                    $model->qty = ((float)$model->qty + (float)$qty);
-                    $model->save(false);
-                }
-
-            } else {
-                $model_new = new \backend\models\Stocksum();
-                $model_new->warehouse_id = $wh_id;
-                $model_new->product_id = $product_id;
-                $model_new->qty = (float)$qty;
-                $model_new->company_id = $company_id;
-                $model_new->branch_id = $branch_id;
-                $model_new->save(false);
-            }
-        }
-    }
-
-    public function updateSummarypos($product_id, $wh_id, $qty, $company_id, $branch_id)
-    {
-        if ($wh_id != null && $product_id != null && (float)$qty > 0) {
-            $model = \backend\models\Stocksum::find()->where(['warehouse_id' => $wh_id, 'product_id' => $product_id, 'company_id' => $company_id, 'branch_id' => $branch_id])->one();
-            if ($model) {
-                $model->qty = ((float)$model->qty - (float)$qty);
-                $model->save(false);
             }
         }
     }
@@ -1732,7 +1580,7 @@ class OrderController extends Controller
                     $model->qty = (double)$qty;
                     $model->save(false);
                 } else {
-                    $model->qty = ((double)$model->qty + (double)$qty);
+                    $model->qty = ($model->qty + (int)$qty);
                     $model->save(false);
                 }
 
@@ -1740,7 +1588,7 @@ class OrderController extends Controller
                 $model_new = new \backend\models\Stocksum();
                 $model_new->warehouse_id = $wh_id;
                 $model_new->product_id = $product_id;
-                $model_new->qty = (double)$qty;
+                $model_new->qty = $qty;
                 $model_new->company_id = $company_id;
                 $model_new->branch_id = $branch_id;
                 $model_new->save(false);
@@ -1754,7 +1602,7 @@ class OrderController extends Controller
             $order_shift = \common\models\OrderStock::find()->where(['route_id' => $route_id, 'date(trans_date)' => date('Y-m-d')])->andFilterWhere(['>', 'issue_id', 0])->groupBy(['issue_id'])->count('issue_id');
             $model = \common\models\SaleRouteDailyClose::find()->where(['product_id' => $product_id, 'route_id' => $route_id, 'date(trans_date)' => date('Y-m-d'), 'order_shift' => $order_shift])->one();
             if ($model) {
-                $model->qty = (float)$qty;
+                $model->qty = $qty;
                 $model->trans_date = date('Y-m-d H:i:s');
                 $model->save(false);
             } else {
@@ -1762,7 +1610,7 @@ class OrderController extends Controller
                 $model_new->trans_date = date('Y-m-d H:i:s');
                 $model_new->route_id = $route_id;
                 $model_new->product_id = $product_id;
-                $model_new->qty = (float)$qty;
+                $model_new->qty = $qty;
                 $model_new->company_id = $company_id;
                 $model_new->branch_id = $branch_id;
                 $model_new->order_shift = $order_shift;
@@ -2084,7 +1932,7 @@ class OrderController extends Controller
                 try {
                     $model_order_stock = \common\models\OrderStock::find()->where(['route_id' => $find_route_id, 'product_id' => $model->product_id, 'date(trans_date)' => date('Y-m-d')])->one();
                     if ($model_order_stock) {
-                        $model_order_stock->avl_qty = ((float)$model_order_stock->avl_qty + (float)$model->qty);
+                        $model_order_stock->avl_qty = ($model_order_stock->avl_qty + $model->qty);
                         if ($model_order_stock->save(false)) {
                             $model->status = 500;
                             if ($model->save(false)) {
@@ -2108,7 +1956,7 @@ class OrderController extends Controller
                         $pre_date = date('Y-m-d', strtotime(date('Y-m-d') . " -1 day"));
                         $model_order_stock = \common\models\OrderStock::find()->where(['route_id' => $find_route_id, 'product_id' => $model->product_id, 'date(trans_date)' => $pre_date])->one();
                         if ($model_order_stock) {
-                            $model_order_stock->avl_qty = ((float)$model_order_stock->avl_qty + (float)$model->qty);
+                            $model_order_stock->avl_qty = ($model_order_stock->avl_qty + $model->qty);
                             if ($model_order_stock->save(false)) {
                                 $model->status = 500;
                                 if ($model->save(false)) {
@@ -2194,12 +2042,8 @@ class OrderController extends Controller
     {
         //$message = "This is test send request from camel paperless";
         $line_api = 'https://notify-api.line.me/api/notify';
-//        $line_token = 'NY1xHWO4Qa6EWGA25AKuQVeHwSwpeTEPpCGE3pYB5qT';
-        $line_token = 'QpL2ZJoZZQaKcXjlVPfBYdGWAwqPN3bVCtJv1a4OeKA'; // dindang
+        $line_token = 'NY1xHWO4Qa6EWGA25AKuQVeHwSwpeTEPpCGE3pYB5qT';
         // $line_token = 'N3x9CANrOE3qjoAejRBLjrJ7FhLuTBPFuC9ToXh0szh';
-
-//        $b_token = \backend\models\Branch::findLintoken($company_id, $branch_id);
-//        $line_token = trim($b_token);
 
         // $queryData = array('message' => $message);
         $queryData = array('message' => $message);
@@ -2260,71 +2104,10 @@ class OrderController extends Controller
 
         $message .= "รับชำระหนี้ " . "\n";
         $message .= "เงินสด: " . number_format($this->getPayment($route_id, date('Y-m-d')), 2) . "\n";
-        $message .= "เงินโอน: " . number_format($this->getPaymentTransfer($route_id,date('Y-m-d')), 2) . "\n";
-
-        // $message .= 'สามารถดูรายละเอียดได้ที่ http://103.253.73.108/icesystem/backend/web/index.php?r=dailysum/indexnew' . "\n"; // nky
-        $message .= 'สามารถดูรายละเอียดได้ที่ http://141.98.16.4/icesystem/backend/web/index.php?r=dailysum/indexnew' . "\n"; // bkt
-
-
-        $queryData = array('message' => $message);
-        $queryData = http_build_query($queryData, '', '&');
-        $headerOptions = array(
-            'http' => array(
-                'method' => 'POST',
-                'header' => "Content-Type: application/x-www-form-urlencoded\r\n"
-                    . "Authorization: Bearer " . $line_token . "\r\n"
-                    . "Content-Length: " . strlen($queryData) . "\r\n",
-                'content' => $queryData
-            )
-        );
-        $context = stream_context_create($headerOptions);
-        $result = file_get_contents($line_api, FALSE, $context);
-        $res = json_decode($result);
-        return $res;
-    }
-
-    public function actionTestclosepos()
-    {
-        $this->notifymessageorderPosclose(6, 1, 1);
-    }
-
-    // public function notifymessageorderPosclose($route_id, $user_id, $company_id, $branch_id)
-    public function notifymessageorderPosclose($user_id, $company_id, $branch_id)
-    {
-        //$message = "This is test send request from camel paperless";
-        $line_api = 'https://notify-api.line.me/api/notify';
-        $line_token = '';
-
-
-        $b_token = \backend\models\Branch::findLintoken($company_id, $branch_id);
-        $line_token = trim($b_token);
-
-        // $line_token = 'N3x9CANrOE3qjoAejRBLjrJ7FhLuTBPFuC9ToXh0szh'
-
-        // $queryData = array('message' => $message);
-        $credit_total = \backend\models\Orders::findordercreditPos($user_id);
-        $cash_total = \backend\models\Orders::findordercashPos($user_id);
-        $credit_discount_total = 0; // \backend\models\Orders::findordercreditdiscount($route_id, 1);
-        $cash_discount_total = 0; // \backend\models\Orders::findordercashdiscount($route_id, 1);
-        //  $message = 'SQL IS '.$credit_total;
-        $total = $credit_total + $cash_total;
-
-        $message = '' . "\n";
-        $message .= 'BP: จบขาย POS' . "\n";
-        $message .= 'User:' . $this->findEmpName($user_id) . "\n";
-        //   $message .= 'User:' . \backend\models\User::findName($user_id) . "\n";
-        $message .= "รวมยอดขาย วันที่: " . date('Y-m-d') . "(" . date('H:i') . ")" . "\n";
-
-        $message .= 'ขายสด: ' . number_format($cash_total, 2) . "\n";
-        $message .= "ขายเชื่อ: " . number_format($credit_total, 2) . "\n";
-        $message .= "รวม: " . number_format(($total) - ($cash_discount_total + $credit_discount_total), 2) . "\n";
-
-        $message .= "รับชำระหนี้ " . "\n";
-        $message .= "เงินสด: " . number_format($this->getPaymentPos($user_id),2) . "\n";
         $message .= "เงินโอน: " . number_format(0, 2) . "\n";
 
-        // $message .= 'สามารถดูรายละเอียดได้ที่ http://103.253.73.108/icesystem/backend/web/index.php?r=dailysum/indexnew' . "\n"; // nky
-        $message .= 'สามารถดูรายละเอียดได้ที่ http:///103.253.73.108/icesystemdindang/backend/web/index.php?r=dailysum/indexnew' . "\n"; // bkt
+       // $message .= 'สามารถดูรายละเอียดได้ที่ http://103.253.73.108/icesystem/backend/web/index.php?r=dailysum/indexnew' . "\n"; // nky
+        $message .= 'สามารถดูรายละเอียดได้ที่ http://141.98.16.4/icesystem/backend/web/index.php?r=dailysum/indexnew' . "\n"; // bkt
 
 
         $queryData = array('message' => $message);
@@ -2368,54 +2151,10 @@ class OrderController extends Controller
         $sql .= " FROM query_payment_receive as t1 INNER JOIN customer as t2 ON t1.customer_id = t2.id";
         $sql .= " WHERE  date(t1.trans_date) =" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " ";
         $sql .= " AND t1.payment_method_id = 2";
-        $sql .= " AND t1.payment_channel_id = 1";
         if ($route_id != null) {
             $sql .= " AND t2.delivery_route_id=" . $route_id;
         }
         $sql .= " GROUP BY t2.delivery_route_id";
-        $query = \Yii::$app->db->createCommand($sql);
-        $model = $query->queryAll();
-        if ($model) {
-            for ($i = 0; $i <= count($model) - 1; $i++) {
-                $pay_amount = $model[$i]['pay_amount'];
-            }
-        }
-        return $pay_amount;
-    }
-
-    function getPaymentTransfer($route_id, $order_date)
-    {
-        $pay_amount = 0;
-
-        $sql = "SELECT SUM(t1.payment_amount) as pay_amount";
-        $sql .= " FROM query_payment_receive as t1 INNER JOIN customer as t2 ON t1.customer_id = t2.id";
-        $sql .= " WHERE  date(t1.trans_date) =" . "'" . date('Y-m-d', strtotime($order_date)) . "'" . " ";
-        $sql .= " AND t1.payment_method_id = 2";
-        $sql .= " AND t1.payment_channel_id = 2";
-        if ($route_id != null) {
-            $sql .= " AND t2.delivery_route_id=" . $route_id;
-        }
-        $sql .= " GROUP BY t2.delivery_route_id";
-        $query = \Yii::$app->db->createCommand($sql);
-        $model = $query->queryAll();
-        if ($model) {
-            for ($i = 0; $i <= count($model) - 1; $i++) {
-                $pay_amount = $model[$i]['pay_amount'];
-            }
-        }
-        return $pay_amount;
-    }
-
-    function getPaymentPos($user_id)
-    {
-        $pay_amount = 0;
-
-        $sql = "SELECT SUM(t1.payment_amount) as pay_amount";
-        $sql .= " FROM query_payment_receive as t1";
-        $sql .= " WHERE  date(t1.trans_date) =" . "'" . date('Y-m-d') . "'" . " ";
-        $sql .= " AND t1.payment_method_id = 2";
-        $sql .= " AND t1.crated_by=" . $user_id;
-        $sql .= " GROUP BY t1.crated_by";
         $query = \Yii::$app->db->createCommand($sql);
         $model = $query->queryAll();
         if ($model) {
@@ -3088,7 +2827,7 @@ class OrderController extends Controller
 
                             // $route_type = \backend\models\Deliveryroute::findRouteType($route_id);
                             // if ($route_id == 929 || $route_id == 900) { // BKT
-                            if ($route_id > 0) {  // NKY
+                            if ($route_id == 4 || $route_id == 6) {  // NKY
 
                                 $model_current_stock = \common\models\OrderStock::find()->where(['route_id' => $route_id, 'product_id' => $datalist[$i]['product_id']])->andFilterWhere(['>=', 'date(trans_date)', $pre_date])->sum('avl_qty');
                                 if ($model_current_stock > 0) {
@@ -4119,958 +3858,7 @@ class OrderController extends Controller
 
         // return $company_id;
 
-        if($route_id){
-            \common\models\LoginRouteLog::updateAll(['logout_date'=>date('Y-m-d H:i:s'),'status'=>2],['route_id'=>$route_id,'date(login_date)'=>date('Y-m-d')]);
-        }
-
         return $this->notifymessageorderclose($route_id, $user_id, $company_id, $branch_id);
     }
 
-    public function actionGetcustomerprice()
-    {
-        $company_id = 0;
-        $branch_id = 0;
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $req_data = \Yii::$app->request->getBodyParams();
-        if ($req_data != null) {
-            $company_id = $req_data['company_id'];
-            $branch_id = $req_data['branch_id'];
-        }
-
-
-        $data = [];
-        $data_cus_price = [];
-        $data_basic_price = [];
-        $customer_id = \Yii::$app->request->post('customer_id');
-        if ($customer_id) {
-            $model = \common\models\QueryCustomerPrice::find()->where(['cus_id' => $customer_id])->all();
-            if ($model != null) {
-                foreach ($model as $value) {
-                    array_push($data_cus_price, ['product_id' => $value->product_id, 'sale_price' => $value->sale_price, 'price_name' => $value->name]);
-                }
-            }
-        }
-        $model_basic_price = \backend\models\Product::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id])->all();
-        if ($model_basic_price) {
-            foreach ($model_basic_price as $value2) {
-                array_push($data_basic_price, ['product_id' => $value2->id, 'sale_price' => $value2->sale_price]);
-            }
-        }
-        array_push($data, $data_cus_price, $data_basic_price);
-        return json_encode($data);
-    }
-
-    public function actionGetoriginprice()
-    {
-        $company_id = 0;
-        $branch_id = 0;
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $req_data = \Yii::$app->request->getBodyParams();
-        if ($req_data != null) {
-            $company_id = $req_data['company_id'];
-            $branch_id = $req_data['branch_id'];
-        }
-
-        $data = [];
-//        $model_basic_price = \backend\models\Product::find()->where(['is_pos_item' => 1, 'company_id' => $company_id, 'branch_id' => $branch_id])->all();
-//        if ($model_basic_price) {
-//            foreach ($model_basic_price as $value) {
-//                $onhand = $this->getProductOnhand($value->id);
-//                array_push($data, [
-//                    'product_id' => $value->id,
-//                    'code' => $value->code,
-//                    'name' => $value->name,
-//                    'sale_price' => $value->sale_price,
-//                    'onhand' => $onhand,
-//                    'haft_cal' => 0,
-//                    'sale_haft_price' =>0,
-//                ]);
-//            }
-//        }
-        // for borplub
-        //$model = \common\models\QueryCustomerPrice::find()->where(['cus_id' => 91])->all(); //91 is สดหน้าบ้าน
-        $model = \common\models\QueryCustomerPrice::find()->where(['cus_id' => 71])->all(); //71 is สดหน้าบ้าน dindang
-        if ($model) {
-            foreach ($model as $value) {
-                if ($value->product_id == null) continue;
-                $onhand = $this->getProductOnhand($value->product_id);
-                $product_code = \backend\models\Product::findCode($value->product_id);
-                $product_name = \backend\models\Product::findName($value->product_id);
-                array_push($data, [
-                    'product_id' => $value->product_id,
-                    'code' => $product_code,
-                    'name' => $product_name,
-                    'sale_price' => $value->sale_price,
-                    'onhand' => $onhand,
-                    'haft_cal' => $value->haft_cal == null ? 0 : $value->haft_cal,
-                    'sale_haft_price' => $value->sale_haft_price == null ? 0 : $value->sale_haft_price,
-                ]);
-            }
-        }
-        // end borplub
-
-        return ['status' => 1, 'data' => $data];
-    }
-
-    public function actionGetcustomerposprice()
-    {
-        $customer_id = 0;
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $req_data = \Yii::$app->request->getBodyParams();
-        if ($req_data != null) {
-            $customer_id = $req_data['customer_id'];
-        }
-
-        $data = [];
-        $model = \common\models\QueryCustomerPrice::find()->where(['cus_id' => $customer_id])->all();
-        if ($model) {
-            foreach ($model as $value) {
-                if ($value->product_id == null) continue;
-                $onhand = $this->getProductOnhand($value->product_id);
-                $product_code = \backend\models\Product::findCode($value->product_id);
-                $product_name = \backend\models\Product::findName($value->product_id);
-                array_push($data, [
-                    'product_id' => $value->product_id,
-                    'code' => $product_code,
-                    'name' => $product_name,
-                    'sale_price' => $value->sale_price,
-                    'onhand' => $onhand,
-                    'haft_cal' => $value->haft_cal == null ? 0 : $value->haft_cal,
-                    'sale_haft_price' => $value->sale_haft_price == null ? 0 : $value->sale_haft_price,
-                ]);
-            }
-        }
-
-        return ['status' => 1, 'data' => $data];
-    }
-
-    public function getProductOnhand($product_id)
-    {
-        $model = Stocksum::find()->where(['product_id' => $product_id, 'warehouse_id' => 1])->sum('qty');
-        return $model;
-    }
-
-    public function actionAddordernewpos() // 29/01/2023 cut transline
-    {
-        $customer_id = null;
-        $status = false;
-        $user_id = 0;
-        $emp_id = 0;
-        $emp2_id = 0;
-        $issue_id = 0;
-        $route_id = 0;
-        $car_id = 0;
-        $company_id = 0;
-        $branch_id = 0;
-        $datalist = null;
-        $discount = 0;
-        $route_code = "XXXX";
-
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $req_data = \Yii::$app->request->getBodyParams();
-        if ($req_data != null) {
-            $customer_id = $req_data['customer_id'];
-            $user_id = $req_data['user_id'] == null ? 1 : $req_data['user_id'];
-            $emp_id = isset($req_data['emp_id']) ? $req_data['emp_id'] : 0;
-            $emp2_id = isset($req_data['emp2_id']) ? $req_data['emp2_id'] : 0;
-            //  $issue_id = $req_data['issue_id'];
-            $route_id = $req_data['route_id'];
-            // $route_code = $req_data['route_code'];
-            $car_id = $req_data['car_id'];
-            $payment_type_id = $req_data['payment_type_id'];
-            $company_id = $req_data['company_id'];
-            $branch_id = $req_data['branch_id'];
-            $datalist = $req_data['data'];
-            if (!empty($req_data['discount'])) {
-                $discount = $req_data['discount'];
-            }
-        }
-
-        $data = [];
-        $is_free = 0;
-        if ($payment_type_id == 3) {
-            $is_free = 1;
-        }
-        if ($customer_id != null) {
-            $default_wh = \backend\models\Warehouse::findPrimary($company_id, $branch_id);
-            //  $sale_date = date('Y/m/d');
-            $sale_date = date('Y/m/d');
-
-            $order_total_all = 0;
-            $order_shift = 0;
-            $has_order = null;
-            $current_date = date('Y-m-d H:i:s');
-            $model = new \backend\models\Ordermobile();
-            // $model->order_no = $model->getLastNoMobileNew($sale_date, $company_id, $branch_id, $route_id,$route_code); // for go api
-            $model->order_no = $model->getLastNoPos($sale_date, $company_id, $branch_id, $current_date);
-            $model->order_date = date('Y-m-d H:i:s');
-            $model->customer_id = $customer_id;
-            $model->order_channel_id = $route_id == null ? 0 : $route_id; // สายส่ง
-            $model->sale_channel_id = 2; //ช่องทาง
-            $model->car_ref_id = $car_id;
-            $model->issue_id = $issue_id;
-            $model->status = 1;
-            $model->created_by = $user_id;
-            $model->company_id = $company_id;
-            $model->branch_id = $branch_id;
-            $model->sale_from_mobile = 0;
-            $model->emp_1 = $emp_id;
-            $model->emp_2 = $emp2_id;
-            $model->order_date2 = date('Y-m-d');
-            $model->order_shift = $order_shift;
-            $model->discount_amt = $discount;
-            $model->payment_method_id = $payment_type_id;
-
-            if ($payment_type_id == 2) {
-                $model->payment_status = 0;
-            }
-
-            if ($model->save(false)) {
-                array_push($data, ['order_no' => $model->order_no]);
-
-                if (count($datalist) > 0) {
-                    //$pre_date = date('Y-m-d', strtotime(date('Y-m-d') . " -1 day"));
-                    for ($i = 0; $i <= count($datalist) - 1; $i++) {
-                        if ((float)$datalist[$i]['qty'] <= 0) continue;
-
-                      //  for other
-                        $line_price = $payment_type_id == 3 ? 0 : $datalist[$i]['price'];
-                        $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $datalist[$i]['price']);
-
-
-                        // for boplub because has haft price
-//                        $line_price = $payment_type_id == 3 ? 0 : $datalist[$i]['original_sale_price'];
-//                        $line_total = 0;
-//                        if ($datalist[$i]['haft_cal'] == 1) {
-//                            $xx = explode('.', $datalist[$i]['qty']);
-//                            if ($xx != null) {
-//                                if (count($xx) > 1) {
-//                                    if ($xx[0] > 0) {
-//                                        $line_total = ($xx[0] * $datalist[$i]['original_sale_price']);
-//                                        $line_total += ($datalist[$i]['price']);
-//                                    } else {
-//                                        $line_total += ($datalist[$i]['price']);
-//                                    }
-//                                } else {
-//                                    $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $line_price);
-//                                }
-//                            } else {
-//                                $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $datalist[$i]['original_sale_price']);
-//                            }
-//
-//                        } else {
-//                            //$line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $datalist[$i]['original_sale_price']);
-//                            $line_total = $payment_type_id == 3 ? 0 : ($datalist[$i]['qty'] * $line_price);
-//                        }
-                        // end boplub
-
-
-                        try {
-                            $model_line = new \backend\models\Orderline();
-                            $model_line->order_id = $model->id;
-                            $model_line->customer_id = $customer_id;
-                            $model_line->product_id = $datalist[$i]['product_id'];
-                            $model_line->qty = (float)$datalist[$i]['qty'];
-                            $model_line->price = (float)$line_price;
-                            $model_line->line_total = (float)$line_total;
-                            $model_line->price_group_id = $datalist[$i]['price_group_id'];//$price_group_id;
-                            $model_line->status = 1;
-                            $model_line->sale_payment_method_id = $payment_type_id;
-                            $model_line->issue_ref_id = $issue_id;
-                            $model_line->is_free = $is_free;
-                            if ($model_line->save(false)) {
-
-                                if ($payment_type_id != 3) { // credit
-                                    $this->addpayment($model->id, $customer_id, $line_total, $company_id, $branch_id, $payment_type_id, $user_id);
-                                }
-
-                                $order_total_all += $line_total;
-                                $status = true;
-                                // cut stock
-//                                if ($default_wh != null && $datalist[$i]['product_id'] != null && $datalist[$i]['qty'] > 0) {
-//                                    $model = \backend\models\Stocksum::find()->where(['warehouse_id' => $default_wh, 'product_id' => $datalist[$i]['product_id']])->one();
-//                                    if ($model) {
-//                                        if ((int)$model->qty < (int)$datalist[$i]['qty']) {
-//                                            return false;
-//                                        }
-//                                        $model->qty = (int)$model->qty - (int)$datalist[$i]['qty'];
-//                                        if ($model->save(false)) {
-//                                            return true;
-//                                        }
-//                                    } else {
-//
-//                                    }
-//                                }
-
-                                $model_stock = new \backend\models\Stocktrans();
-                                $model_stock->journal_no = $model->order_no;
-                                $model_stock->trans_date = date('Y-m-d H:i:s');
-                                $model_stock->product_id = $datalist[$i]['product_id'];
-                                $model_stock->qty = (float)$datalist[$i]['qty'];
-                                $model_stock->warehouse_id = 1; // default
-                                $model_stock->stock_type = 2;
-                                $model_stock->activity_type_id = 5; // pos sale
-                                $model_stock->trans_ref_id = $model->id;
-                                $model_stock->company_id = $company_id;
-                                $model_stock->branch_id = $branch_id;
-                                $model_stock->created_by = $user_id;
-                                if ($model_stock->save(false)) {
-                                    $this->updateSummaryPos($datalist[$i]['product_id'], 1, $datalist[$i]['qty'], $company_id, $branch_id);
-                                }
-
-                            }
-
-
-                        } catch (Exception $exception) {
-                            $status = false;
-                        }
-
-                    }
-                    $this->genissue($model->id, $company_id, $branch_id);
-                }
-
-                $model->order_total_amt = $order_total_all;
-                $model->save(false);
-            }
-        }
-
-        //  array_push($data,['data'=>$req_data]);
-
-        return ['status' => $status, 'data' => $data];
-    }
-
-    public function genissue($order_id, $company_id, $branch_id)
-    {
-        $issue_no = '';
-
-        if ($order_id != null) {
-            // $model_order = \backend\models\Orders::find()->where(['id' => $order_id])->one();
-            $model_line = \backend\models\Orderline::find()->select(['id', 'product_id', 'qty', 'price'])->where(['order_id' => $order_id])->all();
-
-            if ($model_line != null) {
-                $model = new Journalissue();
-
-                $model->journal_no = $model->getLastNo(date('Y-m-d'), $company_id, $branch_id);
-                $model->trans_date = date('Y-m-d H:i:s');
-                $model->status = 2; // close
-                $model->reason_id = 1;
-                $model->company_id = $company_id;
-                $model->branch_id = $branch_id;
-                $model->order_ref_id = $order_id;
-                if ($model->save(false)) {
-                    foreach ($model_line as $value) {
-                        if ($value->product_id == '') continue;
-                        $model_issue_line = new \backend\models\Journalissueline();
-                        $model_issue_line->issue_id = $model->id;
-                        $model_issue_line->product_id = $value->product_id;
-                        $model_issue_line->qty = $value->qty;
-                        $model_issue_line->avl_qty = $value->qty;
-                        $model_issue_line->sale_price = $value->price;
-                        $model_issue_line->origin_qty = $value->qty;
-                        $model_issue_line->status = 1;
-                        $model_issue_line->save(false);
-
-                    }
-                    $issue_no = $model->journal_no;
-                }
-            }
-        }
-        return $issue_no;
-    }
-
-
-    public function actionCancelposorder()
-    {
-        $status = 0;
-
-        $order_id = 0;
-        $company_id = 1;
-        $branch_id = 1;
-        $reason = '';
-        $default_warehouse = 1;
-
-
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $req_data = \Yii::$app->request->getBodyParams();
-        $order_id = $req_data['order_id'];
-        $reason = $req_data['reason'];
-
-        $data = [];
-
-        if ($order_id != null) {
-            $model = \backend\models\Orders::find()->where(['id' => $order_id])->one();
-            if ($model) {
-                $model->status = 3; // cancel
-                if ($model->save(false)) {
-                    $model_issue = \backend\models\Journalissue::find()->where(['order_ref_id' => $order_id])->one();
-                    if ($model_issue) {
-                        $model_issue->status = 200; // cancel issue
-                        if ($model_issue->save(false)) {
-                            // return qty to palate
-                            $model_issue_stock = \common\models\IssueStockTemp::find()->where(['issue_id' => $model_issue->id])->all();
-                            if ($model_issue_stock) {
-                                foreach ($model_issue_stock as $val) {
-                                    $model_cancel_issue = \common\models\IssueStockTemp::find()->where(['issue_id' => $val->issue_id])->andFilterWhere(['>', 'qty', 0])->one();
-                                    if ($model_cancel_issue) {
-                                        $model_cancel_issue->qty = 0;
-                                        $model_cancel_issue->save(false);
-                                    }
-                                    // return to palate
-                                    //   $model_palate = \backend\models\Stocktrans::find()->where(['id' => $val->prodrec_id])->one();
-//                                    if ($model_palate) {
-//                                        // $model_palate->qty = ($model_palate->qty + $val->qty);
-//                                        $model_palate->qty = ($model_palate->qty + $val->qty);
-//                                        $model_palate->save(false);
-//                                    }
-                                    // create trans and update stock
-                                    $this->updatestockcancel($val->product_id, $val->qty, $default_warehouse, '', $company_id, $branch_id);
-                                }
-                            } else {
-                                $model_issue_line = \backend\models\Journalissueline::find()->where(['issue_id' => $model_issue->id])->all();
-                                foreach ($model_issue_line as $line) {
-                                    $this->updatestockcancel($line->product_id, $line->qty, $default_warehouse, '', $company_id, $branch_id);
-                                }
-
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return ['status' => $status, 'data' => $data];
-    }
-
-    public function updatestockcancel($product_id, $qty, $wh_id, $journal_no, $company_id, $branch_id)
-    {
-        if ($product_id != null && $qty > 0) {
-            $model_trans = new \backend\models\Stocktrans();
-            $model_trans->journal_no = $journal_no;
-            $model_trans->trans_date = date('Y-m-d H:i:s');
-            $model_trans->product_id = $product_id;
-            $model_trans->qty = (float)$qty;
-            $model_trans->warehouse_id = $wh_id;
-            $model_trans->stock_type = 1; // 1 in 2 out
-            $model_trans->activity_type_id = 8; // คืนขาย
-            $model_trans->company_id = $company_id;
-            $model_trans->branch_id = $branch_id;
-            $model_trans->created_by = \Yii::$app->user->id;
-            if ($model_trans->save(false)) {
-                $model = \backend\models\Stocksum::find()->where(['warehouse_id' => $wh_id, 'product_id' => $product_id])->one();
-                if ($model) {
-                    $model->qty = (float)$model->qty + (float)$qty;
-                    $model->save(false);
-                }
-            }
-        }
-    }
-
-    public function actionCloseorderposmobile()
-    {
-        $status = 0;
-
-        $user_id = 0;
-        $company_id = 1;
-        $branch_id = 1;
-        $enddate = null;
-        $default_warehouse = 1;
-
-
-        \Yii::$app->response->format = \yii\web\Response::FORMAT_JSON;
-        $req_data = \Yii::$app->request->getBodyParams();
-        $company_id = $req_data['company_id'];
-        $branch_id = $req_data['branch_id'];
-        $user_id = $req_data['user_id'];
-        // $enddate = $req_data['end_date'];
-
-        $data = [];
-        $res = 0;
-        $model_product = \backend\models\Product::find()->where(['status' => 1])->orderBy(['id' => SORT_ASC])->all();
-
-        if ($user_id != null && $model_product != null) {
-
-            $login_time = \backend\models\User::findLogintime($user_id);
-            $cur_shift = $this->getTransShift($company_id, $branch_id);
-
-            $list_product_data = [];
-            $line_car_issue_qty = 0;
-            $line_transfer_qty = 0;
-            foreach ($model_product as $value) {
-                $line_cash_qty = $this->getOrderCashQty($value->id, $user_id, $login_time);
-                $line_credit_qty = $this->getOrderCreditQty($value->id, $user_id, $login_time);
-                $line_production_qty = $this->getProdDaily($value->id, $login_time, $company_id, $branch_id, $user_id);
-                $line_scrap_qty = $this->getScrapDaily($value->id, $login_time, $user_id);
-                $line_stock_count = $this->getDailycount($value->id, $company_id, $branch_id, $user_id);
-                $line_refill_qty = $this->getIssueRefillDaily($value->id, $login_time, $user_id);
-                $line_repack_qty = $this->getProdRepackDaily($value->id, $login_time, $user_id);
-                $line_balance_in = $this->getBalancein($value->id);
-                $line_transfer_qty = $this->getProdTransferDaily($value->id, $login_time, $user_id);
-
-                $line_cash_amount = $this->getOrderCashAmount($value->id, $user_id, $login_time);
-                $line_credit_amount = $this->getOrderCreditAmount($value->id, $user_id, $login_time);
-
-
-                array_push($list_product_data, [
-                    'line_product_id' => $value->id,
-                    'line_cash_qty' => $line_cash_qty,
-                    'line_credit_qty' => $line_credit_qty,
-                    'line_production_qty' => $line_production_qty,
-                    'line_scrap_qty' => $line_scrap_qty,
-                    'line_stock_count' => $line_stock_count,
-                    'line_refill_qty' => $line_refill_qty,
-                    'line_repack_qty' => $line_repack_qty,
-                    'line_balance_in' => $line_balance_in,
-                    'line_cash_amount' => $line_cash_amount,
-                    'line_credit_amount' => $line_credit_amount,
-                    'line_transfer_qty' => $line_transfer_qty,
-                ]);
-
-                // $data = $list_product_data;
-
-                $model = new \common\models\SaleDailySum();
-                $model->emp_id = $user_id;
-                $model->trans_date = date('Y-m-d H:i:s');
-                $model->product_id = $value->id;
-                $model->total_cash_qty = $line_cash_qty;
-                $model->total_credit_qty = $line_credit_qty;
-                $model->total_cash_price = $line_cash_amount;
-                $model->total_credit_price = $line_credit_amount;
-                $model->total_prod_qty = $line_production_qty;
-                $model->trans_shift = $cur_shift;
-                $model->balance_in = $line_balance_in;
-                $model->balance_out = 0;
-                $model->prod_repack_qty = $line_repack_qty;
-                $model->scrap_qty = $line_scrap_qty;
-                $model->issue_refill_qty = $line_refill_qty;
-                $model->real_stock_count = $line_stock_count;
-                $model->line_diff = 0;
-                $model->company_id = $company_id;
-                $model->branch_id = $branch_id;
-                $model->login_date = date('Y-m-d H:i:s', strtotime($login_time));
-                $model->status = 1; // close and cannot edit everything
-                if ($model->save(false)) {
-                    $res += 1;
-                    $model_balance = \common\models\BalanceDaily::find()->where(['product_id' => $value->id, 'company_id' => $company_id, 'branch_id' => $branch_id])->one();
-                    if ($model_balance) {
-                        $model_balance->balance_qty = $line_stock_count;
-                        $model_balance->trans_date = date('Y-m-d H:i:s');
-                        $model_balance->sale_close_date = date('Y-m-d H:i:s');
-                        $model_balance->status = 1;
-                        $model_balance->from_user_id = $user_id;
-                        $model_balance->save(false);
-                    } else {
-                        $model_balance_new = new \common\models\BalanceDaily(); // create current balance in
-                        $model_balance_new->product_id = $value->id;
-                        $model_balance_new->balance_qty = $line_stock_count;
-                        $model_balance_new->from_user_id = $user_id;
-                        $model_balance_new->trans_date = date('Y-m-d H:i:s');
-                        $model_balance_new->status = 1;
-                        $model_balance_new->company_id = $company_id;
-                        $model_balance_new->branch_id = $branch_id;
-                        $model_balance_new->save(false);
-                    }
-
-                    $this->adjustStock($default_warehouse, $value->id, $line_stock_count, $company_id, $branch_id); // update stock main
-                    \common\models\DailyCountStock::updateAll(['status' => 1], ['status' => 0, 'company_id' => $company_id, 'branch_id' => $branch_id, 'product_id' => $value->id]); // update count stock
-
-                }
-            }
-        }
-
-        if ($res > 0) {
-            if ($this->saveTransactionsalepos($list_product_data, $login_time, $line_car_issue_qty, $company_id, $branch_id, $user_id)) {
-                \common\models\Orders::updateAll(['status' => 100], ['created_by' => $user_id, 'sale_channel_id' => 2, 'status' => 1]);
-                $status = 1;
-                array_push($data, ['message' => 'success']);
-                $this->notifymessageorderPosclose($user_id,$company_id,$branch_id);
-            }
-        }
-        return ['status' => $status, 'data' => $data];
-    }
-
-    public function adjustStock($warehouse_id, $product_id, $qty, $company_id, $branch_id)
-    {
-        $res = 0;
-        if ($company_id != null && $branch_id != null && $warehouse_id && $product_id) {
-            $model = new \backend\models\Adjustment();
-            $model->journal_no = $model->getLastNo($company_id, $branch_id);
-            $model->trans_date = date('Y-m-d H:i:s');
-            $model->company_id = $company_id;
-            $model->branch_id = $branch_id;
-            if ($model->save(false)) {
-                $model_line = new \backend\models\Stocktrans();
-                $model_line->journal_no = $model->journal_no;
-                $model_line->journal_stock_id = $model->id;
-                $model_line->trans_date = date('Y-m-d H:i:s');
-                $model_line->product_id = $product_id;
-                $model_line->warehouse_id = $warehouse_id;
-                $model_line->qty = (float)$qty;
-                $model_line->stock_type = 1; // out
-                $model_line->activity_type_id = 11;
-                $model_line->company_id = $company_id;
-                $model_line->branch_id = $branch_id;
-                if ($model_line->save(false)) {
-                    $model_stock = \backend\models\Stocksum::find()->where(['warehouse_id' => $warehouse_id, 'product_id' => $product_id])->one();
-                    if ($model_stock) {
-                        $model_stock->qty = (float)$qty; // replace stock qty
-                        $model_stock->save(false);
-                    } else {
-                        $model_new = new \backend\models\Stocksum();
-                        $model_new->company_id = $company_id;
-                        $model_new->branch_id = $branch_id;
-                        $model_new->product_id = $product_id;
-                        $model_new->qty = (float)$qty;
-                        $model_new->warehouse_id = $warehouse_id;
-                        $model_new->save(false);
-                    }
-                    $res += 1;
-                }
-            }
-        }
-
-        return $res;
-    }
-
-    function saveTransactionsalepos($list_product_data, $login_date, $line_car_issue_qty, $company_id, $branch_id, $user_id)
-    {
-        $res = 0;
-        // $cal_date = date('Y-m-d',strtotime("2022/06/22"));
-        $cal_date = date('Y-m-d');
-
-        //\common\models\TransactionCarSale::deleteAll(['date(trans_date)'=>date('Y-m-d')]);
-        //\common\models\TransactionPosSaleSum::deleteAll(['date(trans_date)' => $cal_date]);
-
-        $user_login_datetime = date('Y-m-d H:i:s', strtotime('2022-06-25 07:30:39'));
-
-        $cur_shift = $this->getTransShift($company_id, $branch_id);
-        if ($list_product_data != null) {
-            if (count($list_product_data) > 0) {
-                for ($i = 0; $i <= count($list_product_data) - 1; $i++) {
-//                    $new_line_credit_qty = 0;
-                    $isssue_car_qty = 0;
-//                    if ($line_credit_qty[$i] > 0) {
-//                        $isssue_car_qty = $this->getIssueCarQty($line_prod_id[$i], $user_id, $login_date, date('Y-m-d H:i:s'), $company_id, $branch_id);
-//                        if ($line_credit_qty[$i] > $isssue_car_qty) {
-//                            $new_line_credit_qty = ($line_credit_qty[$i] - $isssue_car_qty);
-//                        } else {
-//                            $new_line_credit_qty = ($isssue_car_qty - $line_credit_qty[$i]);
-//                        }
-//                    }
-
-                    $model_trans = new \common\models\TransactionPosSaleSum();
-                    $model_trans->trans_date = $cal_date;
-                    $model_trans->product_id = $list_product_data[$i]['line_product_id'];
-                    $model_trans->cash_qty = $list_product_data[$i]['line_cash_qty'];
-                    $model_trans->credit_qty = $list_product_data[$i]['line_credit_qty'];//$new_line_credit_qty;
-                    $model_trans->free_qty = $this->getFreeQty($list_product_data[$i]['line_product_id'], $user_id, $login_date, date('Y-m-d H:i:s'), $company_id, $branch_id);// 0;
-                    $model_trans->balance_in_qty = $list_product_data[$i]['line_balance_in'];
-                    $model_trans->balance_out_qty = 0;
-                    $model_trans->prodrec_qty = $list_product_data[$i]['line_production_qty'];
-                    $model_trans->reprocess_qty = $list_product_data[$i]['line_repack_qty'];
-                    $model_trans->return_qty = $this->getProdReprocessCarDaily($list_product_data[$i]['line_product_id'], $login_date, date('Y-m-d H:i:s'), $company_id, $branch_id);
-                    $model_trans->issue_car_qty = $this->getIssueCarQty($list_product_data[$i]['line_product_id'], $user_id, $login_date, date('Y-m-d H:i:s'), $company_id, $branch_id);
-                    $model_trans->issue_transfer_qty = $list_product_data[$i]['line_transfer_qty'];// $this->getTransferout($value->product_id, $cal_date);
-                    $model_trans->issue_refill_qty = $list_product_data[$i]['line_refill_qty'];
-                    $model_trans->scrap_qty = $list_product_data[$i]['line_scrap_qty'];//$this->getScrapDaily($value->product_id, $user_login_datetime, $cal_date);
-                    $model_trans->counting_qty = $list_product_data[$i]['line_stock_count'];
-                    $model_trans->shift = $cur_shift;//$this->checkDailyShift($cal_date);
-                    $model_trans->company_id = $company_id;
-                    $model_trans->branch_id = $branch_id;
-                    $model_trans->user_id = $user_id;
-                    $model_trans->login_datetime = date('Y-m-d H:i:s', strtotime($login_date));
-                    $model_trans->logout_datetime = date('Y-m-d H:i:s');
-                    if ($model_trans->save(false)) {
-                        $res += 1;
-                    }
-                }
-            }
-        }
-
-        return $res;
-    }
-
-    function getFreeQty($product_id, $user_id, $user_login_datetime, $t_date, $company_id, $branch_id)
-    {
-        if(date('H',strtotime($user_login_datetime)) == 23){
-            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
-            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
-        }
-
-        $qty = 0;
-        if ($user_id != null) {
-            $qty = \common\models\QuerySalePosData::find()->where(['created_by' => $user_id, 'product_id' => $product_id])
-                ->andFilterWhere(['between', 'order_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])
-                ->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id, 'price' => 0])->sum('qty');
-        }
-        return $qty;
-    }
-
-    function getIssueCarQty($product_id, $user_id, $user_login_datetime, $t_date, $company_id, $branch_id)
-    {
-        if(date('H',strtotime($user_login_datetime)) == 23){
-            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
-            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
-        }
-
-        $qty = 0;
-        if ($user_id != null) {
-            $qty = \common\models\QuerySalePosData::find()->where(['created_by' => $user_id, 'product_id' => $product_id])
-                ->andFilterWhere(['between', 'order_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])
-                ->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id, 'payment_method_id' => 2])->andFilterWhere(['>', 'order_channel_id', 0])->sum('line_qty_credit');
-            // ->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id,'payment_method_id'=>2])->andFilterWhere(['is not', 'order_channel_id', new \yii\db\Expression('null')])->sum('line_qty_credit');
-        }
-        return $qty;
-    }
-
-    public function getTransShift($company_id, $branch_id)
-    {
-        $nums = 1;
-        $model = \common\models\SaleDailySum::find()->where(['company_id' => $company_id, 'branch_id' => $branch_id])->max('trans_shift');
-        if ($model) {
-            $nums = $model + 1;
-        }
-        return $nums;
-    }
-
-    function getOrderCashQty($product_id, $user_id, $user_login_datetime)
-    {
-//        $hx = '23:45:00';
-//        $new_date = date_create(date('Y-m-d'). $hx);
-//        $xdate = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). ' - 1 day'));
-//        echo date('Y-m-d H:i:s',strtotime($xdate));
-        if(date('H',strtotime($user_login_datetime)) == 23){
-            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
-            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
-        }
-
-        $qty = 0;
-        if ($user_id != null) {
-            $model = \common\models\SalePosCloseCashQty::find()->select('qty')->where(['user_id' => $user_id, 'product_id' => $product_id])->andFilterWhere(['between', 'start_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s')])->one();
-            if ($model) {
-                $qty = $model->qty;
-            }
-        }
-        if ($qty == null) {
-            $qty = 0;
-        }
-        return $qty;
-    }
-
-    function getOrderCreditQty($product_id, $user_id, $user_login_datetime)
-    {
-        if(date('H',strtotime($user_login_datetime)) == 23){
-            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
-            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
-        }
-
-        $qty = 0;
-        $qty2 = 0;
-        if ($user_id != null) {
-            $model = \common\models\SalePosCloseCreditQty::find()->select('qty')->where(['product_id' => $product_id])->andFilterWhere(['between', 'start_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s')])->one();
-            if ($model) {
-                $qty = $model->qty;
-            }
-            $model2 = \common\models\SalePosCloseIssueCarQty::find()->select('qty')->where(['product_id' => $product_id])->andFilterWhere(['between', 'start_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s')])->one();
-            if ($model2) {
-                $qty2 = $model2->qty;
-            }
-        }
-        return ($qty + $qty2);
-    }
-
-    function getProdDaily($product_id, $user_login_datetime, $company_id, $branch_id, $user_id)
-    {
-        if(date('H',strtotime($user_login_datetime)) == 23){
-            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
-            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
-        }
-
-        $qty = 0;
-        $cancel_qty = 0;
-        $second_user_id = [];
-        if ($product_id != null) {
-
-            $model_login = \common\models\LoginLogCal::find()->where(['user_id' => $user_id])->orderBy(['id' => SORT_DESC])->one();
-            if ($model_login) {
-                //  $second_user_id = $model_login->second_user_id;
-                $model_user_ref = \common\models\LoginUserRef::find()->select('user_id')->where(['login_log_cal_id' => $model_login->id])->all();
-                if ($model_user_ref) {
-                    foreach ($model_user_ref as $value) {
-                        array_push($second_user_id, $value->user_id);
-                    }
-                }
-            }
-
-            if (count($second_user_id) > 0) {
-                $qty = \backend\models\Stocktrans::find()->where(['activity_type_id' => 15, 'production_type' => 1, 'company_id' => $company_id, 'branch_id' => $branch_id, 'created_by' => $second_user_id])->andFilterWhere(['product_id' => $product_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s')])->sum('qty');
-                // $cancel_qty = \backend\models\Stocktrans::find()->where(['activity_type_id' => 28, 'production_type' => 28, 'company_id'=>$company_id,'branch_id'=>$branch_id])->andFilterWhere(['product_id' => $product_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])->sum('qty');
-                $cancel_qty = \backend\models\Stocktrans::find()->where(['activity_type_id' => 28, 'production_type' => 28, 'company_id' => $company_id, 'branch_id' => $branch_id, 'created_by' => $second_user_id])->andFilterWhere(['product_id' => $product_id])->andFilterWhere(['and', ['>=', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime))], ['<=', 'trans_date', date('Y-m-d H:i:s')]])->sum('qty');
-            } else {
-                $qty = \backend\models\Stocktrans::find()->where(['activity_type_id' => 15, 'created_by' => $user_id, 'production_type' => 1, 'company_id' => $company_id, 'branch_id' => $branch_id])->andFilterWhere(['product_id' => $product_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s')])->sum('qty');
-                // $cancel_qty = \backend\models\Stocktrans::find()->where(['activity_type_id' => 28, 'production_type' => 28, 'company_id'=>$company_id,'branch_id'=>$branch_id])->andFilterWhere(['product_id' => $product_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])->sum('qty');
-                $cancel_qty = \backend\models\Stocktrans::find()->where(['activity_type_id' => 28, 'created_by' => $user_id, 'production_type' => 28, 'company_id' => $company_id, 'branch_id' => $branch_id])->andFilterWhere(['product_id' => $product_id])->andFilterWhere(['and', ['>=', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime))], ['<=', 'trans_date', date('Y-m-d H:i:s')]])->sum('qty');
-            }
-
-        }
-
-        return $qty - $cancel_qty; // ลบยอดยกเลิกผลิต
-        //return $cancel_qty; // ลบยอดยกเลิกผลิต
-    }
-
-    function getScrapDaily($product_id, $user_login_datetime, $user_id)
-    {
-        if(date('H',strtotime($user_login_datetime)) == 23){
-            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
-            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
-        }
-
-        $qty = 0;
-        $second_user_id = [];
-        if ($product_id != null) {
-            $model_login = \common\models\LoginLogCal::find()->where(['user_id' => $user_id])->orderBy(['id' => SORT_DESC])->one();
-            if ($model_login) {
-                //  $second_user_id = $model_login->second_user_id;
-                $model_user_ref = \common\models\LoginUserRef::find()->select('user_id')->where(['login_log_cal_id' => $model_login->id])->all();
-                if ($model_user_ref) {
-                    foreach ($model_user_ref as $value) {
-                        array_push($second_user_id, $value->user_id);
-                    }
-                }
-            }
-            if (count($second_user_id) > 0) {
-                $qty = \backend\models\Scrap::find()->join('inner join', 'scrap_line', 'scrap_line.scrap_id = scrap.id')->where(['scrap_line.product_id' => $product_id, 'created_by' => $second_user_id])->andFilterWhere(['between', 'scrap.trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s')])->sum('scrap_line.qty');
-            } else {
-                $qty = \backend\models\Scrap::find()->join('inner join', 'scrap_line', 'scrap_line.scrap_id = scrap.id')->where(['scrap_line.product_id' => $product_id, 'created_by' => $user_id])->andFilterWhere(['between', 'scrap.trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s')])->sum('scrap_line.qty');
-            }
-
-        }
-        if ($qty == null) {
-            $qty = 0;
-        }
-        return $qty;
-    }
-
-    function getDailycount($product_id, $company_id, $branch_id, $user_id)
-    {
-
-        $qty = 0;
-        if ($product_id != null && $company_id != null && $branch_id != null) {
-            $model = \common\models\DailyCountStock::find()->where(['product_id' => $product_id, 'company_id' => $company_id, 'branch_id' => $branch_id, 'status' => 0, 'user_id' => $user_id])->andFilterWhere(['date(trans_date)' => date('Y-m-d')])->one();
-            if ($model != null) {
-                //  foreach ($model as $value) {
-                $qty = $model->qty;
-                //  }
-
-            }
-        }
-        return $qty;
-    }
-
-    function getIssueRefillDaily($product_id, $user_login_datetime, $user_id)
-    {
-        if(date('H',strtotime($user_login_datetime)) == 23){
-            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
-            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
-        }
-
-        $qty = 0;
-        if ($product_id != null) {
-            $qty = \backend\models\Stocktrans::find()->where(['activity_type_id' => 18])->andFilterWhere(['product_id' => $product_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s')])->sum('qty');
-        }
-        if ($qty == null) {
-            $qty = 0;
-        }
-        return $qty;
-    }
-
-    function getProdRepackDaily($product_id, $user_login_datetime, $user_id)
-    {
-        if(date('H',strtotime($user_login_datetime)) == 23){
-            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
-            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
-        }
-
-        $qty = 0;
-        if ($product_id != null) {
-            $qty = \backend\models\Stocktrans::find()->where(['in', 'activity_type_id', [27]])->andFilterWhere(['product_id' => $product_id, 'created_by' => $user_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s')])->sum('qty');
-        }
-
-        if ($qty == null) {
-            $qty = 0;
-        }
-        return $qty;
-    }
-
-    function getBalancein($product_id)
-    {
-        $qty = 0;
-        $model = \common\models\BalanceDaily::find()->where(['product_id' => $product_id])->one();
-        if ($model) {
-            $qty = $model->balance_qty;
-        }
-        if ($qty == null) {
-            $qty = 0;
-        }
-        return $qty;
-    }
-
-    function getOrderCashAmount($product_id, $user_id, $user_login_datetime)
-    {
-        $qty = 0;
-        if ($user_id != null) {
-            $model = \common\models\SalePosCloseCashAmount::find()->select('qty')->where(['user_id' => $user_id, 'product_id' => $product_id])->one();
-            if ($model) {
-                $qty = $model->qty;
-            }
-        }
-        return $qty;
-    }
-
-    function getOrderCreditAmount($product_id, $user_id, $user_login_datetime)
-    {
-        $qty = 0;
-        if ($user_id != null) {
-
-            $model = \common\models\SalePosCloseCreditAmount::find()->select('qty')->where(['user_id' => $user_id, 'product_id' => $product_id])->one();
-            if ($model) {
-                $qty = $model->qty;
-            }
-        }
-        return $qty;
-    }
-
-    function getProdTransferDaily($product_id, $user_login_datetime, $user_id)
-    {
-        if(date('H',strtotime($user_login_datetime)) == 23){
-            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
-            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
-        }
-
-        $qty = 0;
-        if ($product_id != null) {
-            //  $qty = \backend\models\Stocktrans::find()->where(['in', 'activity_type_id', [26, 27]])->andFilterWhere(['product_id' => $product_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])->sum('qty');
-            $qty = \backend\models\Stocktrans::find()->where(['production_type' => 5])->andFilterWhere(['product_id' => $product_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s')])->sum('qty');
-        }
-        if ($qty == null) {
-            $qty = 0;
-        }
-        return $qty;
-    }
-
-    function getProdReprocessCarDaily($product_id, $user_login_datetime, $t_date, $company_id, $branch_id)
-    {
-        if(date('H',strtotime($user_login_datetime)) == 23){
-            $new_date = date_create(date('Y-m-d'). $user_login_datetime);
-            $user_login_datetime = date('Y-m-d H:i:s', strtotime(date_format($new_date,"Y-m-d H:i:s"). '- 1 day'));
-        }
-
-        $qty = 0;
-        if ($product_id != null) {
-            //  $qty = \backend\models\Stocktrans::find()->where(['in', 'activity_type_id', [26, 27]])->andFilterWhere(['product_id' => $product_id])->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])->sum('qty');
-            $qty = \backend\models\Stocktrans::find()->where(['in', 'activity_type_id', [26]])->andFilterWhere(['product_id' => $product_id])
-                ->andFilterWhere(['between', 'trans_date', date('Y-m-d H:i:s', strtotime($user_login_datetime)), date('Y-m-d H:i:s', strtotime($t_date))])
-                ->andFilterWhere(['company_id' => $company_id, 'branch_id' => $branch_id])->sum('qty');
-        }
-
-        return $qty;
-    }
 }

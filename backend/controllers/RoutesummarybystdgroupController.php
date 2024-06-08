@@ -88,8 +88,8 @@ class RoutesummarybystdgroupController extends Controller
 //        $date=date_create("2013-03-15");
 //        echo date_format($date,"Y/m/d");
 
-       // $cal_date = date('Y-m-d', strtotime("-1 day"));
-        $cal_date = date('Y-m-d');
+        $cal_date = date('Y-m-d', strtotime("-4 day"));
+     //   $cal_date = date('Y-m-d');
         $model_product = \backend\models\Product::find()->select(['id'])->where(['status' => 1, 'branch_id' => 2])->all();
         $model_transfer_branch = \backend\models\Transferbrach::find()->select(['id'])->where(['status' => 1])->all();
         $model_stdgroup = \backend\models\Stdpricegroup::find()->select(['price', 'type_id'])->groupBy('seq_no')->orderBy(['type_id' => SORT_ASC, 'seq_no' => SORT_ASC])->all();

@@ -174,7 +174,9 @@ class AuthenController extends Controller
                         $has_driver_login = $this->checkHaslogin($model->employee_ref_id, 1);
                         $has_memeber_login = $this->checkHasloginMember($member_id, 0);
 
-                        if ($has_driver_login > 0 || $has_memeber_login > 0) { // has today login
+                        $route_enable_dup = $this->checkEnableLoginDup($car_info[0]['route_id']);
+
+                        if (($has_driver_login > 0 || $has_memeber_login > 0) && $route_enable_dup == 0) { // has today login and not enable duplicate login
                             $status = 900;
                         } else {
                             if ($this->addEmpDaily($car_info[0]['car_id'], $car_info[0]['route_id'], null, $emp_id, $isdriver, $model->company_id, $model->branch_id)) {
@@ -269,6 +271,18 @@ class AuthenController extends Controller
 
             return $res;
         }
+    }
+
+    public function checkEnableLoginDup($route_id){
+        $enable = 0;
+        if($route_id){
+            $model = \backend\models\Deliveryroute::find()->where(['id' => $route_id, 'status' => 1,'is_dup_login' => 1])->one();
+            if($model){
+                $enable = 1;
+            }
+        }
+        
+        return $enable;
     }
 
     public function getCar($emp_id, $company_id, $branch_id)

@@ -314,7 +314,6 @@ class ProductController extends Controller
                     array_push($data, [
                         'id' => $value->product_id,
                         'image' => '',
-                        //'image' => 'http://119.59.100.74/icesystem/backend/web/uploads/images/products/' . $value->photo,
                         'code' => \backend\models\Product::findCode($value->product_id),
                         'name' => \backend\models\Product::findName($value->product_id),
                         'sale_price' => $this->findCustomerprice($customer_id, $value->product_id),
